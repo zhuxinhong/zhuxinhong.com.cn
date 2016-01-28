@@ -1,2 +1,2 @@
-# zhuxinhong.me
-website
+# zhuxinhong.com.cn
+wiki
