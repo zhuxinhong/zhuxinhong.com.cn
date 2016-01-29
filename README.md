@@ -1,2 +1,2 @@
-# zhuxinhong.com.cn
+# zhuxinhong.github.io
 wiki
