@@ -1,2 +1,0 @@
-# zhuxinhong.github.io
-wiki
