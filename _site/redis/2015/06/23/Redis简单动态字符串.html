@@ -6,12 +6,11 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <title>About</title>
-  <meta name="description" content="ZhuXinhong Java Blog
-">
+  <title>Redis简单动态字符串</title>
+  <meta name="description" content="Redis使用SDS(simple dynamic string)用作字符串默认实现。">
 
   <link rel="stylesheet" href="/css/main.css">
-  <link rel="canonical" href="http://yourdomain.com/about/">
+  <link rel="canonical" href="http://yourdomain.com/redis/2015/06/23/Redis%E7%AE%80%E5%8D%95%E5%8A%A8%E6%80%81%E5%AD%97%E7%AC%A6%E4%B8%B2.html">
   <link rel="alternate" type="application/rss+xml" title="zhuxinhong blog" href="http://yourdomain.com/feed.xml">
 </head>
 
@@ -55,26 +54,44 @@
 
     <div class="page-content">
       <div class="wrapper">
-        <article class="post">
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
 
   <header class="post-header">
-    <h1 class="post-title">About</h1>
+    <h1 class="post-title" itemprop="name headline">Redis简单动态字符串</h1>
+    <p class="post-meta"><time datetime="2015-06-23T00:00:00+08:00" itemprop="datePublished">Jun 23, 2015</time></p>
   </header>
 
-  <div class="post-content">
-    <p>This is the base Jekyll theme. You can find out more info about customizing your Jekyll theme, as well as basic Jekyll usage documentation at <a href="http://jekyllrb.com/">jekyllrb.com</a></p>
+  <div class="post-content" itemprop="articleBody">
+    <p>Redis使用SDS(simple dynamic string)用作字符串默认实现。</p>
 
-<p>You can find the source code for the Jekyll new theme at:
-<a href="https://github.com/jglovier"><span class="icon icon--github"><svg viewbox="0 0 16 16"><path fill="#828282" d="M7.999,0.431c-4.285,0-7.76,3.474-7.76,7.761 c0,3.428,2.223,6.337,5.307,7.363c0.388,0.071,0.53-0.168,0.53-0.374c0-0.184-0.007-0.672-0.01-1.32 c-2.159,0.469-2.614-1.04-2.614-1.04c-0.353-0.896-0.862-1.135-0.862-1.135c-0.705-0.481,0.053-0.472,0.053-0.472 c0.779,0.055,1.189,0.8,1.189,0.8c0.692,1.186,1.816,0.843,2.258,0.645c0.071-0.502,0.271-0.843,0.493-1.037 C4.86,11.425,3.049,10.76,3.049,7.786c0-0.847,0.302-1.54,0.799-2.082C3.768,5.507,3.501,4.718,3.924,3.65 c0,0,0.652-0.209,2.134,0.796C6.677,4.273,7.34,4.187,8,4.184c0.659,0.003,1.323,0.089,1.943,0.261 c1.482-1.004,2.132-0.796,2.132-0.796c0.423,1.068,0.157,1.857,0.077,2.054c0.497,0.542,0.798,1.235,0.798,2.082 c0,2.981-1.814,3.637-3.543,3.829c0.279,0.24,0.527,0.713,0.527,1.437c0,1.037-0.01,1.874-0.01,2.129 c0,0.208,0.14,0.449,0.534,0.373c3.081-1.028,5.302-3.935,5.302-7.362C15.76,3.906,12.285,0.431,7.999,0.431z"></path></svg>
-</span><span class="username">jglovier</span></a>
- /
-<a href="https://github.com/jglovier/jekyll-new">jekyll-new</a></p>
+<figure class="highlight"><pre><code class="language-ruby" data-lang="ruby"><span class="n">struct</span> <span class="n">sdshdr</span><span class="p">{</span>
+	<span class="sr">//</span><span class="err">已使用</span><span class="n">buf</span><span class="err">数组的字节数量，也就是字符串长度</span>
+	<span class="n">int</span> <span class="n">len</span><span class="p">;</span>
+	<span class="sr">//</span><span class="err">未使用的长度</span>
+	<span class="n">int</span> <span class="n">free</span><span class="p">;</span>
+	<span class="sr">//</span><span class="err">保存字符串</span>
+	<span class="n">char</span> <span class="n">buf</span><span class="p">[];</span>
+<span class="p">}</span></code></pre></figure>
 
-<p>You can find the source code for Jekyll at
-<a href="https://github.com/jekyll"><span class="icon icon--github"><svg viewbox="0 0 16 16"><path fill="#828282" d="M7.999,0.431c-4.285,0-7.76,3.474-7.76,7.761 c0,3.428,2.223,6.337,5.307,7.363c0.388,0.071,0.53-0.168,0.53-0.374c0-0.184-0.007-0.672-0.01-1.32 c-2.159,0.469-2.614-1.04-2.614-1.04c-0.353-0.896-0.862-1.135-0.862-1.135c-0.705-0.481,0.053-0.472,0.053-0.472 c0.779,0.055,1.189,0.8,1.189,0.8c0.692,1.186,1.816,0.843,2.258,0.645c0.071-0.502,0.271-0.843,0.493-1.037 C4.86,11.425,3.049,10.76,3.049,7.786c0-0.847,0.302-1.54,0.799-2.082C3.768,5.507,3.501,4.718,3.924,3.65 c0,0,0.652-0.209,2.134,0.796C6.677,4.273,7.34,4.187,8,4.184c0.659,0.003,1.323,0.089,1.943,0.261 c1.482-1.004,2.132-0.796,2.132-0.796c0.423,1.068,0.157,1.857,0.077,2.054c0.497,0.542,0.798,1.235,0.798,2.082 c0,2.981-1.814,3.637-3.543,3.829c0.279,0.24,0.527,0.713,0.527,1.437c0,1.037-0.01,1.874-0.01,2.129 c0,0.208,0.14,0.449,0.534,0.373c3.081-1.028,5.302-3.935,5.302-7.362C15.76,3.906,12.285,0.431,7.999,0.431z"></path></svg>
-</span><span class="username">jekyll</span></a>
- /
-<a href="https://github.com/jekyll/jekyll">jekyll</a></p>
+<p>SDS遵循C语言字符串以空字符串结尾，保留1个字节的空字符串’\0’，该空串不记入len中。</p>
+
+<p>C语言中，获取字符串长度需要遍历整个字符串，时间复杂度为O(n)，SDS中有len属性维护长度，时间复杂度为O(1)，Java里面String不可变，初始化的时候就记录了长度，时间复杂度啊也是O(n)。</p>
+
+<p>SDS空间分配策略杜绝缓冲区溢出的可能。当需要对SDS进行修改时，API会先检查SDS剩余空间是否满足需求，如不满足会自动扩容。</p>
+
+<p>SDS内存分配策略：
+1.空间预分配
+当SDS长度(len)小于1MB，程序会分配和len同样大小的未使用空间，这是len===free。例如修改后字符串长度为13字节，就会分配13字节的未使用空间，此时buf=len+free+1=13+13+1=27字节，其中1是’\0’。</p>
+
+<p>当SDS被修改后长度大于1MB，程序会分配1MB的未使用空间。即使len=50MB，也还是分配1MB的未使用空间。</p>
+
+<p>通过空间预分配策略，Redis可以有效减少连续修改字符串操作引起的内存分配次数。</p>
+
+<p>2.惰性空间释放：
+当SDS字符串进行缩短操作时，程序不会立即重新分配内存来回收多的字节，而是用free记录，等待将来使用。
+例如SDS：abcxyz，修改成abc，SDS并不会释放多余出来的3个字节，而是将free=free+3，以备将来字符串增长操作时使用。</p>
+
+<p>SDS是二进制安全的。</p>
 
   </div>
 
