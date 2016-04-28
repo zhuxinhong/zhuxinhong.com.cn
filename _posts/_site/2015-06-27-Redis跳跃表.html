@@ -1,0 +1,32 @@
+<p>Redis使用跳跃表作为有序集合键的底层实现之一，如果一个有序集合包含的元素数量较多，或者有序集合中成员是较长的字符串时，Redis就会使用跳跃表来作为有序集合键的底层实现。
+和链表、字典等数据结构在Redis内部的广泛应用不同，Redis只在实现有序集合键和集群节点中用到跳跃表。</p>
+
+<p>跳跃表节点 zskiplistNode</p>
+
+<figure class="highlight"><pre><code class="language-ruby" data-lang="ruby"><span class="n">typeof</span> <span class="n">struct</span> <span class="n">zskiplistNode</span> <span class="p">{</span>
+	<span class="sr">//</span><span class="err">层</span>
+	<span class="n">struct</span> <span class="n">zskipzlistLevel</span><span class="p">{</span>
+	<span class="sr">//</span><span class="err">前进指针</span>
+	<span class="n">struct</span> <span class="n">zskiplistNode</span> <span class="o">*</span><span class="n">forward</span><span class="p">;</span>
+	<span class="sr">//</span><span class="err">跨度</span>
+	<span class="n">unsigned</span> <span class="n">int</span> <span class="n">span</span><span class="err">；</span>
+	<span class="p">}</span> <span class="n">level</span><span class="p">[];</span>
+	
+	<span class="sr">//</span><span class="err">后退指针</span>
+	<span class="n">struct</span> <span class="n">zskiplistNode</span> <span class="o">*</span><span class="n">backward</span><span class="p">;</span>
+	<span class="sr">//</span><span class="err">分值</span>
+	<span class="n">double</span> <span class="n">score</span><span class="p">;</span>
+	<span class="sr">//</span><span class="err">成员对象</span>
+	<span class="n">rojb</span> <span class="o">*</span><span class="n">obj</span><span class="p">;</span>
+<span class="p">}</span> <span class="n">zskiplistNode</span><span class="p">;</span></code></pre></figure>
+
+<p>跳跃表 zskiplist</p>
+
+<figure class="highlight"><pre><code class="language-ruby" data-lang="ruby"><span class="n">typeof</span> <span class="n">struct</span> <span class="n">zskiplist</span> <span class="p">{</span>
+	<span class="sr">//</span><span class="err">表头节点和表尾节点</span>
+	<span class="n">structz</span> <span class="n">skiplistNode</span> <span class="o">*</span><span class="n">header</span><span class="p">,</span> <span class="o">*</span><span class="n">tail</span><span class="p">;</span>
+	<span class="sr">//</span><span class="err">表中节点数量</span>
+	<span class="n">unsigned</span> <span class="n">long</span> <span class="n">length</span><span class="p">;</span>
+	<span class="sr">//</span><span class="err">表中层数最大节点的层数</span>
+	<span class="n">int</span> <span class="n">level</span><span class="p">;</span>
+<span class="p">}</span> <span class="n">zskiplist</span><span class="p">;</span></code></pre></figure>

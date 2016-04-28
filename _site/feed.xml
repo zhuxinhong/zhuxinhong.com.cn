@@ -6,9 +6,45 @@
 </description>
     <link>http://yourdomain.com/</link>
     <atom:link href="http://yourdomain.com/feed.xml" rel="self" type="application/rss+xml"/>
-    <pubDate>Thu, 28 Apr 2016 20:59:27 +0800</pubDate>
-    <lastBuildDate>Thu, 28 Apr 2016 20:59:27 +0800</lastBuildDate>
+    <pubDate>Thu, 28 Apr 2016 21:07:20 +0800</pubDate>
+    <lastBuildDate>Thu, 28 Apr 2016 21:07:20 +0800</lastBuildDate>
     <generator>Jekyll v3.1.0</generator>
+    
+      <item>
+        <title>Redis对象</title>
+        <description>&lt;p&gt;Redis中每个对象都由一个redisObject结构表示：&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-ruby&quot; data-lang=&quot;ruby&quot;&gt;	&lt;span class=&quot;n&quot;&gt;typeof&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;struct&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;redisObject&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+	&lt;span class=&quot;sr&quot;&gt;//&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;类型&lt;/span&gt;
+	&lt;span class=&quot;n&quot;&gt;unsigned&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;type&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;4&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+	&lt;span class=&quot;sr&quot;&gt;//&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;编码&lt;/span&gt;
+	&lt;span class=&quot;n&quot;&gt;unsigned&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;encoding&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;4&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+	&lt;span class=&quot;sr&quot;&gt;//&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;指向底层数据结构的指针&lt;/span&gt;
+	&lt;span class=&quot;n&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ptr&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+	&lt;span class=&quot;sr&quot;&gt;//&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;.&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;.&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;robj&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;type  对象的类型
+REDIS_STRING 字符串对象
+REDIS_LIST 列表对象
+REDIS_HASH 哈希对象
+REDIS_SET 集合对象
+REDIS_ZSET 有序集合对象&lt;/p&gt;
+
+&lt;p&gt;对于Redis保存的键值对来说，键总是一个字符串对象，而值可以是上述对象中的任意对象。使用TYPE命令返回的结果是数据库对应键的值对象类型。&lt;/p&gt;
+
+&lt;p&gt;encoding 记录对象底层数据结构的实现。使用OBJECT ENCODING 可查看一个数据库键的值对象编码。&lt;/p&gt;
+
+&lt;p&gt;Redis对象的内存回收采用的是类似JVM垃圾回收的方法之一  引用计数法。&lt;/p&gt;
+</description>
+        <pubDate>Sun, 28 Jun 2015 00:00:00 +0800</pubDate>
+        <link>http://yourdomain.com/redis/2015/06/28/Redis%E5%AF%B9%E8%B1%A1.html</link>
+        <guid isPermaLink="true">http://yourdomain.com/redis/2015/06/28/Redis%E5%AF%B9%E8%B1%A1.html</guid>
+        
+        
+        <category>Redis</category>
+        
+      </item>
     
       <item>
         <title>Redis跳跃表</title>
@@ -48,6 +84,37 @@
         <pubDate>Sat, 27 Jun 2015 00:00:00 +0800</pubDate>
         <link>http://yourdomain.com/redis/2015/06/27/Redis%E8%B7%B3%E8%B7%83%E8%A1%A8.html</link>
         <guid isPermaLink="true">http://yourdomain.com/redis/2015/06/27/Redis%E8%B7%B3%E8%B7%83%E8%A1%A8.html</guid>
+        
+        
+        <category>Redis</category>
+        
+      </item>
+    
+      <item>
+        <title>Redis压缩列表</title>
+        <description>&lt;p&gt;压缩列表（ziplist）是列表键和哈希键的底层实现之一。当一个列表键只包含少量列表项，并且每项都是小整数或短字符串时，Redis就会使用压缩列表作为列表键的底层实现。&lt;/p&gt;
+
+&lt;p&gt;ziplis组成：
+zlbytes : 记录列表占用内存字节数：在重新分配内存或计算zlend时使用
+zltail : 记录压缩列表表尾节点距离列表的起始地址有多少字节
+zllen : 记录压缩列表包含节点数量
+entryX : 各个节点
+zlend : 标记压缩列表末端&lt;/p&gt;
+
+&lt;p&gt;压缩列表节点构成 entryX :
+previous_entry_length : 记录前1个节点长度，单位为字节，程序可通过指针运算，根据当前节点的起始地址计算出前一个节点的起始地址。如前一节点长度小于254字节，则值为1个字节；反之若前一节点长度大于等于254字节，值为5字节，其中第一字节为0xFE(十进制254)，之后4个字节用于保存前1节点长度。
+encoding : 记录节点的content属性所保存数据的类型及长度
+content : 节点值&lt;/p&gt;
+
+&lt;p&gt;连锁更新
+例如在一个压缩列表中，有多个连续的长度为250-253的节点e1至eN，现在在表头插入一个长度大于254的节点。
+想像一下，新节点插入后，e1需要修改previous_entry_length的值从1个字节扩展到5个字节，并且该变化会递归到eN。
+因此连锁更新在最坏的情况下需要对压缩列表执行N次空间重分配，每次空间重分配的最坏复杂度为O(N)，所以连锁更新的最坏复杂度为O(N平方)。
+但尽管该操作复杂度较高，但实际环境中，存在多个连续的250-253字节长度之间的节点并不多，所以我们可以不必担心连锁更新对性能的影响。&lt;/p&gt;
+</description>
+        <pubDate>Sat, 27 Jun 2015 00:00:00 +0800</pubDate>
+        <link>http://yourdomain.com/redis/2015/06/27/Redis%E5%8E%8B%E7%BC%A9%E5%88%97%E8%A1%A8.html</link>
+        <guid isPermaLink="true">http://yourdomain.com/redis/2015/06/27/Redis%E5%8E%8B%E7%BC%A9%E5%88%97%E8%A1%A8.html</guid>
         
         
         <category>Redis</category>
