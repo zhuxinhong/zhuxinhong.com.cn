@@ -6,12 +6,11 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <title>zhuxinhong blog</title>
-  <meta name="description" content="ZhuXinhong Java Blog
-">
+  <title>Redis跳跃表</title>
+  <meta name="description" content="Redis使用跳跃表作为有序集合键的底层实现之一，如果一个有序集合包含的元素数量较多，或者有序集合中成员是较长的字符串时，Redis就会使用跳跃表来作为有序集合键的底层实现。和链表、字典等数据结构在Redis内部的广泛应用不同，Redis只在实现有序集合键和集群节点中用到跳跃表。">
 
   <link rel="stylesheet" href="/css/main.css">
-  <link rel="canonical" href="http://yourdomain.com/">
+  <link rel="canonical" href="http://yourdomain.com/redis/2015/06/27/Redis%E8%B7%B3%E8%B7%83%E8%A1%A8.html">
   <link rel="alternate" type="application/rss+xml" title="zhuxinhong blog" href="http://yourdomain.com/feed.xml">
 </head>
 
@@ -55,49 +54,50 @@
 
     <div class="page-content">
       <div class="wrapper">
-        <div class="home">
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
 
-  <h1 class="page-heading">Posts</h1>
+  <header class="post-header">
+    <h1 class="post-title" itemprop="name headline">Redis跳跃表</h1>
+    <p class="post-meta"><time datetime="2015-06-27T00:00:00+08:00" itemprop="datePublished">Jun 27, 2015</time></p>
+  </header>
 
-  <ul class="post-list">
-    
-      <li>
-        <span class="post-meta">Jun 27, 2015</span>
+  <div class="post-content" itemprop="articleBody">
+    <p>Redis使用跳跃表作为有序集合键的底层实现之一，如果一个有序集合包含的元素数量较多，或者有序集合中成员是较长的字符串时，Redis就会使用跳跃表来作为有序集合键的底层实现。
+和链表、字典等数据结构在Redis内部的广泛应用不同，Redis只在实现有序集合键和集群节点中用到跳跃表。</p>
 
-        <h2>
-          <a class="post-link" href="/redis/2015/06/27/Redis%E8%B7%B3%E8%B7%83%E8%A1%A8.html">Redis跳跃表</a>
-        </h2>
-      </li>
-    
-      <li>
-        <span class="post-meta">Jun 25, 2015</span>
+<p>跳跃表节点 zskiplistNode</p>
 
-        <h2>
-          <a class="post-link" href="/redis/2015/06/25/Redis%E5%AD%97%E5%85%B8%E7%9A%84%E5%AE%9E%E7%8E%B0.html">Redis字典</a>
-        </h2>
-      </li>
-    
-      <li>
-        <span class="post-meta">Jun 24, 2015</span>
+<figure class="highlight"><pre><code class="language-ruby" data-lang="ruby"><span class="n">typeof</span> <span class="n">struct</span> <span class="n">zskiplistNode</span> <span class="p">{</span>
+	<span class="sr">//</span><span class="err">层</span>
+	<span class="n">struct</span> <span class="n">zskipzlistLevel</span><span class="p">{</span>
+	<span class="sr">//</span><span class="err">前进指针</span>
+	<span class="n">struct</span> <span class="n">zskiplistNode</span> <span class="o">*</span><span class="n">forward</span><span class="p">;</span>
+	<span class="sr">//</span><span class="err">跨度</span>
+	<span class="n">unsigned</span> <span class="n">int</span> <span class="n">span</span><span class="err">；</span>
+	<span class="p">}</span> <span class="n">level</span><span class="p">[];</span>
+	
+	<span class="sr">//</span><span class="err">后退指针</span>
+	<span class="n">struct</span> <span class="n">zskiplistNode</span> <span class="o">*</span><span class="n">backward</span><span class="p">;</span>
+	<span class="sr">//</span><span class="err">分值</span>
+	<span class="n">double</span> <span class="n">score</span><span class="p">;</span>
+	<span class="sr">//</span><span class="err">成员对象</span>
+	<span class="n">rojb</span> <span class="o">*</span><span class="n">obj</span><span class="p">;</span>
+<span class="p">}</span> <span class="n">zskiplistNode</span><span class="p">;</span></code></pre></figure>
 
-        <h2>
-          <a class="post-link" href="/redis/2015/06/24/Redis%E9%93%BE%E8%A1%A8%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84.html">Redis链表数据结构</a>
-        </h2>
-      </li>
-    
-      <li>
-        <span class="post-meta">Jun 23, 2015</span>
+<p>跳跃表 zskiplist</p>
 
-        <h2>
-          <a class="post-link" href="/redis/2015/06/23/Redis%E7%AE%80%E5%8D%95%E5%8A%A8%E6%80%81%E5%AD%97%E7%AC%A6%E4%B8%B2.html">Redis简单动态字符串</a>
-        </h2>
-      </li>
-    
-  </ul>
+<figure class="highlight"><pre><code class="language-ruby" data-lang="ruby"><span class="n">typeof</span> <span class="n">struct</span> <span class="n">zskiplist</span> <span class="p">{</span>
+	<span class="sr">//</span><span class="err">表头节点和表尾节点</span>
+	<span class="n">structz</span> <span class="n">skiplistNode</span> <span class="o">*</span><span class="n">header</span><span class="p">,</span> <span class="o">*</span><span class="n">tail</span><span class="p">;</span>
+	<span class="sr">//</span><span class="err">表中节点数量</span>
+	<span class="n">unsigned</span> <span class="n">long</span> <span class="n">length</span><span class="p">;</span>
+	<span class="sr">//</span><span class="err">表中层数最大节点的层数</span>
+	<span class="n">int</span> <span class="n">level</span><span class="p">;</span>
+<span class="p">}</span> <span class="n">zskiplist</span><span class="p">;</span></code></pre></figure>
 
-  <p class="rss-subscribe">subscribe <a href="/feed.xml">via RSS</a></p>
+  </div>
 
-</div>
+</article>
 
       </div>
     </div>
