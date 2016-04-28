@@ -6,12 +6,11 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <title>zhuxinhong blog</title>
-  <meta name="description" content="ZhuXinhong Java Blog
-">
+  <title>Redis链表数据结构</title>
+  <meta name="description" content="typeof struct listNode {	//前置节点	struct listNode *prev;	//后置节点	struct listNode *next;	//节点的值	void *value；	} listNode;	链接的数据结构：	typeof struct list {	//表头节点	lis...">
 
   <link rel="stylesheet" href="/css/main.css">
-  <link rel="canonical" href="http://yourdomain.com/">
+  <link rel="canonical" href="http://yourdomain.com/redis/2015/06/24/Redis%E9%93%BE%E8%A1%A8%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84.html">
   <link rel="alternate" type="application/rss+xml" title="zhuxinhong blog" href="http://yourdomain.com/feed.xml">
 </head>
 
@@ -55,41 +54,42 @@
 
     <div class="page-content">
       <div class="wrapper">
-        <div class="home">
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
 
-  <h1 class="page-heading">Posts</h1>
+  <header class="post-header">
+    <h1 class="post-title" itemprop="name headline">Redis链表数据结构</h1>
+    <p class="post-meta"><time datetime="2015-06-24T00:00:00+08:00" itemprop="datePublished">Jun 24, 2015</time></p>
+  </header>
 
-  <ul class="post-list">
+  <div class="post-content" itemprop="articleBody">
     
-      <li>
-        <span class="post-meta">Jun 25, 2015</span>
+<figure class="highlight"><pre><code class="language-ruby" data-lang="ruby"><span class="n">typeof</span> <span class="n">struct</span> <span class="n">listNode</span> <span class="p">{</span>
+	<span class="sr">//</span><span class="err">前置节点</span>
+	<span class="n">struct</span> <span class="n">listNode</span> <span class="o">*</span><span class="n">prev</span><span class="p">;</span>
+	<span class="sr">//</span><span class="err">后置节点</span>
+	<span class="n">struct</span> <span class="n">listNode</span> <span class="o">*</span><span class="k">next</span><span class="p">;</span>
+	<span class="sr">//</span><span class="err">节点的值</span>
+	<span class="n">void</span> <span class="o">*</span><span class="n">value</span><span class="err">；</span>
+	<span class="p">}</span> <span class="n">listNode</span><span class="p">;</span>
+	<span class="err">链接的数据结构：</span>
+	<span class="n">typeof</span> <span class="n">struct</span> <span class="n">list</span> <span class="p">{</span>
+	<span class="sr">//</span><span class="err">表头节点</span>
+	<span class="n">listNode</span> <span class="o">*</span><span class="n">head</span><span class="p">;</span>
+	<span class="sr">//</span><span class="err">表尾节点</span>
+	<span class="n">listNode</span> <span class="o">*</span><span class="n">tail</span><span class="p">;</span>
+	<span class="sr">//</span><span class="err">节点数量</span>
+	<span class="n">unsiged</span> <span class="n">long</span> <span class="n">len</span><span class="p">;</span>
+	<span class="sr">//</span><span class="err">节点复制函数</span>
+	<span class="n">void</span> <span class="o">*</span><span class="p">(</span><span class="o">*</span><span class="nb">dup</span><span class="p">)</span> <span class="p">(</span><span class="n">void</span> <span class="o">*</span><span class="n">ptr</span><span class="p">);</span>
+	<span class="sr">//</span><span class="err">节点释放函数</span>
+	<span class="n">void</span> <span class="p">(</span><span class="o">*</span><span class="n">free</span><span class="p">)</span> <span class="p">(</span><span class="n">void</span> <span class="o">*</span><span class="n">ptr</span><span class="p">);</span>
+	<span class="sr">//</span><span class="err">节点对比函数</span>
+	<span class="n">int</span> <span class="p">(</span><span class="o">*</span><span class="n">match</span><span class="p">)</span> <span class="p">(</span><span class="n">void</span> <span class="o">*</span><span class="n">ptr</span><span class="p">,</span> <span class="n">void</span> <span class="o">*</span><span class="n">key</span><span class="p">);</span>
+<span class="p">}</span> <span class="n">list</span><span class="p">;</span></code></pre></figure>
 
-        <h2>
-          <a class="post-link" href="/redis/2015/06/25/Redis%E5%AD%97%E5%85%B8%E7%9A%84%E5%AE%9E%E7%8E%B0.html">Redis字典</a>
-        </h2>
-      </li>
-    
-      <li>
-        <span class="post-meta">Jun 24, 2015</span>
+  </div>
 
-        <h2>
-          <a class="post-link" href="/redis/2015/06/24/Redis%E9%93%BE%E8%A1%A8%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84.html">Redis链表数据结构</a>
-        </h2>
-      </li>
-    
-      <li>
-        <span class="post-meta">Jun 23, 2015</span>
-
-        <h2>
-          <a class="post-link" href="/redis/2015/06/23/Redis%E7%AE%80%E5%8D%95%E5%8A%A8%E6%80%81%E5%AD%97%E7%AC%A6%E4%B8%B2.html">Redis简单动态字符串</a>
-        </h2>
-      </li>
-    
-  </ul>
-
-  <p class="rss-subscribe">subscribe <a href="/feed.xml">via RSS</a></p>
-
-</div>
+</article>
 
       </div>
     </div>
