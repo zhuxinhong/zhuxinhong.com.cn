@@ -6,15 +6,283 @@
 </description>
     <link>http://yourdomain.com/</link>
     <atom:link href="http://yourdomain.com/feed.xml" rel="self" type="application/rss+xml"/>
-    <pubDate>Thu, 28 Apr 2016 21:07:20 +0800</pubDate>
-    <lastBuildDate>Thu, 28 Apr 2016 21:07:20 +0800</lastBuildDate>
+    <pubDate>Tue, 03 May 2016 10:51:36 +0800</pubDate>
+    <lastBuildDate>Tue, 03 May 2016 10:51:36 +0800</lastBuildDate>
     <generator>Jekyll v3.1.0</generator>
+    
+      <item>
+        <title>Redis持久化-AOF</title>
+        <description>&lt;p&gt;Redis提供了AOF(Append Only File)持久化功能，AOF通过保存服务器所执行命令来记录数据库状态的，和MySQL记录增删改的log有点像哈。&lt;/p&gt;
+
+&lt;p&gt;AOF持久化功能实现分为命令追加(append)、文件写入(write)和文件同步(sync)三个步骤。&lt;/p&gt;
+
+&lt;p&gt;1.AOF命令追加&lt;br /&gt;
+当开启AOF持久化功能时，服务器会在执行完一个写命令后，会以协议格式将执行的写命令追加到服务器状态的aof_buf缓冲区末尾。&lt;/p&gt;
+
+&lt;p&gt;2.AOF文件写入和同步&lt;br /&gt;
+Redis服务进程就是一个事件循环，循环中的文件事件负责接受客户端的命令请求，以及向客户端发送命令回复，而时间事件则负责执行像serverCron函数这样需要定时运行的函数。&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-ruby&quot; data-lang=&quot;ruby&quot;&gt;&lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;eventLoop&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;():&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;while&lt;/span&gt; &lt;span class=&quot;no&quot;&gt;True&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;
+	&lt;span class=&quot;sr&quot;&gt;//&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;处理文件事件，接收命令以及发送命令&lt;/span&gt;
+	&lt;span class=&quot;sr&quot;&gt;//&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;处理命令时可能会有新内容被追加到&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;aof_buf&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;中&lt;/span&gt;
+	&lt;span class=&quot;n&quot;&gt;processFileEvents&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+	&lt;span class=&quot;sr&quot;&gt;//&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;处理时间事件&lt;/span&gt;
+	&lt;span class=&quot;n&quot;&gt;processTimeEvents&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+	&lt;span class=&quot;sr&quot;&gt;//&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;考虑是否将&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;aof_buf&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;中内容写入和保存到&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;aof&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;文件&lt;/span&gt;
+	&lt;span class=&quot;n&quot;&gt;flushAppendOnlyFile&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;flushAppendOnlyFile函数的行为由服务器配置的appendfsync选项值来决定。&lt;br /&gt;
+appendfsync配置：&lt;br /&gt;
+always : 服务器在每个事件循环都要将aof_buf缓冲区的所有内容写到AOF文件，并同步，效率最慢，但最安全。&lt;br /&gt;
+everysec : 服务器在每个事件循环都将aof_bug缓冲区的所有文件写到AOF文件，并且每隔1s就在子线程中对AOF文件做同步，效率快。&lt;br /&gt;
+no : 服务器在每个事件循环都将aof_bug缓冲区的所有文件写到AOF文件，此模式下的flushAppendOnlyFile无须执行同步操作，同步AOF文件由操作系统决定，写入速度最快。&lt;/p&gt;
+
+&lt;p&gt;3.AOF重写&lt;br /&gt;
+随着服务器运行时间的流逝，AOF文件中的内容会越来越多，可能会对Redis服务器和宿主计算机造成影响。&lt;br /&gt;
+虽然Redis将生成新AOF文件替换旧AOF文件功能命名为AOF文件重写，但实际上，AOF文件重写并不需要对现有AOF文件进行任何读取、分析和写入操作，这个功能是通过读取服务器当前数据库状态来实现的。
+实际操作中，Redis依次遍历数据库中所有key，并根据key类型的不同，取出相应值并生成对应类型的写入语句。同时，为了避免在执行命令时造成客户端输入缓冲区溢出，重写程序在处理列表、哈希表、集合、有序集合这4种可能会带有多个元素的键时，会先检查键所包含元素的数量，如果数量超过了redis.h/REDIS_AOF_REWRITE_ITEMS_PER_CMD常量的值，那重写程序会使用多条命令来记录键的值。当前版本中，REDIS_AOF_REWRITE_ITEMS_PER_CMD常量值为64，所以每条语句最多会写入64个元素。&lt;/p&gt;
+
+&lt;p&gt;4.AOF后台重写&lt;br /&gt;
+上面介绍的AOF重写可以很好的完成创建一个新AOF文件的任务，但是，这个操作会进行大量的写入操作，所以调用这个函数的线程将被长时间阻塞，因为Redis服务器使用单个线程来处理命令请求，所以如果由服务器调用AOF重写，那么在重写期间，服务器将无法处理客户端发来的请求。
+Redis并不希望AOF的重写操作造成服务器无法处理请求，所以需要将重写放到子进程里执行，这样做可以达到两个目的：&lt;br /&gt;
+1)子进程执行AOF重写期间，服务器可以继续处理客户端的命令请求。&lt;br /&gt;
+2)子进程带有服务器进程的数据副本，使用子进程而不是线程，可以在避免使用锁的情况下，保证数据安全性。&lt;/p&gt;
+
+&lt;p&gt;不过这里仍然存在一个问题：在子进程执行AOF重写期间，服务器处理客户端的命令请求时，对现有数据库状态进行修改操作，会使得服务器当前数据库状态和重写后的AOF文件所保存的数据库状态不一致。
+为了解决这个问题，Redis服务器设置了一个AOF重写缓冲区，这个缓冲区在服务器创建子进程之后开始使用，当Redis执行完一个写命令后，它会同时将这个写命令发送给AOF缓冲区和AOF重写缓冲区。
+以上就是AOF后台重写，即BGREWRITEAOF命令的实现原理。&lt;/p&gt;
+</description>
+        <pubDate>Sat, 11 Jul 2015 00:00:00 +0800</pubDate>
+        <link>http://yourdomain.com/redis/2015/07/11/Redis%E6%8C%81%E4%B9%85%E5%8C%96-AOF.html</link>
+        <guid isPermaLink="true">http://yourdomain.com/redis/2015/07/11/Redis%E6%8C%81%E4%B9%85%E5%8C%96-AOF.html</guid>
+        
+        
+        <category>Redis</category>
+        
+      </item>
+    
+      <item>
+        <title>RedisRDB文件结构</title>
+        <description>&lt;p&gt;Redis RDB文件保存的是二进制数据，结构包括5部分:
+REDIS | db_version | databases | EOF | check_sum&lt;/p&gt;
+
+&lt;p&gt;db_version长度为4个字节，它的值是一个字符串表示的整数，记录RDB文件的版本号。&lt;/p&gt;
+
+&lt;p&gt;databases记录数据库实例，和各个数据库实例的键值对数据，如果redis-server中所有db都为空，那这个值也为空，长度为0字节。&lt;/p&gt;
+
+&lt;p&gt;EOF常量长度为1字节，标志着RDB文件正文内容结束。&lt;/p&gt;
+
+&lt;p&gt;check_sum是一个8字节长的无符号整数，保存着一个校验和，这个校验和是程序通过对REDIS、db_version、databases、EOF四个部分内容计算而来。Redis在载入RDB文件时，会将载入数据的检验和与该值对比，以此来检查RDB文件是否出错或损坏。&lt;/p&gt;
+
+&lt;p&gt;1.databases&lt;br /&gt;
+每个非空数据库在RDB文件中的都保存为SELECTDB、db_number、key_value_pairs三个部分。&lt;br /&gt;
+SELECTDB | db_number | key_value_pairs&lt;br /&gt;
+SELECTDB常量长度为1字节，标识后面的数据库号码。&lt;br /&gt;
+db_number保存数据库号码，根据号码大小不同，长度为1字节、2字节或5字节。当程序读入db_number部分后，服务器啊会调用SELECT命令，根据读入的数据库号码进行数据库切换。
+key_value_pairs保存了数据库中所有键值对数据，如果键值对带有过期时间，那么过期时间也会和键值对保存在一起。&lt;/p&gt;
+
+&lt;p&gt;2.key_value_pairs&lt;br /&gt;
+不带过期时间的键值对结构
+TYPE | key | value
+带过期时间的键值对结构
+EXPIRETIME_MS | ms | TYPE | key | value
+其中，TYPE记录value的类型，是以下常量中任意一个：
+REDIS_RDB_TYPE_STRING&lt;br /&gt;
+REDIS_RDB_TYPE_LIST&lt;br /&gt;
+REDIS_RDB_TYPE_SET&lt;br /&gt;
+REDIS_RDB_TYPE_ZSET&lt;br /&gt;
+REDIS_RDB_TYPE_HASH&lt;br /&gt;
+REDIS_RDB_TYPE_LIST_ZIPLIST&lt;br /&gt;
+REDIS_RDB_TYPE_SET_INSERT&lt;br /&gt;
+REDIS_RDB_TYPE_ZSET_ZIPLIST&lt;br /&gt;
+REDIS_RDB_TYPE_HASH_ZIPLIST&lt;br /&gt;
+key总是一个字符串对象，编码和REDIS_RDB_TYPE_STRING类型的value一样。&lt;br /&gt;
+value根据TYPE类型不同，结构和长度也会不同。&lt;br /&gt;
+EXPIRETIME_MS常量长度为1字节，当程序读入该常量时，会表示下一个读入的将是一个以毫秒为单位的过期时间。&lt;br /&gt;
+ms是一个8字节长的带符号整数，记录了一个以毫秒为单位的unix时间戳，即过期时间。&lt;/p&gt;
+
+&lt;p&gt;3.value编码&lt;br /&gt;
+a.字符串对象&lt;br /&gt;
+TYPE是REDIS_RDB_TYPE_STRING，字符串对象编码可以是REDIS_ENCODING_INT或者REDIS_ENCODING_RAW，对应保存的值类型是整数和字符串。&lt;br /&gt;
+如果字符串对象编码为REDIS_ENCODING_RAW，字符串长度若大于20字节，那么这个字符串会被压缩保存，否则原样保存。&lt;br /&gt;
+无压缩字符串结构&lt;br /&gt;
+len | string&lt;br /&gt;
+压缩后结构&lt;br /&gt;
+REDIS_RDB_ENC_LZF | compressed_len | origin_len | compressed_string&lt;br /&gt;
+其中REDIS_RDB_ENC_LZF常量标志字符串已被LZF算法压缩，程序在读入过程中，碰到这个常量时，会根据之后的compressed_len和orgin_len和compressed_string 三部分对字符串进行解压。&lt;/p&gt;
+
+&lt;p&gt;b.列表对象&lt;br /&gt;
+TYPE为REDIS_RDB_TYPE_LIST，value保存的是一个REDIS_ENCODING_LINKEDLIST编码的列表对象，结构如下&lt;br /&gt;
+list_length | item1| item2 | item3 | … | itemN&lt;br /&gt;
+list_length记录了列表的长度，item部分代表列表的项，每项都是字符串对象。&lt;/p&gt;
+
+&lt;p&gt;c.集合对象&lt;br /&gt;
+TYPE为REDIS_RDB_TYPE_SET，value保存的是一个REDIS_ENCODING_HT编码的对象集合，结构如下&lt;br /&gt;
+set_size | elem1 | elem2 | elem3 | … | elemN&lt;br /&gt;
+set_size记录集合大小，elem开头部分代表元素集合，每个元素都是一个字符串对象。&lt;/p&gt;
+
+&lt;p&gt;d.哈希表对象&lt;br /&gt;
+TYPE为REDIS_RDB_TYPE_HASH，value保存的是一个REDIS_ENCODING_HT编码的集合对象，结构如下&lt;br /&gt;
+hash_size | key_value_pair 1 | key_value_pair 2 | key_value_pair 3 | … | key_value_pair N&lt;br /&gt;
+hash_size记录了哈希表的大小。key_value_pair部分代表键值对，结构中的每个键值对都以键紧挨着值的方式排列。结构如下&lt;br /&gt;
+key1 | value1 | key2 | value2 | key3 | value3 | ….&lt;/p&gt;
+
+&lt;p&gt;e.有序集合对象&lt;br /&gt;
+TYPE为REDIS_RDB_TYPE_ZSET，value保存的是一个REDIS_ENCODING_SKIPLIST编码的有序集合对象。结构如下&lt;br /&gt;
+sorted_set_size | elem1 | elem2 | elem3 | … | elemN&lt;br /&gt;
+sorted_set_size记录有序集合大小，elem开头部分代表有序集合中的元素，每个元素又分为成员 (member)和分值(score)两部分，成员是一个字符串对象，分值则是一个double类型的浮点数，程序在保存RDB文件时会先将分支转换成字符串对象，再用保存字符串的方法将分值保存起来。&lt;br /&gt;
+有序集合中每个元素都是以成员紧挨着分值方式排列，结构如下&lt;br /&gt;
+sorted_set_size | member1 | score 1 | member2 | score2 | … | memberN | scoreN&lt;/p&gt;
+
+&lt;p&gt;f.INTSET编码集合&lt;br /&gt;
+TYPE为REDIS_RDB_TYPE_SET_INTSET，value保存的是一个整数集合对象，RDB保存这种对象方法是先将整数集合转换为字符串对象，再保存到RDB文件中。读取是相反。&lt;/p&gt;
+
+&lt;p&gt;g.ZIPLIST编码的列表、哈希表或有序集合&lt;br /&gt;
+TYPE为REDIS_RDB_TYPE_LIST_ZIPLIST、REDIS_RDB_TYPE_HASH_ZIPLIST或者REDIS_RDB_TYPE_ZSET_ZIPLIST，那么value保存的是一个压缩列表对象，RDB文件保存方法是:
+1)将压缩列表转换成一个字符串对象；
+2)将转换所得的字符串对象保存到RDB文件。
+读取时做对应类型转换即可。&lt;/p&gt;
+</description>
+        <pubDate>Sat, 04 Jul 2015 00:00:00 +0800</pubDate>
+        <link>http://yourdomain.com/redis/2015/07/04/RedisRDB%E6%96%87%E4%BB%B6%E7%BB%93%E6%9E%84.html</link>
+        <guid isPermaLink="true">http://yourdomain.com/redis/2015/07/04/RedisRDB%E6%96%87%E4%BB%B6%E7%BB%93%E6%9E%84.html</guid>
+        
+        
+        <category>Redis</category>
+        
+      </item>
+    
+      <item>
+        <title>Redis类型检查和命令多态</title>
+        <description>&lt;p&gt;Redis中用于操作键的命令基本可以分为2类。&lt;/p&gt;
+
+&lt;p&gt;其中一种是可以对任何类型的键执行，比如DEL,EXPIRE,RENAME,TYPE,OBJECT,TTL等命令。&lt;/p&gt;
+
+&lt;p&gt;另一种只能对特定的键执行，比如：
+SET,GET,APPEND,STRLEN 等仅限用于字符串的键类型；
+HDEL,HSET,HGET,HLEN 等仅限用于哈希键类型；
+RPUSH,LPOP,LINSERT,LLEN 等仅限用于列表键类型；
+SADD,SPOP,SINTER,SCARD 等仅限用于集合键类型；
+ZADD,ZCARD,ZRANK,ZSCORE 等仅限用于有序集合键类型；&lt;/p&gt;
+
+&lt;p&gt;在执行一个类型特定命令之前，Redis会先检查输入键类型是否正确，然后再决定是否执行命令。
+如果键名称正确，再检查键对象是否是执行命令所需的类型，不是的话就返回一个类型错误。&lt;/p&gt;
+
+&lt;p&gt;多态命令的实现除了检查键类型和命令是否匹配外，还会检查键的至对象所使用的编码。例如，LLEN命令。
+如果列表对象编码为ziplist,，说明对象为压缩列表，程序使用ziplistlen作为底层实现返回列表长度。
+如果列表对象编码为linkedlist，说明对象为双端链表，程序使用listLength作为底层实现返回链表长度。&lt;/p&gt;
+</description>
+        <pubDate>Wed, 01 Jul 2015 00:00:00 +0800</pubDate>
+        <link>http://yourdomain.com/redis/2015/07/01/Redis%E7%B1%BB%E5%9E%8B%E6%A3%80%E6%9F%A5%E5%92%8C%E5%91%BD%E4%BB%A4%E5%A4%9A%E6%80%81.html</link>
+        <guid isPermaLink="true">http://yourdomain.com/redis/2015/07/01/Redis%E7%B1%BB%E5%9E%8B%E6%A3%80%E6%9F%A5%E5%92%8C%E5%91%BD%E4%BB%A4%E5%A4%9A%E6%80%81.html</guid>
+        
+        
+        <category>Redis</category>
+        
+      </item>
+    
+      <item>
+        <title>Redis持久化-RDB</title>
+        <description>&lt;p&gt;RDB持久化可以自动，也可以手动，这个功能将某个时间点上的数据库状态保存到一个经过压缩的二进制文件中。&lt;/p&gt;
+
+&lt;p&gt;SAVE命令会阻塞服务，执行完成前客户端的所有请求都会拒绝。
+BGSAVE命令会新建一个子进程执行持久化操作，不阻塞服务。&lt;/p&gt;
+
+&lt;p&gt;服务器状态维护了一个dirty计数器以及一个lastsave属性，供RDB持久化策略使用。
+dirty计数器记录距离上一次成功执行SAVE或BGSAVE操作后，服务器中所有数据库进行了多少次修改操作（增删改）；
+lastsave属性是一个unix时间戳，记录上一次RDB持久化的时间。&lt;/p&gt;
+</description>
+        <pubDate>Wed, 01 Jul 2015 00:00:00 +0800</pubDate>
+        <link>http://yourdomain.com/redis/2015/07/01/Redis%E6%8C%81%E4%B9%85%E5%8C%96-RDB.html</link>
+        <guid isPermaLink="true">http://yourdomain.com/redis/2015/07/01/Redis%E6%8C%81%E4%B9%85%E5%8C%96-RDB.html</guid>
+        
+        
+        <category>Redis</category>
+        
+      </item>
+    
+      <item>
+        <title>Redis中的数据库</title>
+        <description>&lt;p&gt;Redis服务器的所有数据库都保存在服务器状态 redis.h/redisServer结构的db数组中，db数组中每项都是一个 redis.h/redisDb结构，代表一个数据库实例。&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-ruby&quot; data-lang=&quot;ruby&quot;&gt;&lt;span class=&quot;n&quot;&gt;struct&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;redisServer&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+	&lt;span class=&quot;sr&quot;&gt;//&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;
+	&lt;span class=&quot;nf&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;dbnum&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+	&lt;span class=&quot;sr&quot;&gt;//&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;
+	&lt;span class=&quot;nf&quot;&gt;redisDb&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;db&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+	&lt;span class=&quot;sr&quot;&gt;//&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;初始化数据库实例默认是16个，可以用过select 0~15 来切换。&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-ruby&quot; data-lang=&quot;ruby&quot;&gt;&lt;span class=&quot;n&quot;&gt;typeof&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;struct&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;redisClient&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+	&lt;span class=&quot;sr&quot;&gt;//&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;
+	&lt;span class=&quot;nf&quot;&gt;/&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;/&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;记录客户端当前正在使用的数据库&lt;/span&gt;
+	&lt;span class=&quot;n&quot;&gt;redisDb&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;db&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+	&lt;span class=&quot;sr&quot;&gt;//&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;redisClient&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;redisDb 结构中的dict字典保存了数据库中的所有键值对，这个字典称之为键空间。&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-ruby&quot; data-lang=&quot;ruby&quot;&gt;&lt;span class=&quot;n&quot;&gt;typeof&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;struct&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;redisDb&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+	&lt;span class=&quot;sr&quot;&gt;//&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;
+	&lt;span class=&quot;nf&quot;&gt;dict&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;dict&lt;/span&gt;
+	&lt;span class=&quot;sr&quot;&gt;//&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;redisDb&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;我们在对键进行增删改查操作时候，其实就是在对dict的字典结构进行对应操作。&lt;/p&gt;
+
+&lt;p&gt;读写键的维护操作：
+1.读取一个key后(读和写都要先读)，服务器会更新键空间命中次数和不命中次数。这2个值可以在INFO命令的status属性 keyspace_hit和keyspace_misses查看。
+2.读取一个key后，服务器会更新key的LRU(最后一次使用)时间，这个值可以用于计算key的闲置时间，使用Object idletime $key 命令可以查看。
+3.读取一个key时，发现该key已过期，会先删除。
+4.如果有watch命令监视了某个key，服务器在对该key进行修改后，会将这个键标记为脏(dirty)，从而让此key暴露给事物。
+5.服务器每修改一个key后，会对脏键计数器+1，这个计数器会触发redis的持久化以及复制操作。
+6.如果服务器开启了数据库通知功能，那么在key被修改后，redis会按配置发送相应的通知。&lt;/p&gt;
+
+&lt;p&gt;Redis有4个命令可以设置键的过期时间：
+1. expire &lt;key&gt; &lt;ttl&gt; 设置key的生存时间为ttl秒；
+2. pexpire &lt;key&gt; &lt;ttk&gt; 设置key的生存时间为ttl毫秒； 
+3. expireat &lt;key&gt; &lt;ts&gt; 设置key的过期时间为ts的秒数时间戳；
+4. pexpireat &lt;key&gt; &lt;ts&gt; 设置key的过期时间为ts的毫秒数时间戳；&lt;/ts&gt;&lt;/key&gt;&lt;/ts&gt;&lt;/key&gt;&lt;/ttk&gt;&lt;/key&gt;&lt;/ttl&gt;&lt;/key&gt;&lt;/p&gt;
+
+&lt;p&gt;实际上 expire, pexpire, expireat 3个命令都是使用pexpireat实现的，只需要转换时间单位就行了。&lt;/p&gt;
+
+&lt;p&gt;redisDb结构中，有一个expires字典保存了所有key的过期时间，这个字典称之为过期字典。
+typeof struct redisDb {
+//…
+dict *expires;
+//…
+} redisDb;&lt;/p&gt;
+
+&lt;p&gt;当一个key被设为过期后，redisDb中键空间字典和过期字典中的键重复，并不会出现重复对象，2个key指向的都是同一个对象。&lt;/p&gt;
+
+&lt;p&gt;key过期删除策略：
+1.定时删除：设置过期键的时候，创意一个定时器；
+2.惰性删除：放任过期键不管，每次访问时，判断是否过期，如过期则删除；
+3.定期删除：每隔一段时间，redis会扫描过期键，发现过期则删除；&lt;/p&gt;
+
+&lt;p&gt;Redis实际使用的是惰性删除和定期删除2种配合使用。
+定期删除函数执行步骤：
+1.从一定量的数据库中去除一定数量的随机键检查，删除其中的过期键；
+2.全局变量current_db会记录当前函数检查的进度，并在下一次调用时，接着上一次的进度处理。
+3.随着函数不断被执行，所有过期键都会被检查到，这时将current_db变量重置为0，再开始新一轮的检查。&lt;/p&gt;
+</description>
+        <pubDate>Wed, 01 Jul 2015 00:00:00 +0800</pubDate>
+        <link>http://yourdomain.com/redis/2015/07/01/Redis%E4%B8%AD%E7%9A%84%E6%95%B0%E6%8D%AE%E5%BA%93.html</link>
+        <guid isPermaLink="true">http://yourdomain.com/redis/2015/07/01/Redis%E4%B8%AD%E7%9A%84%E6%95%B0%E6%8D%AE%E5%BA%93.html</guid>
+        
+        
+        <category>Redis</category>
+        
+      </item>
     
       <item>
         <title>Redis对象</title>
         <description>&lt;p&gt;Redis中每个对象都由一个redisObject结构表示：&lt;/p&gt;
 
-&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-ruby&quot; data-lang=&quot;ruby&quot;&gt;	&lt;span class=&quot;n&quot;&gt;typeof&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;struct&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;redisObject&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-ruby&quot; data-lang=&quot;ruby&quot;&gt;&lt;span class=&quot;n&quot;&gt;typeof&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;struct&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;redisObject&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
 	&lt;span class=&quot;sr&quot;&gt;//&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;类型&lt;/span&gt;
 	&lt;span class=&quot;n&quot;&gt;unsigned&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;type&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;4&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
 	&lt;span class=&quot;sr&quot;&gt;//&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;编码&lt;/span&gt;
@@ -40,6 +308,29 @@ REDIS_ZSET 有序集合对象&lt;/p&gt;
         <pubDate>Sun, 28 Jun 2015 00:00:00 +0800</pubDate>
         <link>http://yourdomain.com/redis/2015/06/28/Redis%E5%AF%B9%E8%B1%A1.html</link>
         <guid isPermaLink="true">http://yourdomain.com/redis/2015/06/28/Redis%E5%AF%B9%E8%B1%A1.html</guid>
+        
+        
+        <category>Redis</category>
+        
+      </item>
+    
+      <item>
+        <title>Redis哈希对象</title>
+        <description>&lt;p&gt;哈希对象编码可以是ziplist或者hashtable。&lt;/p&gt;
+
+&lt;p&gt;ziplist编码的哈希对象使用压缩列表作为底层实现。有新的键值对要保存时，程序会先将键值对的键推到列表表尾，再将键值对的值推到列表表尾。&lt;/p&gt;
+
+&lt;p&gt;hashtable编码的哈希对象使用字典作为底层实现，哈希对象中的每个键值对都是用一个字典键值对来保存。&lt;/p&gt;
+
+&lt;p&gt;当哈希对象满足下面2个条件时，哈希对象使用ziplist编码，其余都使用hashtable编码：
+a.哈希对象保存所有键值对的键和值字符长度都小于64字节；
+b.哈希对象保存的键值对数量小于512个；&lt;/p&gt;
+
+&lt;p&gt;上述2个条件的阀值是可以修改的，在配置文件中的 hash-max-ziplist-value 和 hash-max-ziplist-entries 选项中。&lt;/p&gt;
+</description>
+        <pubDate>Sun, 28 Jun 2015 00:00:00 +0800</pubDate>
+        <link>http://yourdomain.com/redis/2015/06/28/Redis%E5%93%88%E5%B8%8C%E5%AF%B9%E8%B1%A1.html</link>
+        <guid isPermaLink="true">http://yourdomain.com/redis/2015/06/28/Redis%E5%93%88%E5%B8%8C%E5%AF%B9%E8%B1%A1.html</guid>
         
         
         <category>Redis</category>
@@ -225,84 +516,6 @@ d.随着字典操作的不断执行，最终ht[0]上所有节点会全部rehash�
         <pubDate>Thu, 25 Jun 2015 00:00:00 +0800</pubDate>
         <link>http://yourdomain.com/redis/2015/06/25/Redis%E5%AD%97%E5%85%B8%E7%9A%84%E5%AE%9E%E7%8E%B0.html</link>
         <guid isPermaLink="true">http://yourdomain.com/redis/2015/06/25/Redis%E5%AD%97%E5%85%B8%E7%9A%84%E5%AE%9E%E7%8E%B0.html</guid>
-        
-        
-        <category>Redis</category>
-        
-      </item>
-    
-      <item>
-        <title>Redis链表数据结构</title>
-        <description>
-&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-ruby&quot; data-lang=&quot;ruby&quot;&gt;&lt;span class=&quot;n&quot;&gt;typeof&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;struct&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;listNode&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
-	&lt;span class=&quot;sr&quot;&gt;//&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;前置节点&lt;/span&gt;
-	&lt;span class=&quot;n&quot;&gt;struct&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;listNode&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;prev&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
-	&lt;span class=&quot;sr&quot;&gt;//&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;后置节点&lt;/span&gt;
-	&lt;span class=&quot;n&quot;&gt;struct&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;listNode&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;next&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
-	&lt;span class=&quot;sr&quot;&gt;//&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;节点的值&lt;/span&gt;
-	&lt;span class=&quot;n&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;value&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;；&lt;/span&gt;
-	&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;listNode&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
-	&lt;span class=&quot;err&quot;&gt;链接的数据结构：&lt;/span&gt;
-	&lt;span class=&quot;n&quot;&gt;typeof&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;struct&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;list&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
-	&lt;span class=&quot;sr&quot;&gt;//&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;表头节点&lt;/span&gt;
-	&lt;span class=&quot;n&quot;&gt;listNode&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;head&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
-	&lt;span class=&quot;sr&quot;&gt;//&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;表尾节点&lt;/span&gt;
-	&lt;span class=&quot;n&quot;&gt;listNode&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;tail&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
-	&lt;span class=&quot;sr&quot;&gt;//&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;节点数量&lt;/span&gt;
-	&lt;span class=&quot;n&quot;&gt;unsiged&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;long&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;len&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
-	&lt;span class=&quot;sr&quot;&gt;//&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;节点复制函数&lt;/span&gt;
-	&lt;span class=&quot;n&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;dup&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ptr&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
-	&lt;span class=&quot;sr&quot;&gt;//&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;节点释放函数&lt;/span&gt;
-	&lt;span class=&quot;n&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;free&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ptr&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
-	&lt;span class=&quot;sr&quot;&gt;//&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;节点对比函数&lt;/span&gt;
-	&lt;span class=&quot;n&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;match&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ptr&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;key&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
-&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;list&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
-</description>
-        <pubDate>Wed, 24 Jun 2015 00:00:00 +0800</pubDate>
-        <link>http://yourdomain.com/redis/2015/06/24/Redis%E9%93%BE%E8%A1%A8%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84.html</link>
-        <guid isPermaLink="true">http://yourdomain.com/redis/2015/06/24/Redis%E9%93%BE%E8%A1%A8%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84.html</guid>
-        
-        
-        <category>Redis</category>
-        
-      </item>
-    
-      <item>
-        <title>Redis简单动态字符串</title>
-        <description>&lt;p&gt;Redis使用SDS(simple dynamic string)用作字符串默认实现。&lt;/p&gt;
-
-&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-ruby&quot; data-lang=&quot;ruby&quot;&gt;&lt;span class=&quot;n&quot;&gt;struct&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;sdshdr&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
-	&lt;span class=&quot;sr&quot;&gt;//&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;已使用&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;buf&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;数组的字节数量，也就是字符串长度&lt;/span&gt;
-	&lt;span class=&quot;n&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;len&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
-	&lt;span class=&quot;sr&quot;&gt;//&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;未使用的长度&lt;/span&gt;
-	&lt;span class=&quot;n&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;free&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
-	&lt;span class=&quot;sr&quot;&gt;//&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;保存字符串&lt;/span&gt;
-	&lt;span class=&quot;n&quot;&gt;char&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;buf&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[];&lt;/span&gt;
-&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
-
-&lt;p&gt;SDS遵循C语言字符串以空字符串结尾，保留1个字节的空字符串’\0’，该空串不记入len中。&lt;/p&gt;
-
-&lt;p&gt;C语言中，获取字符串长度需要遍历整个字符串，时间复杂度为O(n)，SDS中有len属性维护长度，时间复杂度为O(1)，Java里面String不可变，初始化的时候就记录了长度，时间复杂度啊也是O(n)。&lt;/p&gt;
-
-&lt;p&gt;SDS空间分配策略杜绝缓冲区溢出的可能。当需要对SDS进行修改时，API会先检查SDS剩余空间是否满足需求，如不满足会自动扩容。&lt;/p&gt;
-
-&lt;p&gt;SDS内存分配策略：
-1.空间预分配
-当SDS长度(len)小于1MB，程序会分配和len同样大小的未使用空间，这是len===free。例如修改后字符串长度为13字节，就会分配13字节的未使用空间，此时buf=len+free+1=13+13+1=27字节，其中1是’\0’。&lt;/p&gt;
-
-&lt;p&gt;当SDS被修改后长度大于1MB，程序会分配1MB的未使用空间。即使len=50MB，也还是分配1MB的未使用空间。&lt;/p&gt;
-
-&lt;p&gt;通过空间预分配策略，Redis可以有效减少连续修改字符串操作引起的内存分配次数。&lt;/p&gt;
-
-&lt;p&gt;2.惰性空间释放：
-当SDS字符串进行缩短操作时，程序不会立即重新分配内存来回收多的字节，而是用free记录，等待将来使用。
-例如SDS：abcxyz，修改成abc，SDS并不会释放多余出来的3个字节，而是将free=free+3，以备将来字符串增长操作时使用。&lt;/p&gt;
-
-&lt;p&gt;SDS是二进制安全的。&lt;/p&gt;
-</description>
-        <pubDate>Tue, 23 Jun 2015 00:00:00 +0800</pubDate>
-        <link>http://yourdomain.com/redis/2015/06/23/Redis%E7%AE%80%E5%8D%95%E5%8A%A8%E6%80%81%E5%AD%97%E7%AC%A6%E4%B8%B2.html</link>
-        <guid isPermaLink="true">http://yourdomain.com/redis/2015/06/23/Redis%E7%AE%80%E5%8D%95%E5%8A%A8%E6%80%81%E5%AD%97%E7%AC%A6%E4%B8%B2.html</guid>
         
         
         <category>Redis</category>

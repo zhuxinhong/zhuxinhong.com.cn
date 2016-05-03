@@ -6,11 +6,11 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <title>Redis对象</title>
-  <meta name="description" content="Redis中每个对象都由一个redisObject结构表示：typeof struct redisObject {	//类型	unsigned type : 4;	//编码	unsigned encoding : 4;	//指向底层数据结构的指针	void *ptr;	// . . .} robj;type  对...">
+  <title>Redis哈希对象</title>
+  <meta name="description" content="哈希对象编码可以是ziplist或者hashtable。">
 
   <link rel="stylesheet" href="/css/main.css">
-  <link rel="canonical" href="http://yourdomain.com/redis/2015/06/28/Redis%E5%AF%B9%E8%B1%A1.html">
+  <link rel="canonical" href="http://yourdomain.com/redis/2015/06/28/Redis%E5%93%88%E5%B8%8C%E5%AF%B9%E8%B1%A1.html">
   <link rel="alternate" type="application/rss+xml" title="zhuxinhong blog" href="http://yourdomain.com/feed.xml">
 </head>
 
@@ -57,35 +57,22 @@
         <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
 
   <header class="post-header">
-    <h1 class="post-title" itemprop="name headline">Redis对象</h1>
+    <h1 class="post-title" itemprop="name headline">Redis哈希对象</h1>
     <p class="post-meta"><time datetime="2015-06-28T00:00:00+08:00" itemprop="datePublished">Jun 28, 2015</time></p>
   </header>
 
   <div class="post-content" itemprop="articleBody">
-    <p>Redis中每个对象都由一个redisObject结构表示：</p>
+    <p>哈希对象编码可以是ziplist或者hashtable。</p>
 
-<figure class="highlight"><pre><code class="language-ruby" data-lang="ruby"><span class="n">typeof</span> <span class="n">struct</span> <span class="n">redisObject</span> <span class="p">{</span>
-	<span class="sr">//</span><span class="err">类型</span>
-	<span class="n">unsigned</span> <span class="n">type</span> <span class="p">:</span> <span class="mi">4</span><span class="p">;</span>
-	<span class="sr">//</span><span class="err">编码</span>
-	<span class="n">unsigned</span> <span class="n">encoding</span> <span class="p">:</span> <span class="mi">4</span><span class="p">;</span>
-	<span class="sr">//</span><span class="err">指向底层数据结构的指针</span>
-	<span class="n">void</span> <span class="o">*</span><span class="n">ptr</span><span class="p">;</span>
-	<span class="sr">//</span> <span class="p">.</span> <span class="nf">.</span> <span class="o">.</span>
-<span class="p">}</span> <span class="n">robj</span><span class="p">;</span></code></pre></figure>
+<p>ziplist编码的哈希对象使用压缩列表作为底层实现。有新的键值对要保存时，程序会先将键值对的键推到列表表尾，再将键值对的值推到列表表尾。</p>
 
-<p>type  对象的类型
-REDIS_STRING 字符串对象
-REDIS_LIST 列表对象
-REDIS_HASH 哈希对象
-REDIS_SET 集合对象
-REDIS_ZSET 有序集合对象</p>
+<p>hashtable编码的哈希对象使用字典作为底层实现，哈希对象中的每个键值对都是用一个字典键值对来保存。</p>
 
-<p>对于Redis保存的键值对来说，键总是一个字符串对象，而值可以是上述对象中的任意对象。使用TYPE命令返回的结果是数据库对应键的值对象类型。</p>
+<p>当哈希对象满足下面2个条件时，哈希对象使用ziplist编码，其余都使用hashtable编码：
+a.哈希对象保存所有键值对的键和值字符长度都小于64字节；
+b.哈希对象保存的键值对数量小于512个；</p>
 
-<p>encoding 记录对象底层数据结构的实现。使用OBJECT ENCODING 可查看一个数据库键的值对象编码。</p>
-
-<p>Redis对象的内存回收采用的是类似JVM垃圾回收的方法之一  引用计数法。</p>
+<p>上述2个条件的阀值是可以修改的，在配置文件中的 hash-max-ziplist-value 和 hash-max-ziplist-entries 选项中。</p>
 
   </div>
 

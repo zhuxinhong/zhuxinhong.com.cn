@@ -6,11 +6,11 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <title>Redis对象</title>
-  <meta name="description" content="Redis中每个对象都由一个redisObject结构表示：typeof struct redisObject {	//类型	unsigned type : 4;	//编码	unsigned encoding : 4;	//指向底层数据结构的指针	void *ptr;	// . . .} robj;type  对...">
+  <title>Redis持久化-RDB</title>
+  <meta name="description" content="RDB持久化可以自动，也可以手动，这个功能将某个时间点上的数据库状态保存到一个经过压缩的二进制文件中。">
 
   <link rel="stylesheet" href="/css/main.css">
-  <link rel="canonical" href="http://yourdomain.com/redis/2015/06/28/Redis%E5%AF%B9%E8%B1%A1.html">
+  <link rel="canonical" href="http://yourdomain.com/redis/2015/07/01/Redis%E6%8C%81%E4%B9%85%E5%8C%96-RDB.html">
   <link rel="alternate" type="application/rss+xml" title="zhuxinhong blog" href="http://yourdomain.com/feed.xml">
 </head>
 
@@ -57,35 +57,19 @@
         <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
 
   <header class="post-header">
-    <h1 class="post-title" itemprop="name headline">Redis对象</h1>
-    <p class="post-meta"><time datetime="2015-06-28T00:00:00+08:00" itemprop="datePublished">Jun 28, 2015</time></p>
+    <h1 class="post-title" itemprop="name headline">Redis持久化-RDB</h1>
+    <p class="post-meta"><time datetime="2015-07-01T00:00:00+08:00" itemprop="datePublished">Jul 1, 2015</time></p>
   </header>
 
   <div class="post-content" itemprop="articleBody">
-    <p>Redis中每个对象都由一个redisObject结构表示：</p>
+    <p>RDB持久化可以自动，也可以手动，这个功能将某个时间点上的数据库状态保存到一个经过压缩的二进制文件中。</p>
 
-<figure class="highlight"><pre><code class="language-ruby" data-lang="ruby"><span class="n">typeof</span> <span class="n">struct</span> <span class="n">redisObject</span> <span class="p">{</span>
-	<span class="sr">//</span><span class="err">类型</span>
-	<span class="n">unsigned</span> <span class="n">type</span> <span class="p">:</span> <span class="mi">4</span><span class="p">;</span>
-	<span class="sr">//</span><span class="err">编码</span>
-	<span class="n">unsigned</span> <span class="n">encoding</span> <span class="p">:</span> <span class="mi">4</span><span class="p">;</span>
-	<span class="sr">//</span><span class="err">指向底层数据结构的指针</span>
-	<span class="n">void</span> <span class="o">*</span><span class="n">ptr</span><span class="p">;</span>
-	<span class="sr">//</span> <span class="p">.</span> <span class="nf">.</span> <span class="o">.</span>
-<span class="p">}</span> <span class="n">robj</span><span class="p">;</span></code></pre></figure>
+<p>SAVE命令会阻塞服务，执行完成前客户端的所有请求都会拒绝。
+BGSAVE命令会新建一个子进程执行持久化操作，不阻塞服务。</p>
 
-<p>type  对象的类型
-REDIS_STRING 字符串对象
-REDIS_LIST 列表对象
-REDIS_HASH 哈希对象
-REDIS_SET 集合对象
-REDIS_ZSET 有序集合对象</p>
-
-<p>对于Redis保存的键值对来说，键总是一个字符串对象，而值可以是上述对象中的任意对象。使用TYPE命令返回的结果是数据库对应键的值对象类型。</p>
-
-<p>encoding 记录对象底层数据结构的实现。使用OBJECT ENCODING 可查看一个数据库键的值对象编码。</p>
-
-<p>Redis对象的内存回收采用的是类似JVM垃圾回收的方法之一  引用计数法。</p>
+<p>服务器状态维护了一个dirty计数器以及一个lastsave属性，供RDB持久化策略使用。
+dirty计数器记录距离上一次成功执行SAVE或BGSAVE操作后，服务器中所有数据库进行了多少次修改操作（增删改）；
+lastsave属性是一个unix时间戳，记录上一次RDB持久化的时间。</p>
 
   </div>
 
