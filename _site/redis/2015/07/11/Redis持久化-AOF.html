@@ -10,8 +10,8 @@
   <meta name="description" content="Redis提供了AOF(Append Only File)持久化功能，AOF通过保存服务器所执行命令来记录数据库状态的，和MySQL记录增删改的log有点像哈。">
 
   <link rel="stylesheet" href="/css/main.css">
-  <link rel="canonical" href="http://yourdomain.com/redis/2015/07/11/Redis%E6%8C%81%E4%B9%85%E5%8C%96-AOF.html">
-  <link rel="alternate" type="application/rss+xml" title="zhuxinhong blog" href="http://yourdomain.com/feed.xml">
+  <link rel="canonical" href="http://zhuxinhong.com.cn/redis/2015/07/11/Redis%E6%8C%81%E4%B9%85%E5%8C%96-AOF.html">
+  <link rel="alternate" type="application/rss+xml" title="zhuxinhong blog" href="http://zhuxinhong.com.cn/feed.xml">
 </head>
 
 
@@ -72,15 +72,15 @@
 <p>2.AOF文件写入和同步<br />
 Redis服务进程就是一个事件循环，循环中的文件事件负责接受客户端的命令请求，以及向客户端发送命令回复，而时间事件则负责执行像serverCron函数这样需要定时运行的函数。</p>
 
-<figure class="highlight"><pre><code class="language-ruby" data-lang="ruby"><span class="k">def</span> <span class="nf">eventLoop</span><span class="p">():</span>
-<span class="k">while</span> <span class="no">True</span><span class="p">:</span>
-	<span class="sr">//</span><span class="err">处理文件事件，接收命令以及发送命令</span>
-	<span class="sr">//</span><span class="err">处理命令时可能会有新内容被追加到</span><span class="n">aof_buf</span><span class="err">中</span>
-	<span class="n">processFileEvents</span><span class="p">()</span>
-	<span class="sr">//</span><span class="err">处理时间事件</span>
-	<span class="n">processTimeEvents</span><span class="p">()</span>
-	<span class="sr">//</span><span class="err">考虑是否将</span><span class="n">aof_buf</span><span class="err">中内容写入和保存到</span><span class="n">aof</span><span class="err">文件</span>
-	<span class="n">flushAppendOnlyFile</span><span class="p">()</span></code></pre></figure>
+<figure class="highlight"><pre><code class="language-c" data-lang="c"><span class="n">def</span> <span class="n">eventLoop</span><span class="p">()</span><span class="o">:</span>
+<span class="k">while</span> <span class="n">True</span><span class="o">:</span>
+	<span class="c1">//处理文件事件，接收命令以及发送命令
+</span>	<span class="c1">//处理命令时可能会有新内容被追加到aof_buf中
+</span>	<span class="n">processFileEvents</span><span class="p">()</span>
+	<span class="c1">//处理时间事件
+</span>	<span class="n">processTimeEvents</span><span class="p">()</span>
+	<span class="c1">//考虑是否将aof_buf中内容写入和保存到aof文件
+</span>	<span class="n">flushAppendOnlyFile</span><span class="p">()</span></code></pre></figure>
 
 <p>flushAppendOnlyFile函数的行为由服务器配置的appendfsync选项值来决定。<br />
 appendfsync配置：<br />

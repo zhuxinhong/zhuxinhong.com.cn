@@ -4,11 +4,133 @@
     <title>zhuxinhong blog</title>
     <description>ZhuXinhong Java Blog
 </description>
-    <link>http://yourdomain.com/</link>
-    <atom:link href="http://yourdomain.com/feed.xml" rel="self" type="application/rss+xml"/>
-    <pubDate>Tue, 03 May 2016 10:51:36 +0800</pubDate>
-    <lastBuildDate>Tue, 03 May 2016 10:51:36 +0800</lastBuildDate>
+    <link>http://zhuxinhong.com.cn/</link>
+    <atom:link href="http://zhuxinhong.com.cn/feed.xml" rel="self" type="application/rss+xml"/>
+    <pubDate>Tue, 03 May 2016 21:11:40 +0800</pubDate>
+    <lastBuildDate>Tue, 03 May 2016 21:11:40 +0800</lastBuildDate>
     <generator>Jekyll v3.1.0</generator>
+    
+      <item>
+        <title>Redis客户端</title>
+        <description>&lt;p&gt;通过使用由I/O多路复用技术实现的文件事件处理器，Redis服务器使用单线程单进程的方式来处理命令请求，并与多个客户端进行网络通信。
+redisClient结构保存客户端的数据结构：&lt;br /&gt;
+*	套接字描述符&lt;br /&gt;
+*	名字&lt;br /&gt;
+* 	标志位&lt;br /&gt;
+* 	正在使用的数据库指针，数据库号码	
+* 	当前要执行的命令、参数、参数个数，以及指向命令实现函数的指针&lt;br /&gt;
+* 	输入缓冲和输出缓冲&lt;br /&gt;
+* 	复制状态信息和复制所需数据结构&lt;br /&gt;
+* 	执行BRPOP、BLPOP等列表阻塞命令时使用的数据结构&lt;br /&gt;
+* 	事物状态，执行WATCH命令用到的数据结构&lt;br /&gt;
+* 	执行发布和订阅用到的数据结构&lt;br /&gt;
+* 	身份验证标志&lt;br /&gt;
+* 	创建时间、最后一次通信时间，输出缓冲区大小超出软性限制的事件&lt;/p&gt;
+</description>
+        <pubDate>Wed, 22 Jul 2015 00:00:00 +0800</pubDate>
+        <link>http://zhuxinhong.com.cn/redis/2015/07/22/Redis%E5%AE%A2%E6%88%B7%E7%AB%AF.html</link>
+        <guid isPermaLink="true">http://zhuxinhong.com.cn/redis/2015/07/22/Redis%E5%AE%A2%E6%88%B7%E7%AB%AF.html</guid>
+        
+        
+        <category>Redis</category>
+        
+      </item>
+    
+      <item>
+        <title>Redis时间事件</title>
+        <description>&lt;p&gt;Redis时间事件分为以下两类：&lt;br /&gt;
+1.定时事件：程序在指定时间执行一次。&lt;br /&gt;
+2.周期性事件：程序每隔指定时间执行一次。&lt;/p&gt;
+
+&lt;p&gt;时间事件的属性：&lt;br /&gt;
+1.id：服务器为时间事件创建的全局唯一ID，ID号从小到大递增。&lt;br /&gt;
+2.when：毫秒精度的unix时间戳，记录时间事件的到达时间。&lt;br /&gt;
+3.timeProc：时间事件处理器，一个函数。当时间事件到达时，执行此函数。&lt;/p&gt;
+
+&lt;p&gt;时间事件的返回值决定了时间事件类型，如返回ae.h/AE_NOMORE，表示事件为定时事件，到达一次后则删除；如返回一个非AE_NOMORE的整数，表示事件为周期性事件，当事件到达之后，服务器会根据返回值更新时间事件的when属性，并以这种方式一直更新下去。当前Redis版本中只有周期性事件，没有使用定时事件。&lt;/p&gt;
+
+&lt;p&gt;实现：&lt;br /&gt;
+服务器将所有时间事件都存放在一个无序列表中，每当时间事件执行器执行时，它就遍历整个链表，找到所有已到达的时间事件并调用相应事件处理器。这里的的无序链表，指的是不按when属性大小排序，其实是按ID排序了，新的时间事件总是插入链表的表头。当前Redis版本中，服务器只使用serverCron一个时间事件，而在benchmark模式下，服务器也只使用2个时间事件，所以使用无序链表来保存时间事情，并不影响性能。&lt;/p&gt;
+
+&lt;p&gt;事件调度伪代码：&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-c&quot; data-lang=&quot;c&quot;&gt;&lt;span class=&quot;n&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;aeProcessEvents&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;//获取到达时间离当前时间最接近的时间事件
+&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;time_event&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;aeSearchNearestTimer&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;//计算最接近的时间事件距离到达还有多少毫秒
+&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;remain_ms&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;time_event&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;when&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;unix_ts_now&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;//如果事件已到达，那么remain_ms 值可能为负数，置为0
+&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;remain_ms&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;remain_ms&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;//根据remain_ms值，创建timeval结构
+&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;timeval&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;create_timeval_with_ms&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;remain_ms&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;//阻塞并等待文件事件产生，最大阻塞时间由传入的timeval结构决定
+//如果remaind_ms值为0，那么aeApiPoll调用之后马上返回，不阻塞
+&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;aeApiPoll&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;timeval&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;//处理所有已产生的文件事件
+&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;processFileEvents&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;//处理所有已到达的时间事件
+&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;processTimeEvents&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+</description>
+        <pubDate>Sun, 12 Jul 2015 00:00:00 +0800</pubDate>
+        <link>http://zhuxinhong.com.cn/redis/2015/07/12/Redis%E6%97%B6%E9%97%B4%E4%BA%8B%E4%BB%B6.html</link>
+        <guid isPermaLink="true">http://zhuxinhong.com.cn/redis/2015/07/12/Redis%E6%97%B6%E9%97%B4%E4%BA%8B%E4%BB%B6.html</guid>
+        
+        
+        <category>Redis</category>
+        
+      </item>
+    
+      <item>
+        <title>Redis文件事件</title>
+        <description>&lt;p&gt;Redis 服务器是一个事件驱动程序，服务器需要处理以下两类事件：&lt;br /&gt;
+1）文件事件&lt;br /&gt;
+Redis服务器通过套接字与客户端（或其他Redis服务器）进行连接，而文件事件就是服务器对套接字操作的抽象。服务器与客户端（或其他服务器）的通信会产生相应的文件事件，而服务器则通过监听并处理这些时间来完成一系列网络通信操作。&lt;br /&gt;
+2）时间事件&lt;br /&gt;
+Redis服务器中的一些操作（比如serverCron函数）需要在给定的时间点执行，而时间事件就是服务器对这类定时操作的抽象。&lt;br /&gt;
+1.文件事件&lt;br /&gt;
+Redis基于Reactor模式开发了自己的网络事件处理器：这个处理器被称为文件事件处理器：&lt;br /&gt;
+a,文件事件处理器使用I/O多路复用程序来同时监听多个套接字，并根据套接字目前执行的任务来为套接字关联不同的事件处理器。&lt;br /&gt;
+b.当被监听的套接字准备好执行连接应答、读取、写入、关闭等操作时，与操作相对应的文件事件就会产生，调用套接字之前关联好的事件处理器来处理这些事件。&lt;br /&gt;
+虽然文件事件处理器以单线程方式运行，但通过I/O多路复用程序来监听多个套接字，文件事件处理器既实现了高性能的网络通信模型，又可以很好地与Redis服务器中其他同样以单线程方式运行的模块进行对接。&lt;/p&gt;
+
+&lt;p&gt;2.文件事件处理器&lt;br /&gt;
+4部分：套接字、 I/O多路复用程序 、 文件事件分派器 和 事件处理器。&lt;br /&gt;
+文件事件是对套接字操作的抽象，每当一个套接字准备好执行连接应答、写入、读取、关闭等操作时，就会产生一个文件事件。服务器通常会连接多个套接字，所以多个文件事件可能并发出现。&lt;br /&gt;
+I/O多路复用程序负责监听多个套接字，并向文件事件分派器传送那些产生了事件的套接字。&lt;br /&gt;
+尽管多个文件事件会有并发，但IO复用程序会将所有产生事件的套接字都放到一个队列里面，然后通过这个队列，以有序、同步、每次一个套接字的方式向文件事件分派器传送套接字。当上一个套接字产生的事件被处理完之后（该套接字为事件所关联的事件处理器执行完毕）。IO多路复用程序才会继续向文件事件分派器传送下一个套接字。&lt;br /&gt;
+文件事件分派器接受IO多路复用程序传来的套接字，并根据套接字所产生的事件类型条用相应的事件处理器。&lt;br /&gt;
+服务器会为执行不同任务的套接字关联不同的事件处理器，这些处理器是一个个函数，它们定义了某个事件发生时，服务器应执行的动作。&lt;/p&gt;
+
+&lt;p&gt;3.IO多路复用程序的实现&lt;br /&gt;
+Redis的IO多路复用程序的所有功能都是通过包装常见的select、epoll、evport和kqueue这些IO多路复用函数库来实现的，每个IO多路复用函数库在Redis源码中都对应一个单独的文件。&lt;/p&gt;
+
+&lt;p&gt;4.事件的类型&lt;br /&gt;
+IO多路复用程序会监听多个套接字的ae,h/AE_READABLE事件和ae.h/AE_WRITEABLE事件，对应关系如下：&lt;br /&gt;
+a.当套接字变得可读时（客户端对套接字执行write操作，或执行close操作），或者有新的可应答套接字出现时，套接字产生AE_READABLE事件。&lt;br /&gt;
+b.当套接字变得可写时（客户端对套接字执行read操作），套接字产生AE_WRITEABLE事件。
+如果同时产生2种事件，文件事件分派器会优先处理AE_READABLE事件，完成之后再处理AE_WRITEABLE事件。&lt;/p&gt;
+
+&lt;p&gt;5.文件事件处理器&lt;br /&gt;
+a.连接应答处理器&lt;br /&gt;
+b.命令请求处理器&lt;br /&gt;
+c.命令回复处理器&lt;/p&gt;
+
+&lt;p&gt;下面通过一个例子来说明各个处理器的作用：&lt;br /&gt;
+假设一个Redis服务器正在运作，那么这个服务器的监听套接字的AE_READABLE事件应该正处于监听状态之下，而该事件所对应的处理器为连接应答处理器。&lt;br /&gt;
+如果这是有一个Redis客户端向服务器发起连接，那么监听套接字将产生AE_READABLE事件，触发连接应答处理器执行。处理器会对客户端的连接请求进行应答，然后创建客户端套接字，以及客户端状态，并将客户端套接字的AE_READABLE事件与命令请求处理器进行关联，使得客户端可以向主服务器发送命令请求。&lt;br /&gt;
+之后，假设客户端向主服务器发送一个命令请求，客户端套接字将产生AE_READABLE事件，引发命令请求处理器执行，处理器读取客户端的命令内容，然后传给相关程序去执行。&lt;br /&gt;
+执行命令产生的命令回复，需要传送回客户端，服务器会将客户端套接字的AE_WRITEABLE事件与命令回复处理器进行关联。当客户端尝试读取命令回复的时候，客户端套接字将产生AE_WRITEABLE事件，触发命令回复处理器执行，当命令回复处理器将命令回复全部写入到套接字之后，服务器就会接触客户端套接字的AE_WRITEABLE事件与命令回复处理器之间的关联。&lt;/p&gt;
+</description>
+        <pubDate>Sat, 11 Jul 2015 00:00:00 +0800</pubDate>
+        <link>http://zhuxinhong.com.cn/redis/2015/07/11/Redis%E6%96%87%E4%BB%B6%E4%BA%8B%E4%BB%B6.html</link>
+        <guid isPermaLink="true">http://zhuxinhong.com.cn/redis/2015/07/11/Redis%E6%96%87%E4%BB%B6%E4%BA%8B%E4%BB%B6.html</guid>
+        
+        
+        <category>Redis</category>
+        
+      </item>
     
       <item>
         <title>Redis持久化-AOF</title>
@@ -22,15 +144,15 @@
 &lt;p&gt;2.AOF文件写入和同步&lt;br /&gt;
 Redis服务进程就是一个事件循环，循环中的文件事件负责接受客户端的命令请求，以及向客户端发送命令回复，而时间事件则负责执行像serverCron函数这样需要定时运行的函数。&lt;/p&gt;
 
-&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-ruby&quot; data-lang=&quot;ruby&quot;&gt;&lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;eventLoop&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;():&lt;/span&gt;
-&lt;span class=&quot;k&quot;&gt;while&lt;/span&gt; &lt;span class=&quot;no&quot;&gt;True&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;
-	&lt;span class=&quot;sr&quot;&gt;//&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;处理文件事件，接收命令以及发送命令&lt;/span&gt;
-	&lt;span class=&quot;sr&quot;&gt;//&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;处理命令时可能会有新内容被追加到&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;aof_buf&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;中&lt;/span&gt;
-	&lt;span class=&quot;n&quot;&gt;processFileEvents&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
-	&lt;span class=&quot;sr&quot;&gt;//&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;处理时间事件&lt;/span&gt;
-	&lt;span class=&quot;n&quot;&gt;processTimeEvents&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
-	&lt;span class=&quot;sr&quot;&gt;//&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;考虑是否将&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;aof_buf&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;中内容写入和保存到&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;aof&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;文件&lt;/span&gt;
-	&lt;span class=&quot;n&quot;&gt;flushAppendOnlyFile&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-c&quot; data-lang=&quot;c&quot;&gt;&lt;span class=&quot;n&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;eventLoop&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;while&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;True&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt;
+	&lt;span class=&quot;c1&quot;&gt;//处理文件事件，接收命令以及发送命令
+&lt;/span&gt;	&lt;span class=&quot;c1&quot;&gt;//处理命令时可能会有新内容被追加到aof_buf中
+&lt;/span&gt;	&lt;span class=&quot;n&quot;&gt;processFileEvents&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+	&lt;span class=&quot;c1&quot;&gt;//处理时间事件
+&lt;/span&gt;	&lt;span class=&quot;n&quot;&gt;processTimeEvents&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+	&lt;span class=&quot;c1&quot;&gt;//考虑是否将aof_buf中内容写入和保存到aof文件
+&lt;/span&gt;	&lt;span class=&quot;n&quot;&gt;flushAppendOnlyFile&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
 
 &lt;p&gt;flushAppendOnlyFile函数的行为由服务器配置的appendfsync选项值来决定。&lt;br /&gt;
 appendfsync配置：&lt;br /&gt;
@@ -54,8 +176,8 @@ Redis并不希望AOF的重写操作造成服务器无法处理请求，所以需
 以上就是AOF后台重写，即BGREWRITEAOF命令的实现原理。&lt;/p&gt;
 </description>
         <pubDate>Sat, 11 Jul 2015 00:00:00 +0800</pubDate>
-        <link>http://yourdomain.com/redis/2015/07/11/Redis%E6%8C%81%E4%B9%85%E5%8C%96-AOF.html</link>
-        <guid isPermaLink="true">http://yourdomain.com/redis/2015/07/11/Redis%E6%8C%81%E4%B9%85%E5%8C%96-AOF.html</guid>
+        <link>http://zhuxinhong.com.cn/redis/2015/07/11/Redis%E6%8C%81%E4%B9%85%E5%8C%96-AOF.html</link>
+        <guid isPermaLink="true">http://zhuxinhong.com.cn/redis/2015/07/11/Redis%E6%8C%81%E4%B9%85%E5%8C%96-AOF.html</guid>
         
         
         <category>Redis</category>
@@ -145,8 +267,8 @@ TYPE为REDIS_RDB_TYPE_LIST_ZIPLIST、REDIS_RDB_TYPE_HASH_ZIPLIST或者REDIS_RDB_
 读取时做对应类型转换即可。&lt;/p&gt;
 </description>
         <pubDate>Sat, 04 Jul 2015 00:00:00 +0800</pubDate>
-        <link>http://yourdomain.com/redis/2015/07/04/RedisRDB%E6%96%87%E4%BB%B6%E7%BB%93%E6%9E%84.html</link>
-        <guid isPermaLink="true">http://yourdomain.com/redis/2015/07/04/RedisRDB%E6%96%87%E4%BB%B6%E7%BB%93%E6%9E%84.html</guid>
+        <link>http://zhuxinhong.com.cn/redis/2015/07/04/RedisRDB%E6%96%87%E4%BB%B6%E7%BB%93%E6%9E%84.html</link>
+        <guid isPermaLink="true">http://zhuxinhong.com.cn/redis/2015/07/04/RedisRDB%E6%96%87%E4%BB%B6%E7%BB%93%E6%9E%84.html</guid>
         
         
         <category>Redis</category>
@@ -174,8 +296,8 @@ ZADD,ZCARD,ZRANK,ZSCORE 等仅限用于有序集合键类型；&lt;/p&gt;
 如果列表对象编码为linkedlist，说明对象为双端链表，程序使用listLength作为底层实现返回链表长度。&lt;/p&gt;
 </description>
         <pubDate>Wed, 01 Jul 2015 00:00:00 +0800</pubDate>
-        <link>http://yourdomain.com/redis/2015/07/01/Redis%E7%B1%BB%E5%9E%8B%E6%A3%80%E6%9F%A5%E5%92%8C%E5%91%BD%E4%BB%A4%E5%A4%9A%E6%80%81.html</link>
-        <guid isPermaLink="true">http://yourdomain.com/redis/2015/07/01/Redis%E7%B1%BB%E5%9E%8B%E6%A3%80%E6%9F%A5%E5%92%8C%E5%91%BD%E4%BB%A4%E5%A4%9A%E6%80%81.html</guid>
+        <link>http://zhuxinhong.com.cn/redis/2015/07/01/Redis%E7%B1%BB%E5%9E%8B%E6%A3%80%E6%9F%A5%E5%92%8C%E5%91%BD%E4%BB%A4%E5%A4%9A%E6%80%81.html</link>
+        <guid isPermaLink="true">http://zhuxinhong.com.cn/redis/2015/07/01/Redis%E7%B1%BB%E5%9E%8B%E6%A3%80%E6%9F%A5%E5%92%8C%E5%91%BD%E4%BB%A4%E5%A4%9A%E6%80%81.html</guid>
         
         
         <category>Redis</category>
@@ -194,8 +316,8 @@ dirty计数器记录距离上一次成功执行SAVE或BGSAVE操作后，服务�
 lastsave属性是一个unix时间戳，记录上一次RDB持久化的时间。&lt;/p&gt;
 </description>
         <pubDate>Wed, 01 Jul 2015 00:00:00 +0800</pubDate>
-        <link>http://yourdomain.com/redis/2015/07/01/Redis%E6%8C%81%E4%B9%85%E5%8C%96-RDB.html</link>
-        <guid isPermaLink="true">http://yourdomain.com/redis/2015/07/01/Redis%E6%8C%81%E4%B9%85%E5%8C%96-RDB.html</guid>
+        <link>http://zhuxinhong.com.cn/redis/2015/07/01/Redis%E6%8C%81%E4%B9%85%E5%8C%96-RDB.html</link>
+        <guid isPermaLink="true">http://zhuxinhong.com.cn/redis/2015/07/01/Redis%E6%8C%81%E4%B9%85%E5%8C%96-RDB.html</guid>
         
         
         <category>Redis</category>
@@ -206,30 +328,30 @@ lastsave属性是一个unix时间戳，记录上一次RDB持久化的时间。&l
         <title>Redis中的数据库</title>
         <description>&lt;p&gt;Redis服务器的所有数据库都保存在服务器状态 redis.h/redisServer结构的db数组中，db数组中每项都是一个 redis.h/redisDb结构，代表一个数据库实例。&lt;/p&gt;
 
-&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-ruby&quot; data-lang=&quot;ruby&quot;&gt;&lt;span class=&quot;n&quot;&gt;struct&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;redisServer&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
-	&lt;span class=&quot;sr&quot;&gt;//&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;
-	&lt;span class=&quot;nf&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;dbnum&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
-	&lt;span class=&quot;sr&quot;&gt;//&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;
-	&lt;span class=&quot;nf&quot;&gt;redisDb&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;db&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
-	&lt;span class=&quot;sr&quot;&gt;//&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;
-&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-c&quot; data-lang=&quot;c&quot;&gt;&lt;span class=&quot;k&quot;&gt;struct&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;redisServer&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+	&lt;span class=&quot;c1&quot;&gt;//...
+&lt;/span&gt;	&lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;dbnum&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+	&lt;span class=&quot;c1&quot;&gt;//...
+&lt;/span&gt;	&lt;span class=&quot;n&quot;&gt;redisDb&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;db&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+	&lt;span class=&quot;c1&quot;&gt;//...
+&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
 
 &lt;p&gt;初始化数据库实例默认是16个，可以用过select 0~15 来切换。&lt;/p&gt;
 
-&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-ruby&quot; data-lang=&quot;ruby&quot;&gt;&lt;span class=&quot;n&quot;&gt;typeof&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;struct&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;redisClient&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
-	&lt;span class=&quot;sr&quot;&gt;//&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;
-	&lt;span class=&quot;nf&quot;&gt;/&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;/&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;记录客户端当前正在使用的数据库&lt;/span&gt;
-	&lt;span class=&quot;n&quot;&gt;redisDb&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;db&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
-	&lt;span class=&quot;sr&quot;&gt;//&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;
-&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;redisClient&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-c&quot; data-lang=&quot;c&quot;&gt;&lt;span class=&quot;n&quot;&gt;typeof&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;struct&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;redisClient&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+	&lt;span class=&quot;c1&quot;&gt;//...
+&lt;/span&gt;	&lt;span class=&quot;c1&quot;&gt;//记录客户端当前正在使用的数据库
+&lt;/span&gt;	&lt;span class=&quot;n&quot;&gt;redisDb&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;db&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+	&lt;span class=&quot;c1&quot;&gt;//...
+&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;redisClient&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
 
 &lt;p&gt;redisDb 结构中的dict字典保存了数据库中的所有键值对，这个字典称之为键空间。&lt;/p&gt;
 
-&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-ruby&quot; data-lang=&quot;ruby&quot;&gt;&lt;span class=&quot;n&quot;&gt;typeof&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;struct&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;redisDb&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
-	&lt;span class=&quot;sr&quot;&gt;//&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;
-	&lt;span class=&quot;nf&quot;&gt;dict&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;dict&lt;/span&gt;
-	&lt;span class=&quot;sr&quot;&gt;//&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;
-&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;redisDb&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-c&quot; data-lang=&quot;c&quot;&gt;&lt;span class=&quot;n&quot;&gt;typeof&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;struct&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;redisDb&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+	&lt;span class=&quot;c1&quot;&gt;//...
+&lt;/span&gt;	&lt;span class=&quot;n&quot;&gt;dict&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;dict&lt;/span&gt;
+	&lt;span class=&quot;c1&quot;&gt;//...
+&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;redisDb&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
 
 &lt;p&gt;我们在对键进行增删改查操作时候，其实就是在对dict的字典结构进行对应操作。&lt;/p&gt;
 
@@ -270,8 +392,8 @@ dict *expires;
 3.随着函数不断被执行，所有过期键都会被检查到，这时将current_db变量重置为0，再开始新一轮的检查。&lt;/p&gt;
 </description>
         <pubDate>Wed, 01 Jul 2015 00:00:00 +0800</pubDate>
-        <link>http://yourdomain.com/redis/2015/07/01/Redis%E4%B8%AD%E7%9A%84%E6%95%B0%E6%8D%AE%E5%BA%93.html</link>
-        <guid isPermaLink="true">http://yourdomain.com/redis/2015/07/01/Redis%E4%B8%AD%E7%9A%84%E6%95%B0%E6%8D%AE%E5%BA%93.html</guid>
+        <link>http://zhuxinhong.com.cn/redis/2015/07/01/Redis%E4%B8%AD%E7%9A%84%E6%95%B0%E6%8D%AE%E5%BA%93.html</link>
+        <guid isPermaLink="true">http://zhuxinhong.com.cn/redis/2015/07/01/Redis%E4%B8%AD%E7%9A%84%E6%95%B0%E6%8D%AE%E5%BA%93.html</guid>
         
         
         <category>Redis</category>
@@ -282,15 +404,15 @@ dict *expires;
         <title>Redis对象</title>
         <description>&lt;p&gt;Redis中每个对象都由一个redisObject结构表示：&lt;/p&gt;
 
-&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-ruby&quot; data-lang=&quot;ruby&quot;&gt;&lt;span class=&quot;n&quot;&gt;typeof&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;struct&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;redisObject&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
-	&lt;span class=&quot;sr&quot;&gt;//&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;类型&lt;/span&gt;
-	&lt;span class=&quot;n&quot;&gt;unsigned&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;type&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;4&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
-	&lt;span class=&quot;sr&quot;&gt;//&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;编码&lt;/span&gt;
-	&lt;span class=&quot;n&quot;&gt;unsigned&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;encoding&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;4&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
-	&lt;span class=&quot;sr&quot;&gt;//&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;指向底层数据结构的指针&lt;/span&gt;
-	&lt;span class=&quot;n&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ptr&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
-	&lt;span class=&quot;sr&quot;&gt;//&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;.&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;.&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;
-&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;robj&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-c&quot; data-lang=&quot;c&quot;&gt;&lt;span class=&quot;n&quot;&gt;typeof&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;struct&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;redisObject&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+	&lt;span class=&quot;c1&quot;&gt;//类型
+&lt;/span&gt;	&lt;span class=&quot;kt&quot;&gt;unsigned&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;type&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;4&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+	&lt;span class=&quot;c1&quot;&gt;//编码
+&lt;/span&gt;	&lt;span class=&quot;kt&quot;&gt;unsigned&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;encoding&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;4&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+	&lt;span class=&quot;c1&quot;&gt;//指向底层数据结构的指针
+&lt;/span&gt;	&lt;span class=&quot;kt&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ptr&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+	&lt;span class=&quot;c1&quot;&gt;// . . .
+&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;robj&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
 
 &lt;p&gt;type  对象的类型
 REDIS_STRING 字符串对象
@@ -306,8 +428,8 @@ REDIS_ZSET 有序集合对象&lt;/p&gt;
 &lt;p&gt;Redis对象的内存回收采用的是类似JVM垃圾回收的方法之一  引用计数法。&lt;/p&gt;
 </description>
         <pubDate>Sun, 28 Jun 2015 00:00:00 +0800</pubDate>
-        <link>http://yourdomain.com/redis/2015/06/28/Redis%E5%AF%B9%E8%B1%A1.html</link>
-        <guid isPermaLink="true">http://yourdomain.com/redis/2015/06/28/Redis%E5%AF%B9%E8%B1%A1.html</guid>
+        <link>http://zhuxinhong.com.cn/redis/2015/06/28/Redis%E5%AF%B9%E8%B1%A1.html</link>
+        <guid isPermaLink="true">http://zhuxinhong.com.cn/redis/2015/06/28/Redis%E5%AF%B9%E8%B1%A1.html</guid>
         
         
         <category>Redis</category>
@@ -329,193 +451,8 @@ b.哈希对象保存的键值对数量小于512个；&lt;/p&gt;
 &lt;p&gt;上述2个条件的阀值是可以修改的，在配置文件中的 hash-max-ziplist-value 和 hash-max-ziplist-entries 选项中。&lt;/p&gt;
 </description>
         <pubDate>Sun, 28 Jun 2015 00:00:00 +0800</pubDate>
-        <link>http://yourdomain.com/redis/2015/06/28/Redis%E5%93%88%E5%B8%8C%E5%AF%B9%E8%B1%A1.html</link>
-        <guid isPermaLink="true">http://yourdomain.com/redis/2015/06/28/Redis%E5%93%88%E5%B8%8C%E5%AF%B9%E8%B1%A1.html</guid>
-        
-        
-        <category>Redis</category>
-        
-      </item>
-    
-      <item>
-        <title>Redis跳跃表</title>
-        <description>&lt;p&gt;Redis使用跳跃表作为有序集合键的底层实现之一，如果一个有序集合包含的元素数量较多，或者有序集合中成员是较长的字符串时，Redis就会使用跳跃表来作为有序集合键的底层实现。
-和链表、字典等数据结构在Redis内部的广泛应用不同，Redis只在实现有序集合键和集群节点中用到跳跃表。&lt;/p&gt;
-
-&lt;p&gt;跳跃表节点 zskiplistNode&lt;/p&gt;
-
-&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-ruby&quot; data-lang=&quot;ruby&quot;&gt;&lt;span class=&quot;n&quot;&gt;typeof&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;struct&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;zskiplistNode&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
-	&lt;span class=&quot;sr&quot;&gt;//&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;层&lt;/span&gt;
-	&lt;span class=&quot;n&quot;&gt;struct&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;zskipzlistLevel&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
-	&lt;span class=&quot;sr&quot;&gt;//&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;前进指针&lt;/span&gt;
-	&lt;span class=&quot;n&quot;&gt;struct&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;zskiplistNode&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;forward&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
-	&lt;span class=&quot;sr&quot;&gt;//&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;跨度&lt;/span&gt;
-	&lt;span class=&quot;n&quot;&gt;unsigned&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;span&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;；&lt;/span&gt;
-	&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;level&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[];&lt;/span&gt;
-	
-	&lt;span class=&quot;sr&quot;&gt;//&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;后退指针&lt;/span&gt;
-	&lt;span class=&quot;n&quot;&gt;struct&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;zskiplistNode&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;backward&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
-	&lt;span class=&quot;sr&quot;&gt;//&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;分值&lt;/span&gt;
-	&lt;span class=&quot;n&quot;&gt;double&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;score&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
-	&lt;span class=&quot;sr&quot;&gt;//&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;成员对象&lt;/span&gt;
-	&lt;span class=&quot;n&quot;&gt;rojb&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;obj&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
-&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;zskiplistNode&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
-
-&lt;p&gt;跳跃表 zskiplist&lt;/p&gt;
-
-&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-ruby&quot; data-lang=&quot;ruby&quot;&gt;&lt;span class=&quot;n&quot;&gt;typeof&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;struct&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;zskiplist&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
-	&lt;span class=&quot;sr&quot;&gt;//&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;表头节点和表尾节点&lt;/span&gt;
-	&lt;span class=&quot;n&quot;&gt;structz&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;skiplistNode&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;header&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;tail&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
-	&lt;span class=&quot;sr&quot;&gt;//&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;表中节点数量&lt;/span&gt;
-	&lt;span class=&quot;n&quot;&gt;unsigned&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;long&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;length&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
-	&lt;span class=&quot;sr&quot;&gt;//&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;表中层数最大节点的层数&lt;/span&gt;
-	&lt;span class=&quot;n&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;level&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
-&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;zskiplist&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
-</description>
-        <pubDate>Sat, 27 Jun 2015 00:00:00 +0800</pubDate>
-        <link>http://yourdomain.com/redis/2015/06/27/Redis%E8%B7%B3%E8%B7%83%E8%A1%A8.html</link>
-        <guid isPermaLink="true">http://yourdomain.com/redis/2015/06/27/Redis%E8%B7%B3%E8%B7%83%E8%A1%A8.html</guid>
-        
-        
-        <category>Redis</category>
-        
-      </item>
-    
-      <item>
-        <title>Redis压缩列表</title>
-        <description>&lt;p&gt;压缩列表（ziplist）是列表键和哈希键的底层实现之一。当一个列表键只包含少量列表项，并且每项都是小整数或短字符串时，Redis就会使用压缩列表作为列表键的底层实现。&lt;/p&gt;
-
-&lt;p&gt;ziplis组成：
-zlbytes : 记录列表占用内存字节数：在重新分配内存或计算zlend时使用
-zltail : 记录压缩列表表尾节点距离列表的起始地址有多少字节
-zllen : 记录压缩列表包含节点数量
-entryX : 各个节点
-zlend : 标记压缩列表末端&lt;/p&gt;
-
-&lt;p&gt;压缩列表节点构成 entryX :
-previous_entry_length : 记录前1个节点长度，单位为字节，程序可通过指针运算，根据当前节点的起始地址计算出前一个节点的起始地址。如前一节点长度小于254字节，则值为1个字节；反之若前一节点长度大于等于254字节，值为5字节，其中第一字节为0xFE(十进制254)，之后4个字节用于保存前1节点长度。
-encoding : 记录节点的content属性所保存数据的类型及长度
-content : 节点值&lt;/p&gt;
-
-&lt;p&gt;连锁更新
-例如在一个压缩列表中，有多个连续的长度为250-253的节点e1至eN，现在在表头插入一个长度大于254的节点。
-想像一下，新节点插入后，e1需要修改previous_entry_length的值从1个字节扩展到5个字节，并且该变化会递归到eN。
-因此连锁更新在最坏的情况下需要对压缩列表执行N次空间重分配，每次空间重分配的最坏复杂度为O(N)，所以连锁更新的最坏复杂度为O(N平方)。
-但尽管该操作复杂度较高，但实际环境中，存在多个连续的250-253字节长度之间的节点并不多，所以我们可以不必担心连锁更新对性能的影响。&lt;/p&gt;
-</description>
-        <pubDate>Sat, 27 Jun 2015 00:00:00 +0800</pubDate>
-        <link>http://yourdomain.com/redis/2015/06/27/Redis%E5%8E%8B%E7%BC%A9%E5%88%97%E8%A1%A8.html</link>
-        <guid isPermaLink="true">http://yourdomain.com/redis/2015/06/27/Redis%E5%8E%8B%E7%BC%A9%E5%88%97%E8%A1%A8.html</guid>
-        
-        
-        <category>Redis</category>
-        
-      </item>
-    
-      <item>
-        <title>Redis字典</title>
-        <description>&lt;p&gt;字典就是我们熟悉的map，键值对(key-value pair)的抽象数据结构。Redis数据库就是使用字典来作为底层实现的。
-先介绍下数据结构：
-1.哈希表&lt;/p&gt;
-
-&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-ruby&quot; data-lang=&quot;ruby&quot;&gt;&lt;span class=&quot;n&quot;&gt;typeof&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;struct&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;dictht&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
-	&lt;span class=&quot;sr&quot;&gt;//&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;哈希表数组&lt;/span&gt;
-	&lt;span class=&quot;n&quot;&gt;dictEntry&lt;/span&gt;   &lt;span class=&quot;o&quot;&gt;**&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;table&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
-	&lt;span class=&quot;sr&quot;&gt;//&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;哈希表大小&lt;/span&gt;
-	&lt;span class=&quot;n&quot;&gt;unsigned&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;long&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;size&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
-	&lt;span class=&quot;sr&quot;&gt;//&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;哈希表大小掩码，用于计算索引&lt;/span&gt;
-	&lt;span class=&quot;sr&quot;&gt;//&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;总是等于&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;size&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;
-	&lt;span class=&quot;n&quot;&gt;unsigned&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;long&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;sizemask&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
-	&lt;span class=&quot;sr&quot;&gt;//&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;已有节点数量&lt;/span&gt;
-	&lt;span class=&quot;n&quot;&gt;unsigned&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;long&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;used&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
-&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;dictht&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
-
-&lt;p&gt;这种数据结构很好理解，和Java里面HashMap实现差不多。哈希表里面每个节点都是一个entry对象。&lt;/p&gt;
-
-&lt;p&gt;2.哈希表节点&lt;/p&gt;
-
-&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-ruby&quot; data-lang=&quot;ruby&quot;&gt;&lt;span class=&quot;n&quot;&gt;typeof&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;struct&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;dictEntry&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
-	&lt;span class=&quot;sr&quot;&gt;//&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;键&lt;/span&gt;
-	&lt;span class=&quot;n&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;key&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
-	&lt;span class=&quot;sr&quot;&gt;//&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;值&lt;/span&gt;
-	&lt;span class=&quot;n&quot;&gt;union&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
-	&lt;span class=&quot;n&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;val&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
-	&lt;span class=&quot;n&quot;&gt;unit64_t&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;u64&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
-	&lt;span class=&quot;n&quot;&gt;int64_t&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;s64&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
-&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;v&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
-
-&lt;span class=&quot;sr&quot;&gt;//&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;指向下个哈希表节点，形成链表&lt;/span&gt;
-&lt;span class=&quot;n&quot;&gt;struct&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;dictEntry&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;next&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
-&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;dictEntry&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
-
-&lt;p&gt;key属性存着键值对中的键，v属性存值。键可以是一个指针，也可以是一个unit64_t整数，或是一个int^4_t整数。C语言没了解过，这种奇怪的整数也不知道什么意思，姑且理解为Java里面的hashCode吧。
-next属性指向链表中的下一个节点，这点和Java一样，当多个对象哈希值相同时，就造成hash冲突，多个对象的索引值都落在同一索引下标上，该节点的数据结构为链表，需要遍历该链表才能找到对应元素。&lt;/p&gt;
-
-&lt;p&gt;3.字典数据结构&lt;/p&gt;
-
-&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-ruby&quot; data-lang=&quot;ruby&quot;&gt;&lt;span class=&quot;n&quot;&gt;typeof&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;struct&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;dict&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
-	&lt;span class=&quot;sr&quot;&gt;//&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;类型特定函数&lt;/span&gt;
-	&lt;span class=&quot;n&quot;&gt;dictType&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;type&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
-	&lt;span class=&quot;sr&quot;&gt;//&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;私有数据&lt;/span&gt;
-	&lt;span class=&quot;n&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;privdata&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
-	&lt;span class=&quot;sr&quot;&gt;//&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;哈希表&lt;/span&gt;
-	&lt;span class=&quot;n&quot;&gt;dictht&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ht&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;];&lt;/span&gt;
-	&lt;span class=&quot;sr&quot;&gt;//&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;rehash&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;索引&lt;/span&gt;
-	&lt;span class=&quot;sr&quot;&gt;//&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;当&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;rehash&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;不再进行时，值为&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;
-	&lt;span class=&quot;n&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;rehashidx&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
-&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;dict&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
-
-&lt;p&gt;type属性和privdata属性针对不同类型的键值对，为创建多态字典设置的。
-type属性是一个指向dictType结构的指针，每个dictType保存了一簇用于操作特定类型键值对的函数，Redis会为用途不同的字典设置不同的类型特定函数。
-privdata属性保存了需要传给那些类型特定函数的可选参数。&lt;/p&gt;
-
-&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-ruby&quot; data-lang=&quot;ruby&quot;&gt;&lt;span class=&quot;n&quot;&gt;typeof&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;struct&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;dictType&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
-	&lt;span class=&quot;sr&quot;&gt;//&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;计算哈希值的函数&lt;/span&gt;
-	&lt;span class=&quot;n&quot;&gt;unsigned&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;hashFunction&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;const&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;key&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
-	&lt;span class=&quot;sr&quot;&gt;//&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;复制键的函数&lt;/span&gt;
-	&lt;span class=&quot;n&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;keyDup&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;privdata&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;const&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;key&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
-	&lt;span class=&quot;sr&quot;&gt;//&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;复制值的函数&lt;/span&gt;
-	&lt;span class=&quot;n&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;valDup&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;privdata&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;const&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;obj&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
-	&lt;span class=&quot;sr&quot;&gt;//&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;对比键的函数&lt;/span&gt;
-	&lt;span class=&quot;n&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;keyCompare&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;privdata&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;const&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;key1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;const&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;key2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
-	&lt;span class=&quot;sr&quot;&gt;//&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;销毁键的函数&lt;/span&gt;
-	&lt;span class=&quot;n&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;keyDestructor&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;privdata&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;key&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
-	&lt;span class=&quot;sr&quot;&gt;//&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;销毁值的函数&lt;/span&gt;
-	&lt;span class=&quot;n&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;valDestructor&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;privdata&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;obj&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
-&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;dictType&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
-
-&lt;p&gt;ht属性是一个包含2个索引的数组，每个位置都是一个dictht哈希表，一般使用ht[0]，ht[1]用于存放对ht[0]哈希表进行rehash的结果。
-rehashidx记录目前rehash进度，当前没有执行rehash，值为-1。&lt;/p&gt;
-
-&lt;p&gt;1.Redis 字典 Hash算法
-根据key计算hash值
-hash = dict -&amp;gt; type -&amp;gt; hashFunction(key);
-根据sizemask属性和哈希值,计算出索引,ht[x]可以是ht[0]或ht[1]
-index = hash &amp;amp; dict -&amp;gt; ht[x].sizemask;
-Redis使用MurmurHash2算法计算键的哈希值，优点在于即使输入的键是有规律的，算法仍能给出一个很好的随机分布性。&lt;/p&gt;
-
-&lt;p&gt;2.解决Hash冲突
-当2个或多个不同对象的Hash值相同时，会被分配到哈希表的同一个索引上，此时就称之为哈希冲突。
-Redis采用链地址法解决键冲突，每个哈希节点都有一个next指针，由此指针构成一个单向链表，新添加的元素在链表表头。&lt;/p&gt;
-
-&lt;p&gt;3.rehash
-负载因子 = 哈希表节点数量/哈希表大小
-load_factor = ht[0].used / ht[0].size
-当哈希表的操作不断进行，需要把哈希表的负载因子保持在一个合理范围内，需要对哈希表进行扩容或缩容操作，2种操作都通过执行再散列操作来执行(rehash)：
-a.为字典的ht[1]分配空间，如果是扩容操作，ht[1]的空间为ht[0]的节点数量2倍;如果是缩容,ht[1]的空间为ht[0]节点数量的一半。
-b.将ht[0]中的所有键值对rehash到ht[1]上面：rehash需要重新计算键的哈希值和索引值，然后放在ht[1]的指定位置上。
-c.当ht[0]所有键值对都迁移到ht[1]上之后，释放ht[0]，就是将ht[0]表置为空表，再将ht[1]置为ht[0],并将ht[1]新建一个大小为0的空哈希表。&lt;/p&gt;
-
-&lt;p&gt;4.渐进式rehash
-上面讲到rehash过程中，需要将ht[0]上的键值对迁移到ht[1]上，但这个过程并不是一次性操作完成的。如果需要一次性完成，就必须对当前哈希表进行锁表操作，锁表期间会导致服务的不可用，所以rehash操作需要分多次、渐进式的完成。
-a.为ht[1]分配空间，字典同时持有ht[0]和ht[1]两个哈希表
-b.将rehashidx值置为0，表示rehash工作开始。
-c.rehash期间，所有对字典执行的读写操作，都会在ht[0]和ht[1]两个表上操作，读操作如果在ht[0]上找到，会把结果rehash到ht[1]上，如果未找到会到ht[1]上去找，保存操作只会存在ht[1]上，当rehash工作完成之后,rehashidx++;
-d.随着字典操作的不断执行，最终ht[0]上所有节点会全部rehash到ht[1]上，这时将rehashidx值置为-1，表示rehash完成。&lt;/p&gt;
-</description>
-        <pubDate>Thu, 25 Jun 2015 00:00:00 +0800</pubDate>
-        <link>http://yourdomain.com/redis/2015/06/25/Redis%E5%AD%97%E5%85%B8%E7%9A%84%E5%AE%9E%E7%8E%B0.html</link>
-        <guid isPermaLink="true">http://yourdomain.com/redis/2015/06/25/Redis%E5%AD%97%E5%85%B8%E7%9A%84%E5%AE%9E%E7%8E%B0.html</guid>
+        <link>http://zhuxinhong.com.cn/redis/2015/06/28/Redis%E5%93%88%E5%B8%8C%E5%AF%B9%E8%B1%A1.html</link>
+        <guid isPermaLink="true">http://zhuxinhong.com.cn/redis/2015/06/28/Redis%E5%93%88%E5%B8%8C%E5%AF%B9%E8%B1%A1.html</guid>
         
         
         <category>Redis</category>

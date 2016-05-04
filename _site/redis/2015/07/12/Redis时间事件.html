@@ -6,11 +6,11 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <title>Redis对象</title>
-  <meta name="description" content="Redis中每个对象都由一个redisObject结构表示：typeof struct redisObject {	//类型	unsigned type : 4;	//编码	unsigned encoding : 4;	//指向底层数据结构的指针	void *ptr;	// . . .} robj;type  对...">
+  <title>Redis时间事件</title>
+  <meta name="description" content="Redis时间事件分为以下两类：1.定时事件：程序在指定时间执行一次。2.周期性事件：程序每隔指定时间执行一次。">
 
   <link rel="stylesheet" href="/css/main.css">
-  <link rel="canonical" href="http://zhuxinhong.com.cn/redis/2015/06/28/Redis%E5%AF%B9%E8%B1%A1.html">
+  <link rel="canonical" href="http://zhuxinhong.com.cn/redis/2015/07/12/Redis%E6%97%B6%E9%97%B4%E4%BA%8B%E4%BB%B6.html">
   <link rel="alternate" type="application/rss+xml" title="zhuxinhong blog" href="http://zhuxinhong.com.cn/feed.xml">
 </head>
 
@@ -57,35 +57,45 @@
         <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
 
   <header class="post-header">
-    <h1 class="post-title" itemprop="name headline">Redis对象</h1>
-    <p class="post-meta"><time datetime="2015-06-28T00:00:00+08:00" itemprop="datePublished">Jun 28, 2015</time></p>
+    <h1 class="post-title" itemprop="name headline">Redis时间事件</h1>
+    <p class="post-meta"><time datetime="2015-07-12T00:00:00+08:00" itemprop="datePublished">Jul 12, 2015</time></p>
   </header>
 
   <div class="post-content" itemprop="articleBody">
-    <p>Redis中每个对象都由一个redisObject结构表示：</p>
+    <p>Redis时间事件分为以下两类：<br />
+1.定时事件：程序在指定时间执行一次。<br />
+2.周期性事件：程序每隔指定时间执行一次。</p>
 
-<figure class="highlight"><pre><code class="language-c" data-lang="c"><span class="n">typeof</span> <span class="k">struct</span> <span class="n">redisObject</span> <span class="p">{</span>
-	<span class="c1">//类型
-</span>	<span class="kt">unsigned</span> <span class="n">type</span> <span class="o">:</span> <span class="mi">4</span><span class="p">;</span>
-	<span class="c1">//编码
-</span>	<span class="kt">unsigned</span> <span class="n">encoding</span> <span class="o">:</span> <span class="mi">4</span><span class="p">;</span>
-	<span class="c1">//指向底层数据结构的指针
-</span>	<span class="kt">void</span> <span class="o">*</span><span class="n">ptr</span><span class="p">;</span>
-	<span class="c1">// . . .
-</span><span class="p">}</span> <span class="n">robj</span><span class="p">;</span></code></pre></figure>
+<p>时间事件的属性：<br />
+1.id：服务器为时间事件创建的全局唯一ID，ID号从小到大递增。<br />
+2.when：毫秒精度的unix时间戳，记录时间事件的到达时间。<br />
+3.timeProc：时间事件处理器，一个函数。当时间事件到达时，执行此函数。</p>
 
-<p>type  对象的类型
-REDIS_STRING 字符串对象
-REDIS_LIST 列表对象
-REDIS_HASH 哈希对象
-REDIS_SET 集合对象
-REDIS_ZSET 有序集合对象</p>
+<p>时间事件的返回值决定了时间事件类型，如返回ae.h/AE_NOMORE，表示事件为定时事件，到达一次后则删除；如返回一个非AE_NOMORE的整数，表示事件为周期性事件，当事件到达之后，服务器会根据返回值更新时间事件的when属性，并以这种方式一直更新下去。当前Redis版本中只有周期性事件，没有使用定时事件。</p>
 
-<p>对于Redis保存的键值对来说，键总是一个字符串对象，而值可以是上述对象中的任意对象。使用TYPE命令返回的结果是数据库对应键的值对象类型。</p>
+<p>实现：<br />
+服务器将所有时间事件都存放在一个无序列表中，每当时间事件执行器执行时，它就遍历整个链表，找到所有已到达的时间事件并调用相应事件处理器。这里的的无序链表，指的是不按when属性大小排序，其实是按ID排序了，新的时间事件总是插入链表的表头。当前Redis版本中，服务器只使用serverCron一个时间事件，而在benchmark模式下，服务器也只使用2个时间事件，所以使用无序链表来保存时间事情，并不影响性能。</p>
 
-<p>encoding 记录对象底层数据结构的实现。使用OBJECT ENCODING 可查看一个数据库键的值对象编码。</p>
+<p>事件调度伪代码：</p>
 
-<p>Redis对象的内存回收采用的是类似JVM垃圾回收的方法之一  引用计数法。</p>
+<figure class="highlight"><pre><code class="language-c" data-lang="c"><span class="n">def</span> <span class="n">aeProcessEvents</span><span class="p">()</span><span class="o">:</span>
+<span class="c1">//获取到达时间离当前时间最接近的时间事件
+</span><span class="n">time_event</span> <span class="o">=</span> <span class="n">aeSearchNearestTimer</span><span class="p">()</span>
+<span class="c1">//计算最接近的时间事件距离到达还有多少毫秒
+</span><span class="n">remain_ms</span> <span class="o">=</span> <span class="n">time_event</span><span class="p">.</span><span class="n">when</span> <span class="o">-</span> <span class="n">unix_ts_now</span><span class="p">()</span>
+<span class="c1">//如果事件已到达，那么remain_ms 值可能为负数，置为0
+</span><span class="k">if</span> <span class="n">remain_ms</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="o">:</span>
+<span class="n">remain_ms</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="c1">//根据remain_ms值，创建timeval结构
+</span><span class="n">timeval</span> <span class="o">=</span> <span class="n">create_timeval_with_ms</span><span class="p">(</span><span class="n">remain_ms</span><span class="p">)</span>
+<span class="c1">//阻塞并等待文件事件产生，最大阻塞时间由传入的timeval结构决定
+//如果remaind_ms值为0，那么aeApiPoll调用之后马上返回，不阻塞
+</span><span class="n">aeApiPoll</span><span class="p">(</span><span class="n">timeval</span><span class="p">)</span>
+<span class="c1">//处理所有已产生的文件事件
+</span><span class="n">processFileEvents</span><span class="p">()</span>
+<span class="c1">//处理所有已到达的时间事件
+</span><span class="n">processTimeEvents</span><span class="p">()</span></code></pre></figure>
+
 
   </div>
 

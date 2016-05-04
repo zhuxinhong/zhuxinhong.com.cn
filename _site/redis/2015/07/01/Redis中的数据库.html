@@ -10,8 +10,8 @@
   <meta name="description" content="Redis服务器的所有数据库都保存在服务器状态 redis.h/redisServer结构的db数组中，db数组中每项都是一个 redis.h/redisDb结构，代表一个数据库实例。">
 
   <link rel="stylesheet" href="/css/main.css">
-  <link rel="canonical" href="http://yourdomain.com/redis/2015/07/01/Redis%E4%B8%AD%E7%9A%84%E6%95%B0%E6%8D%AE%E5%BA%93.html">
-  <link rel="alternate" type="application/rss+xml" title="zhuxinhong blog" href="http://yourdomain.com/feed.xml">
+  <link rel="canonical" href="http://zhuxinhong.com.cn/redis/2015/07/01/Redis%E4%B8%AD%E7%9A%84%E6%95%B0%E6%8D%AE%E5%BA%93.html">
+  <link rel="alternate" type="application/rss+xml" title="zhuxinhong blog" href="http://zhuxinhong.com.cn/feed.xml">
 </head>
 
 
@@ -64,30 +64,30 @@
   <div class="post-content" itemprop="articleBody">
     <p>Redis服务器的所有数据库都保存在服务器状态 redis.h/redisServer结构的db数组中，db数组中每项都是一个 redis.h/redisDb结构，代表一个数据库实例。</p>
 
-<figure class="highlight"><pre><code class="language-ruby" data-lang="ruby"><span class="n">struct</span> <span class="n">redisServer</span> <span class="p">{</span>
-	<span class="sr">//</span><span class="p">.</span><span class="nf">.</span><span class="p">.</span>
-	<span class="nf">int</span> <span class="n">dbnum</span><span class="p">;</span>
-	<span class="sr">//</span><span class="p">.</span><span class="nf">.</span><span class="p">.</span>
-	<span class="nf">redisDb</span> <span class="o">*</span><span class="n">db</span><span class="p">;</span>
-	<span class="sr">//</span><span class="p">.</span><span class="nf">.</span><span class="o">.</span>
-<span class="p">}</span> <span class="p">;</span></code></pre></figure>
+<figure class="highlight"><pre><code class="language-c" data-lang="c"><span class="k">struct</span> <span class="n">redisServer</span> <span class="p">{</span>
+	<span class="c1">//...
+</span>	<span class="kt">int</span> <span class="n">dbnum</span><span class="p">;</span>
+	<span class="c1">//...
+</span>	<span class="n">redisDb</span> <span class="o">*</span><span class="n">db</span><span class="p">;</span>
+	<span class="c1">//...
+</span><span class="p">}</span> <span class="p">;</span></code></pre></figure>
 
 <p>初始化数据库实例默认是16个，可以用过select 0~15 来切换。</p>
 
-<figure class="highlight"><pre><code class="language-ruby" data-lang="ruby"><span class="n">typeof</span> <span class="n">struct</span> <span class="n">redisClient</span> <span class="p">{</span>
-	<span class="sr">//</span><span class="p">.</span><span class="nf">.</span><span class="p">.</span>
-	<span class="nf">/</span><span class="o">/</span><span class="err">记录客户端当前正在使用的数据库</span>
-	<span class="n">redisDb</span> <span class="o">*</span><span class="n">db</span><span class="p">;</span>
-	<span class="sr">//</span><span class="p">.</span><span class="nf">.</span><span class="o">.</span>
-<span class="p">}</span> <span class="n">redisClient</span><span class="p">;</span></code></pre></figure>
+<figure class="highlight"><pre><code class="language-c" data-lang="c"><span class="n">typeof</span> <span class="k">struct</span> <span class="n">redisClient</span> <span class="p">{</span>
+	<span class="c1">//...
+</span>	<span class="c1">//记录客户端当前正在使用的数据库
+</span>	<span class="n">redisDb</span> <span class="o">*</span><span class="n">db</span><span class="p">;</span>
+	<span class="c1">//...
+</span><span class="p">}</span> <span class="n">redisClient</span><span class="p">;</span></code></pre></figure>
 
 <p>redisDb 结构中的dict字典保存了数据库中的所有键值对，这个字典称之为键空间。</p>
 
-<figure class="highlight"><pre><code class="language-ruby" data-lang="ruby"><span class="n">typeof</span> <span class="n">struct</span> <span class="n">redisDb</span> <span class="p">{</span>
-	<span class="sr">//</span><span class="p">.</span><span class="nf">.</span><span class="p">.</span>
-	<span class="nf">dict</span> <span class="o">*</span><span class="n">dict</span>
-	<span class="sr">//</span><span class="p">.</span><span class="nf">.</span><span class="o">.</span>
-<span class="p">}</span> <span class="n">redisDb</span><span class="p">;</span></code></pre></figure>
+<figure class="highlight"><pre><code class="language-c" data-lang="c"><span class="n">typeof</span> <span class="k">struct</span> <span class="n">redisDb</span> <span class="p">{</span>
+	<span class="c1">//...
+</span>	<span class="n">dict</span> <span class="o">*</span><span class="n">dict</span>
+	<span class="c1">//...
+</span><span class="p">}</span> <span class="n">redisDb</span><span class="p">;</span></code></pre></figure>
 
 <p>我们在对键进行增删改查操作时候，其实就是在对dict的字典结构进行对应操作。</p>
 

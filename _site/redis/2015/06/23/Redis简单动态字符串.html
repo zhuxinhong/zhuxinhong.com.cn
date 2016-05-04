@@ -10,8 +10,8 @@
   <meta name="description" content="Redis使用SDS(simple dynamic string)用作字符串默认实现。">
 
   <link rel="stylesheet" href="/css/main.css">
-  <link rel="canonical" href="http://yourdomain.com/redis/2015/06/23/Redis%E7%AE%80%E5%8D%95%E5%8A%A8%E6%80%81%E5%AD%97%E7%AC%A6%E4%B8%B2.html">
-  <link rel="alternate" type="application/rss+xml" title="zhuxinhong blog" href="http://yourdomain.com/feed.xml">
+  <link rel="canonical" href="http://zhuxinhong.com.cn/redis/2015/06/23/Redis%E7%AE%80%E5%8D%95%E5%8A%A8%E6%80%81%E5%AD%97%E7%AC%A6%E4%B8%B2.html">
+  <link rel="alternate" type="application/rss+xml" title="zhuxinhong blog" href="http://zhuxinhong.com.cn/feed.xml">
 </head>
 
 
@@ -64,13 +64,13 @@
   <div class="post-content" itemprop="articleBody">
     <p>Redis使用SDS(simple dynamic string)用作字符串默认实现。</p>
 
-<figure class="highlight"><pre><code class="language-ruby" data-lang="ruby"><span class="n">struct</span> <span class="n">sdshdr</span><span class="p">{</span>
-	<span class="sr">//</span><span class="err">已使用</span><span class="n">buf</span><span class="err">数组的字节数量，也就是字符串长度</span>
-	<span class="n">int</span> <span class="n">len</span><span class="p">;</span>
-	<span class="sr">//</span><span class="err">未使用的长度</span>
-	<span class="n">int</span> <span class="n">free</span><span class="p">;</span>
-	<span class="sr">//</span><span class="err">保存字符串</span>
-	<span class="n">char</span> <span class="n">buf</span><span class="p">[];</span>
+<figure class="highlight"><pre><code class="language-c" data-lang="c"><span class="k">struct</span> <span class="n">sdshdr</span><span class="p">{</span>
+	<span class="c1">//已使用buf数组的字节数量，也就是字符串长度
+</span>	<span class="kt">int</span> <span class="n">len</span><span class="p">;</span>
+	<span class="c1">//未使用的长度
+</span>	<span class="kt">int</span> <span class="n">free</span><span class="p">;</span>
+	<span class="c1">//保存字符串
+</span>	<span class="kt">char</span> <span class="n">buf</span><span class="p">[];</span>
 <span class="p">}</span></code></pre></figure>
 
 <p>SDS遵循C语言字符串以空字符串结尾，保留1个字节的空字符串’\0’，该空串不记入len中。</p>

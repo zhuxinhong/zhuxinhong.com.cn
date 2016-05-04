@@ -10,8 +10,8 @@
   <meta name="description" content="字典就是我们熟悉的map，键值对(key-value pair)的抽象数据结构。Redis数据库就是使用字典来作为底层实现的。先介绍下数据结构：1.哈希表typeof struct dictht {	//哈希表数组	dictEntry   **table;	//哈希表大小	unsigned long size;	...">
 
   <link rel="stylesheet" href="/css/main.css">
-  <link rel="canonical" href="http://yourdomain.com/redis/2015/06/25/Redis%E5%AD%97%E5%85%B8%E7%9A%84%E5%AE%9E%E7%8E%B0.html">
-  <link rel="alternate" type="application/rss+xml" title="zhuxinhong blog" href="http://yourdomain.com/feed.xml">
+  <link rel="canonical" href="http://zhuxinhong.com.cn/redis/2015/06/25/Redis%E5%AD%97%E5%85%B8%E7%9A%84%E5%AE%9E%E7%8E%B0.html">
+  <link rel="alternate" type="application/rss+xml" title="zhuxinhong blog" href="http://zhuxinhong.com.cn/feed.xml">
 </head>
 
 
@@ -66,34 +66,34 @@
 先介绍下数据结构：
 1.哈希表</p>
 
-<figure class="highlight"><pre><code class="language-ruby" data-lang="ruby"><span class="n">typeof</span> <span class="n">struct</span> <span class="n">dictht</span> <span class="p">{</span>
-	<span class="sr">//</span><span class="err">哈希表数组</span>
-	<span class="n">dictEntry</span>   <span class="o">**</span><span class="n">table</span><span class="p">;</span>
-	<span class="sr">//</span><span class="err">哈希表大小</span>
-	<span class="n">unsigned</span> <span class="n">long</span> <span class="n">size</span><span class="p">;</span>
-	<span class="sr">//</span><span class="err">哈希表大小掩码，用于计算索引</span>
-	<span class="sr">//</span><span class="err">总是等于</span><span class="n">size</span><span class="o">-</span><span class="mi">1</span>
-	<span class="n">unsigned</span> <span class="n">long</span> <span class="n">sizemask</span><span class="p">;</span>
-	<span class="sr">//</span><span class="err">已有节点数量</span>
-	<span class="n">unsigned</span> <span class="n">long</span> <span class="n">used</span><span class="p">;</span>
+<figure class="highlight"><pre><code class="language-c" data-lang="c"><span class="n">typeof</span> <span class="k">struct</span> <span class="n">dictht</span> <span class="p">{</span>
+	<span class="c1">//哈希表数组
+</span>	<span class="n">dictEntry</span>   <span class="o">**</span><span class="n">table</span><span class="p">;</span>
+	<span class="c1">//哈希表大小
+</span>	<span class="kt">unsigned</span> <span class="kt">long</span> <span class="n">size</span><span class="p">;</span>
+	<span class="c1">//哈希表大小掩码，用于计算索引
+</span>	<span class="c1">//总是等于size-1
+</span>	<span class="kt">unsigned</span> <span class="kt">long</span> <span class="n">sizemask</span><span class="p">;</span>
+	<span class="c1">//已有节点数量
+</span>	<span class="kt">unsigned</span> <span class="kt">long</span> <span class="n">used</span><span class="p">;</span>
 <span class="p">}</span> <span class="n">dictht</span><span class="p">;</span></code></pre></figure>
 
 <p>这种数据结构很好理解，和Java里面HashMap实现差不多。哈希表里面每个节点都是一个entry对象。</p>
 
 <p>2.哈希表节点</p>
 
-<figure class="highlight"><pre><code class="language-ruby" data-lang="ruby"><span class="n">typeof</span> <span class="n">struct</span> <span class="n">dictEntry</span> <span class="p">{</span>
-	<span class="sr">//</span><span class="err">键</span>
-	<span class="n">void</span> <span class="o">*</span><span class="n">key</span><span class="p">;</span>
-	<span class="sr">//</span><span class="err">值</span>
-	<span class="n">union</span> <span class="p">{</span>
-	<span class="n">void</span> <span class="o">*</span><span class="n">val</span><span class="p">;</span>
+<figure class="highlight"><pre><code class="language-c" data-lang="c"><span class="n">typeof</span> <span class="k">struct</span> <span class="n">dictEntry</span> <span class="p">{</span>
+	<span class="c1">//键
+</span>	<span class="kt">void</span> <span class="o">*</span><span class="n">key</span><span class="p">;</span>
+	<span class="c1">//值
+</span>	<span class="k">union</span> <span class="p">{</span>
+	<span class="kt">void</span> <span class="o">*</span><span class="n">val</span><span class="p">;</span>
 	<span class="n">unit64_t</span> <span class="n">u64</span><span class="p">;</span>
-	<span class="n">int64_t</span> <span class="n">s64</span><span class="p">;</span>
+	<span class="kt">int64_t</span> <span class="n">s64</span><span class="p">;</span>
 <span class="p">}</span> <span class="n">v</span><span class="p">;</span>
 
-<span class="sr">//</span><span class="err">指向下个哈希表节点，形成链表</span>
-<span class="n">struct</span> <span class="n">dictEntry</span> <span class="o">*</span><span class="k">next</span><span class="p">;</span>
+<span class="c1">//指向下个哈希表节点，形成链表
+</span><span class="k">struct</span> <span class="n">dictEntry</span> <span class="o">*</span><span class="n">next</span><span class="p">;</span>
 <span class="p">}</span> <span class="n">dictEntry</span><span class="p">;</span></code></pre></figure>
 
 <p>key属性存着键值对中的键，v属性存值。键可以是一个指针，也可以是一个unit64_t整数，或是一个int^4_t整数。C语言没了解过，这种奇怪的整数也不知道什么意思，姑且理解为Java里面的hashCode吧。
@@ -101,35 +101,35 @@ next属性指向链表中的下一个节点，这点和Java一样，当多个对
 
 <p>3.字典数据结构</p>
 
-<figure class="highlight"><pre><code class="language-ruby" data-lang="ruby"><span class="n">typeof</span> <span class="n">struct</span> <span class="n">dict</span> <span class="p">{</span>
-	<span class="sr">//</span><span class="err">类型特定函数</span>
-	<span class="n">dictType</span> <span class="o">*</span><span class="n">type</span><span class="p">;</span>
-	<span class="sr">//</span><span class="err">私有数据</span>
-	<span class="n">void</span> <span class="o">*</span><span class="n">privdata</span><span class="p">;</span>
-	<span class="sr">//</span><span class="err">哈希表</span>
-	<span class="n">dictht</span> <span class="n">ht</span><span class="p">[</span><span class="mi">2</span><span class="p">];</span>
-	<span class="sr">//</span><span class="n">rehash</span><span class="err">索引</span>
-	<span class="sr">//</span><span class="err">当</span><span class="n">rehash</span><span class="err">不再进行时，值为</span><span class="o">-</span><span class="mi">1</span>
-	<span class="n">int</span> <span class="n">rehashidx</span><span class="p">;</span>
+<figure class="highlight"><pre><code class="language-c" data-lang="c"><span class="n">typeof</span> <span class="k">struct</span> <span class="n">dict</span> <span class="p">{</span>
+	<span class="c1">//类型特定函数
+</span>	<span class="n">dictType</span> <span class="o">*</span><span class="n">type</span><span class="p">;</span>
+	<span class="c1">//私有数据
+</span>	<span class="kt">void</span> <span class="o">*</span><span class="n">privdata</span><span class="p">;</span>
+	<span class="c1">//哈希表
+</span>	<span class="n">dictht</span> <span class="n">ht</span><span class="p">[</span><span class="mi">2</span><span class="p">];</span>
+	<span class="c1">//rehash索引
+</span>	<span class="c1">//当rehash不再进行时，值为-1
+</span>	<span class="kt">int</span> <span class="n">rehashidx</span><span class="p">;</span>
 <span class="p">}</span> <span class="n">dict</span><span class="p">;</span></code></pre></figure>
 
 <p>type属性和privdata属性针对不同类型的键值对，为创建多态字典设置的。
 type属性是一个指向dictType结构的指针，每个dictType保存了一簇用于操作特定类型键值对的函数，Redis会为用途不同的字典设置不同的类型特定函数。
 privdata属性保存了需要传给那些类型特定函数的可选参数。</p>
 
-<figure class="highlight"><pre><code class="language-ruby" data-lang="ruby"><span class="n">typeof</span> <span class="n">struct</span> <span class="n">dictType</span> <span class="p">{</span>
-	<span class="sr">//</span><span class="err">计算哈希值的函数</span>
-	<span class="n">unsigned</span> <span class="n">int</span> <span class="p">(</span><span class="o">*</span><span class="n">hashFunction</span><span class="p">)</span> <span class="p">(</span><span class="n">const</span> <span class="n">void</span> <span class="o">*</span><span class="n">key</span><span class="p">);</span>
-	<span class="sr">//</span><span class="err">复制键的函数</span>
-	<span class="n">void</span> <span class="o">*</span><span class="p">(</span><span class="o">*</span><span class="n">keyDup</span><span class="p">)</span> <span class="p">(</span><span class="n">void</span> <span class="o">*</span><span class="n">privdata</span><span class="p">,</span> <span class="n">const</span> <span class="n">void</span> <span class="o">*</span><span class="n">key</span><span class="p">);</span>
-	<span class="sr">//</span><span class="err">复制值的函数</span>
-	<span class="n">void</span> <span class="o">*</span><span class="p">(</span><span class="o">*</span><span class="n">valDup</span><span class="p">)(</span><span class="n">void</span> <span class="o">*</span><span class="n">privdata</span><span class="p">,</span> <span class="n">const</span> <span class="n">void</span> <span class="o">*</span><span class="n">obj</span><span class="p">);</span>
-	<span class="sr">//</span><span class="err">对比键的函数</span>
-	<span class="n">int</span> <span class="p">(</span><span class="o">*</span><span class="n">keyCompare</span><span class="p">)</span> <span class="p">(</span><span class="n">void</span> <span class="o">*</span><span class="n">privdata</span><span class="p">,</span> <span class="n">const</span> <span class="n">void</span> <span class="o">*</span><span class="n">key1</span><span class="p">,</span> <span class="n">const</span> <span class="n">void</span> <span class="o">*</span><span class="n">key2</span><span class="p">);</span>
-	<span class="sr">//</span><span class="err">销毁键的函数</span>
-	<span class="n">void</span> <span class="p">(</span><span class="o">*</span><span class="n">keyDestructor</span><span class="p">)</span> <span class="p">(</span><span class="n">void</span> <span class="o">*</span><span class="n">privdata</span><span class="p">,</span> <span class="n">void</span> <span class="o">*</span><span class="n">key</span><span class="p">);</span>
-	<span class="sr">//</span><span class="err">销毁值的函数</span>
-	<span class="n">void</span> <span class="p">(</span><span class="o">*</span><span class="n">valDestructor</span><span class="p">)</span> <span class="p">(</span><span class="n">void</span> <span class="o">*</span><span class="n">privdata</span><span class="p">,</span> <span class="n">void</span> <span class="o">*</span><span class="n">obj</span><span class="p">);</span>
+<figure class="highlight"><pre><code class="language-c" data-lang="c"><span class="n">typeof</span> <span class="k">struct</span> <span class="n">dictType</span> <span class="p">{</span>
+	<span class="c1">//计算哈希值的函数
+</span>	<span class="kt">unsigned</span> <span class="kt">int</span> <span class="p">(</span><span class="o">*</span><span class="n">hashFunction</span><span class="p">)</span> <span class="p">(</span><span class="k">const</span> <span class="kt">void</span> <span class="o">*</span><span class="n">key</span><span class="p">);</span>
+	<span class="c1">//复制键的函数
+</span>	<span class="kt">void</span> <span class="o">*</span><span class="p">(</span><span class="o">*</span><span class="n">keyDup</span><span class="p">)</span> <span class="p">(</span><span class="kt">void</span> <span class="o">*</span><span class="n">privdata</span><span class="p">,</span> <span class="k">const</span> <span class="kt">void</span> <span class="o">*</span><span class="n">key</span><span class="p">);</span>
+	<span class="c1">//复制值的函数
+</span>	<span class="kt">void</span> <span class="o">*</span><span class="p">(</span><span class="o">*</span><span class="n">valDup</span><span class="p">)(</span><span class="kt">void</span> <span class="o">*</span><span class="n">privdata</span><span class="p">,</span> <span class="k">const</span> <span class="kt">void</span> <span class="o">*</span><span class="n">obj</span><span class="p">);</span>
+	<span class="c1">//对比键的函数
+</span>	<span class="kt">int</span> <span class="p">(</span><span class="o">*</span><span class="n">keyCompare</span><span class="p">)</span> <span class="p">(</span><span class="kt">void</span> <span class="o">*</span><span class="n">privdata</span><span class="p">,</span> <span class="k">const</span> <span class="kt">void</span> <span class="o">*</span><span class="n">key1</span><span class="p">,</span> <span class="k">const</span> <span class="kt">void</span> <span class="o">*</span><span class="n">key2</span><span class="p">);</span>
+	<span class="c1">//销毁键的函数
+</span>	<span class="kt">void</span> <span class="p">(</span><span class="o">*</span><span class="n">keyDestructor</span><span class="p">)</span> <span class="p">(</span><span class="kt">void</span> <span class="o">*</span><span class="n">privdata</span><span class="p">,</span> <span class="kt">void</span> <span class="o">*</span><span class="n">key</span><span class="p">);</span>
+	<span class="c1">//销毁值的函数
+</span>	<span class="kt">void</span> <span class="p">(</span><span class="o">*</span><span class="n">valDestructor</span><span class="p">)</span> <span class="p">(</span><span class="kt">void</span> <span class="o">*</span><span class="n">privdata</span><span class="p">,</span> <span class="kt">void</span> <span class="o">*</span><span class="n">obj</span><span class="p">);</span>
 <span class="p">}</span> <span class="n">dictType</span><span class="p">;</span></code></pre></figure>
 
 <p>ht属性是一个包含2个索引的数组，每个位置都是一个dictht哈希表，一般使用ht[0]，ht[1]用于存放对ht[0]哈希表进行rehash的结果。
