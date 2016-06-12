@@ -1,0 +1,324 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>垃圾收集器算法 | zhuxinhong.github.io</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="引用计数算法给对象添加引用计数器，每增加一个地方引用时，计数器加1，引用失效时，计数器减1。
+主流的JVM里面并没有选用引用计数法来管理内存，原因是它很难解决对象之间相互循环引用的问题。微软的COM技术、使用ActionScript的FlashPlayer、Python语言和游戏脚本领域被广泛应用的Squirrel中都使用了引用计数法管理内存。
+可达性分析算法通过一系列称为”GC Roots”的对">
+<meta property="og:type" content="article">
+<meta property="og:title" content="垃圾收集器算法">
+<meta property="og:url" content="http://zhuxinhong.github.io/2016/05/15/深入理解Java虚拟机/垃圾收集器算法/index.html">
+<meta property="og:site_name" content="zhuxinhong.github.io">
+<meta property="og:description" content="引用计数算法给对象添加引用计数器，每增加一个地方引用时，计数器加1，引用失效时，计数器减1。
+主流的JVM里面并没有选用引用计数法来管理内存，原因是它很难解决对象之间相互循环引用的问题。微软的COM技术、使用ActionScript的FlashPlayer、Python语言和游戏脚本领域被广泛应用的Squirrel中都使用了引用计数法管理内存。
+可达性分析算法通过一系列称为”GC Roots”的对">
+<meta property="og:updated_time" content="2016-06-08T10:28:53.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="垃圾收集器算法">
+<meta name="twitter:description" content="引用计数算法给对象添加引用计数器，每增加一个地方引用时，计数器加1，引用失效时，计数器减1。
+主流的JVM里面并没有选用引用计数法来管理内存，原因是它很难解决对象之间相互循环引用的问题。微软的COM技术、使用ActionScript的FlashPlayer、Python语言和游戏脚本领域被广泛应用的Squirrel中都使用了引用计数法管理内存。
+可达性分析算法通过一系列称为”GC Roots”的对">
+  
+    <link rel="alternative" href="/atom.xml" title="zhuxinhong.github.io" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="http://static.hdslb.com/images/favicon.ico">
+  
+  <link rel="stylesheet" href="/css/style.css">
+  <link href="//fonts.useso.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  <!--[if lt IE 9]><script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7/html5shiv.min.js"></script><![endif]-->
+  
+</head>
+<body>
+<div id="container">
+  <div id="wrap">
+    <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">zhuxinhong.github.io</a>
+      </h1>
+      
+        <h2 id="subtitle-wrap">
+          <a href="/" id="subtitle">java coder</a>
+        </h2>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="http://www.baidu.com/baidu" method="get" accept-charset="utf-8" class="search-form">
+          <input type="search" name="word" maxlength="20" class="search-form-input" placeholder="Search">
+          <input type="submit" value="" class="search-form-submit">
+          <input name=tn type=hidden value="bds">
+          <input name=cl type=hidden value="3">
+          <input name=ct type=hidden value="2097152">
+          <input type="hidden" name="si" value="zhuxinhong.github.io">
+        </form>
+      </div>
+    </div>
+  </div>
+</header>
+    <div class="outer">
+      <section id="main"><article id="post-深入理解Java虚拟机/垃圾收集器算法" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2016/05/15/深入理解Java虚拟机/垃圾收集器算法/" class="article-date">
+  <time datetime="2016-05-14T16:00:00.000Z" itemprop="datePublished">2016-05-15</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/深入理解Java虚拟机/">深入理解Java虚拟机</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      垃圾收集器算法
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h1 id="引用计数算法"><a href="#引用计数算法" class="headerlink" title="引用计数算法"></a>引用计数算法</h1><p>给对象添加引用计数器，每增加一个地方引用时，计数器加1，引用失效时，计数器减1。</p>
+<p>主流的JVM里面并没有选用引用计数法来管理内存，原因是它很难解决对象之间相互循环引用的问题。<br>微软的COM技术、使用ActionScript的FlashPlayer、Python语言和游戏脚本领域被广泛应用的Squirrel中都使用了引用计数法管理内存。</p>
+<h1 id="可达性分析算法"><a href="#可达性分析算法" class="headerlink" title="可达性分析算法"></a>可达性分析算法</h1><p>通过一系列称为”GC Roots”的对象作为起始点，从这些节点向下搜索，搜索走过的路径称为引用链，当一个对象到GC Roots没有任何引用链相连时，则证明对象不可用。<br>在Java语言中，可作为GC Roots对象包括下面几种：  </p>
+<ul>
+<li>虚拟机栈（栈帧中的本地变量表）中引用的对象。  </li>
+<li>方法区中类静态属性引用的对象。  </li>
+<li>方法区中常量引用的对象。  </li>
+<li>本地方法栈中JNI（Native方法）引用的对象。</li>
+</ul>
+<h1 id="引用"><a href="#引用" class="headerlink" title="引用"></a>引用</h1><p>JDK1.2后，Java对引用概念进行扩充，将引用分为强引用、软引用、弱引用、虚引用4种。  </p>
+<ul>
+<li>强引用是指在程序代码中普遍存在的，类似“Object object = new Object()”这类的引用，只要强引用存在，垃圾收集器永远不会回收被引用的对象。  </li>
+<li>软引用用来描述一些还有用但并非必须的对象。对于软引用关联着的对象，在系统将要发生内存溢出异常前，将会把这些对象列进回收范围之中进行第二次回收。如果这次回收还没有足够内存，才会抛出内存溢出异常。JDK1.2后，提供SoftReference类实现软引用。  </li>
+<li>弱引用也是描述非必须对象，它的强度较软引用更弱一些，被弱引用关联的对象只能生存到下一次垃圾收集发生之前。当垃圾收集器工作时，无论当前内存是否足够，都会回收掉被弱引用关联的对象。JDK1.2后，提供WeakReference类实现弱引用。  </li>
+<li>虚引用也称为幽灵引用或幻影引用，是最弱的一种引用关系。一个对象是否有虚引用的存在，完全不会对其生存时间构成影响，也无法通过虚引用来取得一个对象实例。为一个对象设置虚引用关联的唯一目的就是能在这个对象被收集器回收时收到一个系统通知。JDK1.2后，提供PhantomReference类实现虚引用。</li>
+</ul>
+<h1 id="回收方法区"><a href="#回收方法区" class="headerlink" title="回收方法区"></a>回收方法区</h1><p>JVM规范中说过可以不要求虚拟机在方法区实现垃圾收集，而且在方法区中进行垃圾收集的“性价比”一般比较低：在堆中，尤其在新生代中，常规应用进行一次垃圾收集一般可以回收70%-95%的空间，而永久代的垃圾搜集效率远低于此。<br>永久代的垃圾收集主要回收两部分内容：废弃常量和无用的类。<br>判定一个常量是否是“废弃常量”比较简单，而要判定一个类是否是“无用的类”的条件则相对苛刻许多。类要同时满足下面3个条件才能算是“无用的类”：  </p>
+<ol>
+<li>该类所有的实例都已经被回收，也就是说Java堆中不存在该类的任何实例。</li>
+<li>加载该类的ClassLoader已经被回收。  </li>
+<li>该类对应的java.lang.Class对象没有在任何地方被引用，无法在任何地方通过反射访问该类的方法。  </li>
+</ol>
+<p>JVM可以对满足上述3各条件的无用类进行回收，这里说的是“可以”，并不是和对象一样，不使用了必然回收。是否对类进行回收，HotSpot虚拟机提供了 -Xnoclassgc 参数进行控制，还可以使用 -verbose:class 以及 -XX:+TraceClassLoading、 -XX:+TraceClassUnLaoding查看类加载和卸载信息，其中 -verboss:class 和 -XX:+TraceClassLoading 可以在Product版的虚拟机中使用。 -XX:+TraceClassUnLoading参数需要FastDebug版的虚拟机支持。<br>在大量使用反射、动态代理、CGLib等ByteCode框架、动态生成JSP以及OSGi这类频繁自定义ClassLoader的场景都需要虚拟机具备类卸载的功能，以保证永久代不会溢出。</p>
+<h1 id="垃圾收集算法"><a href="#垃圾收集算法" class="headerlink" title="垃圾收集算法"></a>垃圾收集算法</h1><h2 id="标记-清除算法"><a href="#标记-清除算法" class="headerlink" title="标记-清除算法"></a>标记-清除算法</h2><p>算法分为“标记”和“清除”两个阶段：首先标记处所有需要回收的对象，在标记完成后统一回收所有被标记的对象。主要不足有2处：一个是效率问题，标记和清除两个过程效率都不高；另一个是空间问题，标记清除之后会产生大量不连续的内存碎片，空间碎片太多可能导致以后程序运行过程中需要分配较大对象时，无法找到足够的连续内存而不得不提前出发另一次垃圾收集动作。</p>
+<h2 id="复制算法"><a href="#复制算法" class="headerlink" title="复制算法"></a>复制算法</h2><p>为了解决效率问题，复制收集算法出现了。它将可用内存按容量分为大小相等的两块，每次只使用其中一块。当这一块内存用完了，就将还存活着的对象复制到另一块上面，然后再把已经使用过的内存空间一次清理掉。</p>
+<p>现在的商业虚拟机都采用这种收集算法来回收新生代，IBM公司专门研究表明，新生代的对象95%是“朝生夕死”的，所以并不需要1:1的比例来划分内存空间，而是将内存分为一块较大的Eden空间和两块较小的Survior空间，每次使用Eden和其中一块Survior。当回收时，将Eden和Survior中还存活着的对象一次性地复制到另一块Survior空间上，最后清理掉Eden和刚才用过的Survior空间。HotSpot默认Eden和Survior的大小比例是8:1，也就是每次新生代中可用内存空间为整个新生代容量的90%（80%+10%）。我们没有办法保证每次回收都只有不多于10%的对象存活，当Survior空间不够用时，需要依赖其他内存（这里指老年代）进行分配担保。</p>
+<p>如果另外一块Survior空间没有足够空间存放上一次新生代收集下来的存活对象时，这些对象将直接通过分配担保机制进入老年代。</p>
+<h2 id="标记-整理算法"><a href="#标记-整理算法" class="headerlink" title="标记-整理算法"></a>标记-整理算法</h2><p>复制收集算法在对象存活率较高时就要进行较多的复制操作，效率将会变低。根据老年代的特点，有人提出了“标记-整理”算法，标记过程仍然与“标记-清除”算法一样，但后续步骤不是直接对可回收对象进行清理，而是让所有存活的对象都向一端移动，然后直接清理掉端边界以外的内存。</p>
+<h2 id="分代收集算法"><a href="#分代收集算法" class="headerlink" title="分代收集算法"></a>分代收集算法</h2><p>当前商业虚拟机的垃圾手机都采用“分代收集”算法，一般把Java堆分为新生代和老年代。新生代中，每次垃圾收集时都发现有大批对象死去，只有少量存活，那就选用复制算法，只需要付出少量存活对象的复制成本就可以完成收集。而老年代中因为对象存活率高、没有额外空间对它进行分配担保，就必须使用“标记-清理”或者“标记-整理”算法来进行回收。</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      
+        <a data-url="http://zhuxinhong.github.io/2016/05/15/深入理解Java虚拟机/垃圾收集器算法/" data-id="cip6s0yrc002899q5tw2omxmy" class="article-share-link" data-share="baidu" data-title="垃圾收集器算法">分享到</a>
+      
+
+      
+
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/JVM/">JVM</a></li></ul>
+
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2016/05/17/Java Web/深入分析IO工作机制/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">下一篇</strong>
+      <div class="article-nav-title">
+        
+          深入分析I/O工作机制
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2016/05/11/Java Web/DNS域名解析过程/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">上一篇</strong>
+      <div class="article-nav-title">DNS域名解析过程</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+</section>
+      
+      <aside id="sidebar">
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">分类</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Java-Web/">Java Web</a><span class="category-list-count">5</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Redis设计与实现/">Redis设计与实现</a><span class="category-list-count">16</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Scala/">Scala</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/深入理解Java虚拟机/">深入理解Java虚拟机</a><span class="category-list-count">2</span></li></ul>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">标签</h3>
+    <div class="widget">
+      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/DNS/">DNS</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/IO/">IO</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/JVM/">JVM</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Java/">Java</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/NIO/">NIO</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Redis/">Redis</a><span class="tag-list-count">16</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Scala/">Scala</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Tomcat/">Tomcat</a><span class="tag-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">标签云</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/DNS/" style="font-size: 10px;">DNS</a> <a href="/tags/IO/" style="font-size: 10px;">IO</a> <a href="/tags/JVM/" style="font-size: 13.33px;">JVM</a> <a href="/tags/Java/" style="font-size: 16.67px;">Java</a> <a href="/tags/NIO/" style="font-size: 10px;">NIO</a> <a href="/tags/Redis/" style="font-size: 20px;">Redis</a> <a href="/tags/Scala/" style="font-size: 10px;">Scala</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/06/">六月 2016</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/05/">五月 2016</a><span class="archive-list-count">7</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/07/">七月 2015</a><span class="archive-list-count">9</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/06/">六月 2015</a><span class="archive-list-count">7</span></li></ul>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">近期文章</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2016/06/07/Scala/Scala基础/">Scala基础</a>
+          </li>
+        
+          <li>
+            <a href="/2016/05/28/Java Web/深入分析ClassLoader/">深入分析ClassLoader</a>
+          </li>
+        
+          <li>
+            <a href="/2016/05/22/Java Web/Tomcat的系统架构/">Tomcat系统架构</a>
+          </li>
+        
+          <li>
+            <a href="/2016/05/18/Java Web/NIO的工作机制/">NIO工作机制</a>
+          </li>
+        
+          <li>
+            <a href="/2016/05/17/Java Web/深入分析IO工作机制/">深入分析I/O工作机制</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">友情链接</h3>
+    <div class="widget">
+      <ul>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+      
+    </div>
+    <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2016 Focus_cn<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+      .
+      Theme by <a href="https://github.com/xiangming/landscape-plus" target="_blank">Landscape-plus</a>
+    </div>
+  </div>
+</footer>
+  </div>
+  <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+  <!-- totop start -->
+<div id="totop">
+<a title="返回顶部"><img src="/img/scrollup.png"/></a>
+</div>
+
+<!-- totop end -->
+
+
+<!-- 百度分享 start -->
+
+<div id="article-share-box" class="article-share-box">
+  <div id="bdshare" class="bdsharebuttonbox article-share-links">
+    <a class="article-share-weibo" data-cmd="tsina" title="分享到新浪微博"></a>
+    <a class="article-share-weixin" data-cmd="weixin" title="分享到微信"></a>
+    <a class="article-share-qq" data-cmd="sqq" title="分享到QQ"></a>
+    <a class="article-share-renren" data-cmd="renren" title="分享到人人网"></a>
+    <a class="article-share-more" data-cmd="more" title="更多"></a>
+  </div>
+</div>
+<script>
+  function SetShareData(cmd, config) {
+    if (shareDataTitle && shareDataUrl) {
+      config.bdText = shareDataTitle;
+      config.bdUrl = shareDataUrl;
+    }
+    return config;
+  }
+  window._bd_share_config={
+    "common":{onBeforeClick: SetShareData},
+    "share":{"bdCustomStyle":"/css/bdshare.css"}
+  };
+  with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='http://bdimg.share.baidu.com/static/api/js/share.js?cdnversion='+~(-new Date()/36e5)];
+</script>
+
+<!-- 百度分享 end -->
+
+<script src="//cdnjs.cloudflare.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+
+
+
+
+<script src="/js/script.js"></script>
+
+</div>
+</body>
+</html>
