@@ -73,6 +73,67 @@
     <div class="outer">
       <section id="main">
   
+    <article id="post-redis设计与实现/Redis客户端" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2015/07/22/redis设计与实现/Redis客户端/" class="article-date">
+  <time datetime="2015-07-21T16:00:00.000Z" itemprop="datePublished">2015-07-22</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/Redis设计与实现/">Redis设计与实现</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2015/07/22/redis设计与实现/Redis客户端/">Redis客户端</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>通过使用由I/O多路复用技术实现的文件事件处理器，Redis服务器使用单线程单进程的方式来处理命令请求，并与多个客户端进行网络通信。<br>redisClient结构保存客户端的数据结构：  </p>
+<ul>
+<li>套接字描述符  </li>
+<li>名字  </li>
+<li>标志位  </li>
+<li>正在使用的数据库指针，数据库号码    </li>
+<li>当前要执行的命令、参数、参数个数，以及指向命令实现函数的指针  </li>
+<li>输入缓冲和输出缓冲  </li>
+<li>复制状态信息和复制所需数据结构  </li>
+<li>执行BRPOP、BLPOP等列表阻塞命令时使用的数据结构  </li>
+<li>事物状态，执行WATCH命令用到的数据结构  </li>
+<li>执行发布和订阅用到的数据结构  </li>
+<li>身份验证标志  </li>
+<li>创建时间、最后一次通信时间，输出缓冲区大小超出软性限制的事件  </li>
+</ul>
+
+      
+    </div>
+    <footer class="article-footer">
+      
+        <a data-url="http://zhuxinhong.github.io/2015/07/22/redis设计与实现/Redis客户端/" data-id="cip6s0yq3001299q5na6xl24h" class="article-share-link" data-share="baidu" data-title="Redis客户端">分享到</a>
+      
+
+      
+
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Redis/">Redis</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+  
     <article id="post-redis设计与实现/Redis时间事件" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
     <a href="/2015/07/12/redis设计与实现/Redis时间事件/" class="article-date">
@@ -290,55 +351,6 @@
 
 
   
-    <article id="post-redis设计与实现/Redis持久化-RDB" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2015/07/01/redis设计与实现/Redis持久化-RDB/" class="article-date">
-  <time datetime="2015-06-30T16:00:00.000Z" itemprop="datePublished">2015-07-01</time>
-</a>
-    
-  <div class="article-category">
-    <a class="article-category-link" href="/categories/Redis设计与实现/">Redis设计与实现</a>
-  </div>
-
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2015/07/01/redis设计与实现/Redis持久化-RDB/">Redis持久化-RDB</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>RDB持久化可以自动，也可以手动，这个功能将某个时间点上的数据库状态保存到一个经过压缩的二进制文件中。</p>
-<p>SAVE命令会阻塞服务，执行完成前客户端的所有请求都会拒绝。<br>BGSAVE命令会新建一个子进程执行持久化操作，不阻塞服务。</p>
-<p>服务器状态维护了一个dirty计数器以及一个lastsave属性，供RDB持久化策略使用。<br>dirty计数器记录距离上一次成功执行SAVE或BGSAVE操作后，服务器中所有数据库进行了多少次修改操作（增删改）；<br>lastsave属性是一个unix时间戳，记录上一次RDB持久化的时间。</p>
-
-      
-    </div>
-    <footer class="article-footer">
-      
-        <a data-url="http://zhuxinhong.github.io/2015/07/01/redis设计与实现/Redis持久化-RDB/" data-id="cip6s0yqj001h99q5ed4sz5no" class="article-share-link" data-share="baidu" data-title="Redis持久化-RDB">分享到</a>
-      
-
-      
-
-      
-  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Redis/">Redis</a></li></ul>
-
-    </footer>
-  </div>
-  
-</article>
-
-
-  
   
     <nav id="page-nav">
       <a class="extend prev" rel="prev" href="/page/2/">&laquo; Prev</a><a class="page-number" href="/">1</a><a class="page-number" href="/page/2/">2</a><span class="page-number current">3</span><a class="page-number" href="/page/4/">4</a><a class="page-number" href="/page/5/">5</a><a class="extend next" rel="next" href="/page/4/">Next &raquo;</a>
@@ -352,7 +364,7 @@
   <div class="widget-wrap">
     <h3 class="widget-title">分类</h3>
     <div class="widget">
-      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Java-Web/">Java Web</a><span class="category-list-count">5</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Redis设计与实现/">Redis设计与实现</a><span class="category-list-count">16</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Scala/">Scala</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/深入理解Java虚拟机/">深入理解Java虚拟机</a><span class="category-list-count">2</span></li></ul>
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/HBase/">HBase</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Java-Web/">Java Web</a><span class="category-list-count">5</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Redis设计与实现/">Redis设计与实现</a><span class="category-list-count">16</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Scala/">Scala</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/深入理解Java虚拟机/">深入理解Java虚拟机</a><span class="category-list-count">2</span></li></ul>
     </div>
   </div>
 
@@ -361,7 +373,7 @@
   <div class="widget-wrap">
     <h3 class="widget-title">标签</h3>
     <div class="widget">
-      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/DNS/">DNS</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/IO/">IO</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/JVM/">JVM</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Java/">Java</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/NIO/">NIO</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Redis/">Redis</a><span class="tag-list-count">16</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Scala/">Scala</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Tomcat/">Tomcat</a><span class="tag-list-count">1</span></li></ul>
+      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/DNS/">DNS</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/HBase/">HBase</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/IO/">IO</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/JVM/">JVM</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Java/">Java</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/NIO/">NIO</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Redis/">Redis</a><span class="tag-list-count">16</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Scala/">Scala</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Tomcat/">Tomcat</a><span class="tag-list-count">1</span></li></ul>
     </div>
   </div>
 
@@ -370,7 +382,7 @@
   <div class="widget-wrap">
     <h3 class="widget-title">标签云</h3>
     <div class="widget tagcloud">
-      <a href="/tags/DNS/" style="font-size: 10px;">DNS</a> <a href="/tags/IO/" style="font-size: 10px;">IO</a> <a href="/tags/JVM/" style="font-size: 13.33px;">JVM</a> <a href="/tags/Java/" style="font-size: 16.67px;">Java</a> <a href="/tags/NIO/" style="font-size: 10px;">NIO</a> <a href="/tags/Redis/" style="font-size: 20px;">Redis</a> <a href="/tags/Scala/" style="font-size: 10px;">Scala</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a>
+      <a href="/tags/DNS/" style="font-size: 10px;">DNS</a> <a href="/tags/HBase/" style="font-size: 10px;">HBase</a> <a href="/tags/IO/" style="font-size: 10px;">IO</a> <a href="/tags/JVM/" style="font-size: 13.33px;">JVM</a> <a href="/tags/Java/" style="font-size: 16.67px;">Java</a> <a href="/tags/NIO/" style="font-size: 10px;">NIO</a> <a href="/tags/Redis/" style="font-size: 20px;">Redis</a> <a href="/tags/Scala/" style="font-size: 10px;">Scala</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a>
     </div>
   </div>
 
@@ -379,7 +391,7 @@
   <div class="widget-wrap">
     <h3 class="widget-title">归档</h3>
     <div class="widget">
-      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/06/">六月 2016</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/05/">五月 2016</a><span class="archive-list-count">7</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/07/">七月 2015</a><span class="archive-list-count">9</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/06/">六月 2015</a><span class="archive-list-count">7</span></li></ul>
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/07/">七月 2016</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/06/">六月 2016</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/05/">五月 2016</a><span class="archive-list-count">7</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/07/">七月 2015</a><span class="archive-list-count">9</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/06/">六月 2015</a><span class="archive-list-count">7</span></li></ul>
     </div>
   </div>
 
@@ -389,6 +401,10 @@
     <h3 class="widget-title">近期文章</h3>
     <div class="widget">
       <ul>
+        
+          <li>
+            <a href="/2016/07/05/HBase/初识HBase/">初识HBase</a>
+          </li>
         
           <li>
             <a href="/2016/06/07/Scala/Scala基础/">Scala基础</a>
@@ -404,10 +420,6 @@
         
           <li>
             <a href="/2016/05/18/Java Web/NIO的工作机制/">NIO工作机制</a>
-          </li>
-        
-          <li>
-            <a href="/2016/05/17/Java Web/深入分析IO工作机制/">深入分析I/O工作机制</a>
           </li>
         
       </ul>
