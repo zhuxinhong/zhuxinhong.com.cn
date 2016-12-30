@@ -248,6 +248,157 @@
             
               
                 
+                <a class="post-title-link" href="/2016/05/28/Java Web/深入分析ClassLoader/" itemprop="url">
+                  深入分析ClassLoader
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2016-05-28T00:00:00+08:00" content="2016-05-28">
+              2016-05-28
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/Java-Web/" itemprop="url" rel="index">
+                    <span itemprop="name">Java Web</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                &nbsp; | &nbsp;
+                <a href="/2016/05/28/Java Web/深入分析ClassLoader/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/05/28/Java Web/深入分析ClassLoader/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+
+          
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>ClassLoader除了能将Class加载到JVM中之外，还能审查每个类该由谁加载。它是一种父优先的等级加载机制。</p>
+<h2 id="ClassLoader等级加载机制"><a href="#ClassLoader等级加载机制" class="headerlink" title="ClassLoader等级加载机制"></a>ClassLoader等级加载机制</h2><ol>
+<li>Bootstrap ClassLoader，主要加载JVM自身工作需要的类，完全由JVM自己控制，外部无法访问，这个ClassLoader不遵守等级加载规则。</li>
+<li>ExtClassLoader，不是JVM亲自实现。服务目标在System.getProperties(“java.ext.dirs”)目录下。</li>
+<li>AppClassLoader，父类是ExtClassLoader，所有在System.getProperties(“java.class.path”)目录下的类都可以被这个类加载器加载，这就是我们常用到的classpath。</li>
+</ol>
+<p>如果我们要实现自己的类加载器，不管是直接实现抽象类ClassLoader，还是继承URLClassLoader或其他子类，它的父加载器都是AppClassLoader，不管调用哪个父类构造器，创建对象都必须最终调用getSystemCLassLoader()作为父加载器，而getSystemClassLoader()方法获取到的正是AppClassLoader。</p>
+<p>Bootstrap ClassLoader并不属于JVM的类层次结构，因为BootstrapClassLoader并没有遵守ClassLoader的加载规则。Bootstrap ClassLoader并没有子类，ExtClassLoader父类也不是Bootstrap ClassLoader，ExtClassLoader并没有父类，应用中能提取到的顶层父类是ExtClassLoader。</p>
+<p>ExtClassLoader和AppClassLoader都位于sun.misc.Launcher类中，它们是Launcher类的内部类，都继承了URLClassLoader类，URLClassLoader实现了抽象类ClassLoader。</p>
+<h2 id="如何加载class文件"><a href="#如何加载class文件" class="headerlink" title="如何加载class文件"></a>如何加载class文件</h2><p>抽象类ClassLoader中并没有定义如何加载，需要子类实现findClass()方法。看一下URLClassLoader实现findClass()过程：    </p>
+<ol>
+<li>通过URLClassPath类取得加载的class文件字节流，找到后读取它的byte字节流。    </li>
+<li>调用defineClass()创建类对象。</li>
+</ol>
+<p>创建URLClassLoader对象会根据传过来的URL数组中路径来判断是文件还是jar包，根据路径的不同分别创建FileLoader和JarLoader，或者使用默认的加载器。</p>
+<h3 id="验证与解析"><a href="#验证与解析" class="headerlink" title="验证与解析"></a>验证与解析</h3><ol>
+<li>字节码验证，确保格式正确，行为正确。</li>
+<li>类准备，准备字段、方法和实现接口所必须的数据结构。</li>
+<li>解析，类装入器装入类引用的其他所有类。    </li>
+<li>初始化对象，该阶段末尾静态字段被初始化默认值。</li>
+</ol>
+<h2 id="实现自己的ClassLoader"><a href="#实现自己的ClassLoader" class="headerlink" title="实现自己的ClassLoader"></a>实现自己的ClassLoader</h2><p>应用场景：    </p>
+<ul>
+<li>在自定义路径下查找自定义的class类文件，也许我们需要的class文件并不总是在classPath下面。    </li>
+<li>对我们自己要加载的类做特殊处理，如保证通过网络传输的安全性，可以将类经过加密后传输，在加载到JVM之前需要对类的字节码再解密。        </li>
+<li>可以定义类的实现机制，例如实现热部署：检查已经加载的class文件是否被修改，如修改可重新加载。    </li>
+</ul>
+<p>JVM表示一个类是否是同一个类有两个条件：    </p>
+<ol>
+<li>检查完整类名是否一致。        </li>
+<li>检查加载这个类的ClassLoader是否是同一个，这里指的是ClassLoader实例是否是同一个。</li>
+</ol>
+
+          
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
                 <a class="post-title-link" href="/2016/05/22/Java Web/Tomcat的系统架构/" itemprop="url">
                   Tomcat系统架构
                 </a>
@@ -877,152 +1028,6 @@
 
 
     
-      
-
-  
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-            
-            
-              
-                
-                <a class="post-title-link" href="/2016/05/11/Java Web/DNS域名解析过程/" itemprop="url">
-                  DNS域名解析过程
-                </a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            <span class="post-meta-item-icon">
-              <i class="fa fa-calendar-o"></i>
-            </span>
-            <span class="post-meta-item-text">发表于</span>
-            <time itemprop="dateCreated" datetime="2016-05-11T00:00:00+08:00" content="2016-05-11">
-              2016-05-11
-            </time>
-          </span>
-
-          
-            <span class="post-category" >
-              &nbsp; | &nbsp;
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-              
-                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
-                  <a href="/categories/Java-Web/" itemprop="url" rel="index">
-                    <span itemprop="name">Java Web</span>
-                  </a>
-                </span>
-
-                
-                
-
-              
-            </span>
-          
-
-          
-            
-              <span class="post-comments-count">
-                &nbsp; | &nbsp;
-                <a href="/2016/05/11/Java Web/DNS域名解析过程/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/05/11/Java Web/DNS域名解析过程/" itemprop="commentsCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-
-          
-          
-
-          
-        </div>
-      </header>
-    
-
-
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>当用户在浏览器输入www.abc.com，DNS解析将会有将近10个步骤。</p>
-<ol>
-<li>浏览器检查缓存有没有该域名对应的IP。如果有，这个解析过程就结束。浏览器缓存域名是有限制的，不仅大小有限制，时间也有限制，通过TTL属性设置域名缓存时间。</li>
-<li>浏览器缓存中没有，检查操作系统缓存中是否有解析结果。如果有，解析结束。没有的话，请求域名服务器解析该域名。</li>
-<li><p>网络配置有配置DNS服务器地址，操作系统把域名发送给这里的LDNS。Linux下通过以下命令查看。  </p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cat /etc/resolv.conf</span><br></pre></td></tr></table></figure>
-</li>
-<li><p>LDNS未命中，直接到Root Server域名服务器请求解析。</p>
-</li>
-<li>根域名服务器返回本地域名服务器一个服务器地址(gTLD Server)。gTLD是国际顶级域名服务器，如.com、.cn、.org等，全球只有13台左右。</li>
-<li>本地域名服务器再向上一步返回的gTLD服务器发送请求。</li>
-<li>gTLD服务器查找并返回此域名对应的Name Server域名服务器地址，这个Name Server通常就是你注册的域名服务器。</li>
-<li>Name Server域名服务器查询存储的域名和IP映射关系，正常情况下查询到目标IP记录，连同一个TTL值返回给DNS Server域名服务器。</li>
-<li>返回该域名对应的IP和TTL值，Local DNS Server会缓存该记录。</li>
-<li>解析结果返回给用户，用户根据TTL值缓存这个记录。</li>
-</ol>
-<p>实际过程中，可能不止这个10个步骤，如Name Server有多级或者有个GTM负载均衡控制，这都会影响域名解析的过程。</p>
-<h1 id="跟踪域名解析过程"><a href="#跟踪域名解析过程" class="headerlink" title="跟踪域名解析过程"></a>跟踪域名解析过程</h1><h2 id="dig"><a href="#dig" class="headerlink" title="dig"></a>dig</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line">--- ~ » dig www.google.com</span><br><span class="line"></span><br><span class="line">; &lt;&lt;&gt;&gt; DiG 9.8.3-P1 &lt;&lt;&gt;&gt; www.google.com</span><br><span class="line">;; global options: +cmd</span><br><span class="line">;; Got answer:</span><br><span class="line">;; -&gt;&gt;HEADER&lt;&lt;- opcode: QUERY, status: NOERROR, id: 50606</span><br><span class="line">;; flags: qr rd ra; QUERY: 1, ANSWER: 16, AUTHORITY: 0, ADDITIONAL: 0</span><br><span class="line"></span><br><span class="line">;; QUESTION SECTION:</span><br><span class="line">;www.google.com.			IN	A</span><br><span class="line"></span><br><span class="line">;; ANSWER SECTION:</span><br><span class="line">www.google.com.		299	IN	A	61.238.239.35</span><br><span class="line">www.google.com.		299	IN	A	61.238.239.20</span><br><span class="line">www.google.com.		299	IN	A	61.238.239.24</span><br><span class="line">www.google.com.		299	IN	A	61.238.239.59</span><br><span class="line">www.google.com.		299	IN	A	61.238.239.29</span><br><span class="line">www.google.com.		299	IN	A	61.238.239.30</span><br><span class="line">www.google.com.		299	IN	A	61.238.239.45</span><br><span class="line">www.google.com.		299	IN	A	61.238.239.40</span><br><span class="line">www.google.com.		299	IN	A	61.238.239.55</span><br><span class="line">www.google.com.		299	IN	A	61.238.239.34</span><br><span class="line">www.google.com.		299	IN	A	61.238.239.44</span><br><span class="line">www.google.com.		299	IN	A	61.238.239.49</span><br><span class="line">www.google.com.		299	IN	A	61.238.239.54</span><br><span class="line">www.google.com.		299	IN	A	61.238.239.25</span><br><span class="line">www.google.com.		299	IN	A	61.238.239.39</span><br><span class="line">www.google.com.		299	IN	A	61.238.239.50</span><br><span class="line"></span><br><span class="line">;; Query time: 61 msec</span><br><span class="line">;; SERVER: 8.8.8.8#53(8.8.8.8)</span><br><span class="line">;; WHEN: Wed May 11 21:04:56 2016</span><br><span class="line">;; MSG SIZE  rcvd: 288</span><br><span class="line"></span><br><span class="line">--- ~ »</span><br></pre></td></tr></table></figure>
-<h2 id="dig-cmd"><a href="#dig-cmd" class="headerlink" title="dig +cmd"></a>dig +cmd</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line">--- ~ » dig +printcmd www.taobao.com</span><br><span class="line">Invalid option: +printcmd</span><br><span class="line">Usage:  dig [@global-server] [domain] [q-type] [q-class] &#123;q-opt&#125;</span><br><span class="line">            &#123;global-d-opt&#125; host [@local-server] &#123;local-d-opt&#125;</span><br><span class="line">            [ host [@local-server] &#123;local-d-opt&#125; [...]]</span><br><span class="line"></span><br><span class="line">Use &quot;dig -h&quot; (or &quot;dig -h | more&quot;) for complete list of options</span><br><span class="line">--- ~ » dig +cmd www.taobao.com                                                                                                                                        1 ↵</span><br><span class="line"></span><br><span class="line">; &lt;&lt;&gt;&gt; DiG 9.8.3-P1 &lt;&lt;&gt;&gt; +cmd www.taobao.com</span><br><span class="line">;; global options: +cmd</span><br><span class="line">;; Got answer:</span><br><span class="line">;; -&gt;&gt;HEADER&lt;&lt;- opcode: QUERY, status: NOERROR, id: 62882</span><br><span class="line">;; flags: qr rd ra; QUERY: 1, ANSWER: 2, AUTHORITY: 0, ADDITIONAL: 0</span><br><span class="line"></span><br><span class="line">;; QUESTION SECTION:</span><br><span class="line">;www.taobao.com.			IN	A</span><br><span class="line"></span><br><span class="line">;; ANSWER SECTION:</span><br><span class="line">www.taobao.com.		71	IN	CNAME	www.taobao.com.danuoyi.tbcache.com.</span><br><span class="line">www.taobao.com.danuoyi.tbcache.com. 599	IN A	205.204.104.227</span><br><span class="line"></span><br><span class="line">;; Query time: 73 msec</span><br><span class="line">;; SERVER: 8.8.8.8#53(8.8.8.8)</span><br><span class="line">;; WHEN: Wed May 11 21:07:41 2016</span><br><span class="line">;; MSG SIZE  rcvd: 93</span><br><span class="line"></span><br><span class="line">--- ~ »</span><br></pre></td></tr></table></figure>
-<h2 id="dig-trace"><a href="#dig-trace" class="headerlink" title="dig +trace"></a>dig +trace</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line">--- ~ » dig www.google.com +trace                                                                                                                                      9 ↵</span><br><span class="line"></span><br><span class="line">; &lt;&lt;&gt;&gt; DiG 9.8.3-P1 &lt;&lt;&gt;&gt; www.google.com +trace</span><br><span class="line">;; global options: +cmd</span><br><span class="line">.			5236	IN	NS	a.root-servers.net.</span><br><span class="line">.			5236	IN	NS	b.root-servers.net.</span><br><span class="line">.			5236	IN	NS	c.root-servers.net.</span><br><span class="line">.			5236	IN	NS	d.root-servers.net.</span><br><span class="line">.			5236	IN	NS	e.root-servers.net.</span><br><span class="line">.			5236	IN	NS	f.root-servers.net.</span><br><span class="line">.			5236	IN	NS	g.root-servers.net.</span><br><span class="line">.			5236	IN	NS	h.root-servers.net.</span><br><span class="line">.			5236	IN	NS	i.root-servers.net.</span><br><span class="line">.			5236	IN	NS	j.root-servers.net.</span><br><span class="line">.			5236	IN	NS	k.root-servers.net.</span><br><span class="line">.			5236	IN	NS	l.root-servers.net.</span><br><span class="line">.			5236	IN	NS	m.root-servers.net.</span><br><span class="line">;; Received 228 bytes from 8.8.8.8#53(8.8.8.8) in 63 ms</span><br><span class="line"></span><br><span class="line">com.			172800	IN	NS	m.gtld-servers.net.</span><br><span class="line">com.			172800	IN	NS	e.gtld-servers.net.</span><br><span class="line">com.			172800	IN	NS	d.gtld-servers.net.</span><br><span class="line">com.			172800	IN	NS	b.gtld-servers.net.</span><br><span class="line">com.			172800	IN	NS	j.gtld-servers.net.</span><br><span class="line">com.			172800	IN	NS	f.gtld-servers.net.</span><br><span class="line">com.			172800	IN	NS	g.gtld-servers.net.</span><br><span class="line">com.			172800	IN	NS	l.gtld-servers.net.</span><br><span class="line">com.			172800	IN	NS	k.gtld-servers.net.</span><br><span class="line">com.			172800	IN	NS	h.gtld-servers.net.</span><br><span class="line">com.			172800	IN	NS	i.gtld-servers.net.</span><br><span class="line">com.			172800	IN	NS	a.gtld-servers.net.</span><br><span class="line">com.			172800	IN	NS	c.gtld-servers.net.</span><br><span class="line">;; Received 504 bytes from 192.5.5.241#53(192.5.5.241) in 38 ms</span><br><span class="line"></span><br><span class="line">;; connection timed out; no servers could be reached</span><br><span class="line">--- ~ »</span><br></pre></td></tr></table></figure>
-<h1 id="几种域名解析方式"><a href="#几种域名解析方式" class="headerlink" title="几种域名解析方式"></a>几种域名解析方式</h1><ul>
-<li>A记录，指定域名对应IP。</li>
-<li>MX记录，表示Mail Exchange，将某个域名下邮件服务器指向自己Mail Server。正常通过Web请求仍然解析A记录IP。</li>
-<li>CNAME记录，Canonical Name(别名解析)。</li>
-<li>NS记录，为某个域名指定DNS解析服务器。</li>
-<li>TXT记录，为某个主机名或域名设置说明。</li>
-</ul>
-
-          
-        
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
   </section>
 
   
@@ -1068,7 +1073,7 @@
         <nav class="site-state motion-element">
           <div class="site-state-item site-state-posts">
             <a href="/archives">
-              <span class="site-state-item-count">27</span>
+              <span class="site-state-item-count">28</span>
               <span class="site-state-item-name">日志</span>
             </a>
           </div>

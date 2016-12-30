@@ -248,8 +248,209 @@
             
               
                 
-                <a class="post-title-link" href="/2016/12/13/Java Web/Java8新特性--初识lambda/" itemprop="url">
-                  Java8 -- lambda表达式
+                <a class="post-title-link" href="/2016/12/19/Java Web/Java8新特性 -- StreamAPI/" itemprop="url">
+                  Java8 -- StreamAPI
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2016-12-19T00:00:00+08:00" content="2016-12-19">
+              2016-12-19
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/Java-Web/" itemprop="url" rel="index">
+                    <span itemprop="name">Java Web</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                &nbsp; | &nbsp;
+                <a href="/2016/12/19/Java Web/Java8新特性 -- StreamAPI/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/12/19/Java Web/Java8新特性 -- StreamAPI/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+
+          
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h1 id="Java8新特性-–-StreamAPI"><a href="#Java8新特性-–-StreamAPI" class="headerlink" title="Java8新特性 – StreamAPI"></a>Java8新特性 – StreamAPI</h1><p>Stream 是 Java 8 中处理集合的关键抽象概念，它可以指定你希望对集合进行的操作，但是将执行操作的时间交给具体实现来决定。</p>
+<ul>
+<li>迭代器遍历策略特定，不能并发执行。</li>
+<li>集合、数组、生成器、迭代器均和创建 Stream。</li>
+<li>过滤器 filter 选择元素，map 改变元素。</li>
+<li>改变 Stream 的操作包括 limit、distinct 和 sorted。</li>
+<li>从Stream中获得结果，使用 reduction 操作符，例如 count、max、min、findFirst 或 findAny。其中一些方法返回 Optional 值。</li>
+<li>Optional 类型为了安全地替代使用 null 值，需要借助 ifPresent 和 orElse 方法。</li>
+<li>Collectors 类的 groupingBy 和 partitioningBy 方法允许你对 Stream 中内容分组。</li>
+<li>Java 8 对原始类型 int、long 和 double 提供专门的 Stream。</li>
+<li>并行 Stream，放弃排序约束。</li>
+</ul>
+<h2 id="从迭代器到-Stream-操作"><a href="#从迭代器到-Stream-操作" class="headerlink" title="从迭代器到 Stream 操作"></a>从迭代器到 Stream 操作</h2><p>处理集合时，通常会迭代所有元素并对其中的每一个进行处理。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Sample1</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        List&lt;String&gt; list = letters();</span><br><span class="line">        list.forEach(System.out::println);</span><br><span class="line"></span><br><span class="line">        countWord(list);</span><br><span class="line">        filterCountWord(list);</span><br><span class="line">        parallelFilterCountWord(list);</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">static</span> List&lt;String&gt; <span class="title">letters</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        List&lt;String&gt; list = <span class="keyword">new</span> ArrayList&lt;&gt;();</span><br><span class="line">        list.add(<span class="string">"Tommy"</span>);</span><br><span class="line">        list.add(<span class="string">"Focus"</span>);</span><br><span class="line">        list.add(<span class="string">"Tim"</span>);</span><br><span class="line">        list.add(<span class="string">"Jack"</span>);</span><br><span class="line">        <span class="keyword">return</span> list;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">countWord</span><span class="params">(List&lt;String&gt; list)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">int</span> count = <span class="number">0</span>;</span><br><span class="line">        <span class="keyword">for</span> (String str : list) &#123;</span><br><span class="line">            <span class="keyword">if</span> (str.length() &gt; <span class="number">4</span>)</span><br><span class="line">                count++;</span><br><span class="line">        &#125;</span><br><span class="line">        System.out.println(<span class="string">"countWord: "</span> + count);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">filterCountWord</span><span class="params">(List&lt;String&gt; list)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">long</span> count = list.stream().filter(w -&gt; w.length() &gt; <span class="number">4</span>).count();</span><br><span class="line">        System.out.println(<span class="string">"filterCountWord: "</span> + count);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">parallelFilterCountWord</span><span class="params">(List&lt;String&gt; list)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">long</span> count = list.parallelStream().filter(w -&gt; w.length() &gt; <span class="number">4</span>).count();</span><br><span class="line">        System.out.println(<span class="string">"parallelFilterCountWord: "</span> + count);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<ol>
+<li>Stream 不存储元素。元素可能被存储在底层的集合中，或根据需要产生出来。</li>
+<li>Stream 操作符不改变源对象。它们返回一个持有结果的新 Stream。</li>
+<li>Stream 操作符可能延迟执行。</li>
+</ol>
+<h2 id="创建-Stream"><a href="#创建-Stream" class="headerlink" title="创建 Stream"></a>创建 Stream</h2><h3 id="API"><a href="#API" class="headerlink" title="API"></a>API</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span><br><span class="line"> * Returns a sequential &#123;<span class="doctag">@code</span> Stream&#125; containing a single element.</span><br><span class="line"> *</span><br><span class="line"> * <span class="doctag">@param</span> t the single element</span><br><span class="line"> * <span class="doctag">@param</span> &lt;T&gt; the type of stream elements</span><br><span class="line"> * <span class="doctag">@return</span> a singleton sequential stream</span><br><span class="line"> */</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span>&lt;T&gt; Stream&lt;T&gt; <span class="title">of</span><span class="params">(T t)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> StreamSupport.stream(<span class="keyword">new</span> Streams.StreamBuilderImpl&lt;&gt;(t), <span class="keyword">false</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span><br><span class="line"> * Returns a sequential ordered stream whose elements are the specified values.</span><br><span class="line"> *</span><br><span class="line"> * <span class="doctag">@param</span> &lt;T&gt; the type of stream elements</span><br><span class="line"> * <span class="doctag">@param</span> values the elements of the new stream</span><br><span class="line"> * <span class="doctag">@return</span> the new stream</span><br><span class="line"> */</span></span><br><span class="line"><span class="meta">@SafeVarargs</span></span><br><span class="line"><span class="meta">@SuppressWarnings</span>(<span class="string">"varargs"</span>) <span class="comment">// Creating a stream from an array is safe</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span>&lt;T&gt; Stream&lt;T&gt; <span class="title">of</span><span class="params">(T... values)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> Arrays.stream(values);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>generate 和 iterate 是两个用来创建无限 Stream 的静态方法。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Sample2</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        Stream&lt;String&gt; echos = Stream.generate(() -&gt; <span class="string">"Echo"</span>);</span><br><span class="line">        Stream&lt;Double&gt; randoms = Stream.generate(Math::random);</span><br><span class="line">        Stream&lt;BigInteger&gt; integers = Stream.iterate(BigInteger.ZERO, n -&gt; n.add(BigInteger.ONE));</span><br><span class="line"></span><br><span class="line">        Object[] powers = Stream.iterate(<span class="number">1.0</span>, p -&gt; p * <span class="number">2</span>).peek(e -&gt; System.out.println(<span class="string">"Fetching "</span> + e)).limit(<span class="number">20</span>).toArray();</span><br><span class="line"></span><br><span class="line">        System.out.println(<span class="string">"well done ..."</span>);</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="filter、map-和-flatMap"><a href="#filter、map-和-flatMap" class="headerlink" title="filter、map 和 flatMap"></a>filter、map 和 flatMap</h3><p>流转换指从一个流中读取数据，并将转换后的数据写入另一个流。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Sample3</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        List&lt;String&gt; list = letters();</span><br><span class="line">        Stream&lt;String&gt; lowerString = list.stream().map(String::toLowerCase);</span><br><span class="line">        lowerString.forEach(System.out::println);</span><br><span class="line"></span><br><span class="line">        Stream&lt;Character&gt; characterStream = list.stream().flatMap(Sample3::characterStream);</span><br><span class="line">        characterStream.forEach(System.out::println);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">static</span> List&lt;String&gt; <span class="title">letters</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        List&lt;String&gt; list = <span class="keyword">new</span> ArrayList&lt;&gt;();</span><br><span class="line">        list.add(<span class="string">"Tommy"</span>);</span><br><span class="line">        list.add(<span class="string">"Focus"</span>);</span><br><span class="line">        list.add(<span class="string">"Tim"</span>);</span><br><span class="line">        list.add(<span class="string">"Jack"</span>);</span><br><span class="line">        <span class="keyword">return</span> list;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Stream&lt;Character&gt; <span class="title">characterStream</span><span class="params">(String s)</span> </span>&#123;</span><br><span class="line">        List&lt;Character&gt; result = <span class="keyword">new</span> ArrayList&lt;&gt;();</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">char</span> c : s.toCharArray()) &#123;</span><br><span class="line">            result.add(c);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> result.stream();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<ol>
+<li>map 方法，会对每个元素应用一个函数，将返回值收集到一个新的流中。</li>
+<li>flatMap 方法，完成从 T 到 G\<u> 的 f 函数和从 U 到 G\<u> 的 g 方法，这是 monads 理论的一个关键概念。</u></u></li>
+</ol>
+<h3 id="提取子流和组合流"><a href="#提取子流和组合流" class="headerlink" title="提取子流和组合流"></a>提取子流和组合流</h3><p>Stream.limit(n) 返回一个 n 个元素的新流（如果原始流的长度小于n，则返回原始的流）。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Sample5</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        unique();</span><br><span class="line"></span><br><span class="line">        sort();</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">unique</span><span class="params">()</span></span>&#123;</span><br><span class="line">        Stream&lt;String&gt; uniqueWords = Stream.of(<span class="string">"zhuxh"</span>, <span class="string">"zhuxh"</span>, <span class="string">"zhuxh"</span>, <span class="string">"focus"</span>).distinct();</span><br><span class="line">        uniqueWords.forEach(System.out::println);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">sort</span><span class="params">()</span></span>&#123;</span><br><span class="line">        List&lt;String&gt; list = letters();</span><br><span class="line">        Stream&lt;String&gt; stringStream = list.stream();</span><br><span class="line"></span><br><span class="line">        Stream&lt;String&gt; longestFirst = stringStream.sorted(Comparator.comparing(String::length).reversed());</span><br><span class="line">        longestFirst.forEach(System.out::println);</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">static</span> List&lt;String&gt; <span class="title">letters</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        List&lt;String&gt; list = <span class="keyword">new</span> ArrayList&lt;&gt;();</span><br><span class="line">        list.add(<span class="string">"Tommy"</span>);</span><br><span class="line">        list.add(<span class="string">"Focus"</span>);</span><br><span class="line">        list.add(<span class="string">"Tim"</span>);</span><br><span class="line">        list.add(<span class="string">"Jack"</span>);</span><br><span class="line">        <span class="keyword">return</span> list;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="简单的聚合方法"><a href="#简单的聚合方法" class="headerlink" title="简单的聚合方法"></a>简单的聚合方法</h3><p>聚合方法都是<em>终止操作</em>，当一个流应用了终止操作后，不能再应用其他操作。</p>
+<p>聚合方法，count、max、min，返回一个 Optional<t> 值，可能封装返回值，也可能没有返回值。</t></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Sample6</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        Stream&lt;String&gt; stringStream = letters().stream();</span><br><span class="line"></span><br><span class="line">        Optional&lt;String&gt; largestString = stringStream.max(String::compareToIgnoreCase);</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span>(largestString.isPresent())&#123;</span><br><span class="line">            System.out.println(largestString.get());</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">static</span> List&lt;String&gt; <span class="title">letters</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        List&lt;String&gt; list = <span class="keyword">new</span> ArrayList&lt;&gt;();</span><br><span class="line">        list.add(<span class="string">"Tommy"</span>);</span><br><span class="line">        list.add(<span class="string">"Focus"</span>);</span><br><span class="line">        list.add(<span class="string">"Tim"</span>);</span><br><span class="line">        list.add(<span class="string">"Jack"</span>);</span><br><span class="line">        <span class="keyword">return</span> list;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>类似的API还有 findFirst(), findAny()。</p>
+<p>还提供了 anyMatch(), allMatch 和 noneMatch()，这些方法总是会检查整个流，但仍可以通过并行执行来提高速度。</p>
+<h3 id="Optional-类型"><a href="#Optional-类型" class="headerlink" title="Optional 类型"></a>Optional 类型</h3><p>java.util.Optional\<t\></t\></p>
+<p>Optional\<t\> 对象是对一个 T 类型对象的封装，或者表示不是任何对象。它比一般指向 T 类型引用更安全，不会反悔null–前提是你正确使用。</t\></p>
+<p>创建 Optional 对象</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> &lt;T&gt; <span class="function">Optional&lt;T&gt; <span class="title">of</span><span class="params">(T value)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">new</span> Optional&lt;&gt;(value);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> &lt;T&gt; <span class="function">Optional&lt;T&gt; <span class="title">ofNullable</span><span class="params">(T value)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> value == <span class="keyword">null</span> ? empty() : of(value);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span>&lt;T&gt; Optional&lt;T&gt; <span class="title">empty</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="meta">@SuppressWarnings</span>(<span class="string">"unchecked"</span>)</span><br><span class="line">    Optional&lt;T&gt; t = (Optional&lt;T&gt;) EMPTY;</span><br><span class="line">    <span class="keyword">return</span> t;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>获取值</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> T <span class="title">get</span><span class="params">()</span> </span>&#123;</span><br><span class="line">     <span class="keyword">if</span> (value == <span class="keyword">null</span>) &#123;</span><br><span class="line">         <span class="keyword">throw</span> <span class="keyword">new</span> NoSuchElementException(<span class="string">"No value present"</span>);</span><br><span class="line">     &#125;</span><br><span class="line">     <span class="keyword">return</span> value;</span><br><span class="line"> &#125;</span><br></pre></td></tr></table></figure>
+<p>ifPresent 方法另一种形式可以接受一个函数，如存在可选值，它会将该值传递给函数，否则不进行任何操作。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">isPresent</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> value != <span class="keyword">null</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">ifPresent</span><span class="params">(Consumer&lt;? <span class="keyword">super</span> T&gt; consumer)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (value != <span class="keyword">null</span>)</span><br><span class="line">        consumer.accept(value);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="flatMap"><a href="#flatMap" class="headerlink" title="flatMap"></a>flatMap</h4><p>组合可选值函数</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">MyMath</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Optional&lt;Double&gt; <span class="title">inverse</span><span class="params">(Double x)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> x == <span class="number">0</span> ? Optional.empty() : Optional.of(<span class="number">1</span> / x);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Optional&lt;Double&gt; <span class="title">squareRoot</span><span class="params">(Double x)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> x &lt; <span class="number">0</span> ? Optional.empty() : Optional.of(Math.sqrt(x));</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        Double x = <span class="number">1</span>d;</span><br><span class="line"></span><br><span class="line">        Optional&lt;Double&gt; result = MyMath.inverse(x).flatMap(MyMath::squareRoot);</span><br><span class="line"></span><br><span class="line">        Optional&lt;Double&gt; res2 = Optional.of(-<span class="number">4</span>d).flatMap(MyMath::inverse).flatMap(MyMath::squareRoot);</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+<h3 id="聚合"><a href="#聚合" class="headerlink" title="聚合"></a>聚合</h3><p>元素求和</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Sample2</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        List&lt;Integer&gt; intList = <span class="keyword">new</span> ArrayList&lt;&gt;();</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; <span class="number">100</span>; i++) &#123;</span><br><span class="line">            intList.add(i);</span><br><span class="line">        &#125;</span><br><span class="line">        Stream&lt;Integer&gt; stream = intList.stream();</span><br><span class="line"></span><br><span class="line">        Optional&lt;Integer&gt; sum = stream.reduce(Integer::sum);</span><br><span class="line"></span><br><span class="line">        System.out.println(sum.get());</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>字符串长度求和</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Sample7</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        List&lt;String&gt; list = letters();</span><br><span class="line">        </span><br><span class="line">        Stream&lt;String&gt; stream = list.stream();</span><br><span class="line">        <span class="keyword">int</span> res = stream.reduce(<span class="number">0</span>, (total, word) -&gt; total + word.length(), (t1, t2) -&gt; t1 + t2);</span><br><span class="line">        System.out.println(res);</span><br><span class="line"></span><br><span class="line">        <span class="keyword">int</span> res2 = stream.mapToInt(String::length).sum();</span><br><span class="line">        System.out.println(res2);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">static</span> List&lt;String&gt; <span class="title">letters</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        List&lt;String&gt; list = <span class="keyword">new</span> ArrayList&lt;&gt;();</span><br><span class="line">        list.add(<span class="string">"Tommy"</span>);</span><br><span class="line">        list.add(<span class="string">"Focus"</span>);</span><br><span class="line">        list.add(<span class="string">"Tim"</span>);</span><br><span class="line">        list.add(<span class="string">"Jack"</span>);</span><br><span class="line">        <span class="keyword">return</span> list;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="收集结果"><a href="#收集结果" class="headerlink" title="收集结果"></a>收集结果</h3><p>处理完流之后，收集结果</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Sample8</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        String[] words = <span class="keyword">new</span> String[]&#123;<span class="string">"Tommy"</span>, <span class="string">"Focus"</span>, <span class="string">"Tim"</span>, <span class="string">"Jack"</span>&#125;;</span><br><span class="line">        Stream&lt;String&gt; stream = Arrays.stream(words);</span><br><span class="line">        HashSet&lt;String&gt; hashSet = stream.collect(HashSet::<span class="keyword">new</span>, HashSet::add, HashSet::addAll);</span><br><span class="line"></span><br><span class="line">        List&lt;String&gt; list = Arrays.stream(words).collect(Collectors.toList());</span><br><span class="line">        Set&lt;String&gt; set = Arrays.stream(words).collect(Collectors.toSet());</span><br><span class="line"></span><br><span class="line">        TreeSet&lt;String&gt; treeSet = Arrays.stream(words).collect(Collectors.toCollection(TreeSet::<span class="keyword">new</span>));</span><br><span class="line"></span><br><span class="line">        String strJoin = Arrays.stream(words).collect(Collectors.joining());</span><br><span class="line"></span><br><span class="line">        String result = Arrays.stream(words).collect(Collectors.joining(<span class="string">","</span>));</span><br><span class="line"></span><br><span class="line">        String result2 = Arrays.stream(words).map(Object::toString).collect(Collectors.joining(<span class="string">","</span>));</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">        IntSummaryStatistics summary = Arrays.stream(words).collect(Collectors.summarizingInt(String::length));</span><br><span class="line">        <span class="keyword">double</span> averagwLength = summary.getAverage();</span><br><span class="line">        <span class="keyword">double</span> maxLength = summary.getMax();</span><br><span class="line">        <span class="keyword">double</span> min = summary.getMin();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="收集结果到-Map"><a href="#收集结果到-Map" class="headerlink" title="收集结果到 Map"></a>收集结果到 Map</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Sample9</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        User user1 = <span class="keyword">new</span> User(<span class="number">1</span>, <span class="string">"Focus"</span>);</span><br><span class="line">        User user2 = <span class="keyword">new</span> User(<span class="number">2</span>, <span class="string">"Tommy"</span>);</span><br><span class="line">        User user3 = <span class="keyword">new</span> User(<span class="number">3</span>, <span class="string">"Jack"</span>);</span><br><span class="line"></span><br><span class="line">        List&lt;User&gt; list = Arrays.asList(user1, user2, user3);</span><br><span class="line"></span><br><span class="line">        s1(list);</span><br><span class="line">        s2(list);</span><br><span class="line">        s3(list);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span><br><span class="line">     * key重复会抛异常</span><br><span class="line">     **/</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">s1</span><span class="params">(List&lt;User&gt; list)</span> </span>&#123;</span><br><span class="line">        Map&lt;Integer, String&gt; idToName = list.stream().collect(Collectors.toMap(User::getId, User::getName));</span><br><span class="line">        Map&lt;Integer, User&gt; idToUser = list.stream().collect(Collectors.toMap(User::getId, Function.identity()));</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">s2</span><span class="params">(List&lt;User&gt; list)</span> </span>&#123;</span><br><span class="line">        User user = <span class="keyword">new</span> User(<span class="number">1</span>, <span class="string">"Billy"</span>);</span><br><span class="line"></span><br><span class="line">        List&lt;User&gt; userList = <span class="keyword">new</span> ArrayList&lt;&gt;(list);</span><br><span class="line">        userList.add(user);</span><br><span class="line"></span><br><span class="line">        Map&lt;Integer, Set&lt;String&gt;&gt; idToName = userList.stream().collect(Collectors.toMap(</span><br><span class="line">                u -&gt; u.getId(),</span><br><span class="line">                u -&gt; Collections.singleton(u.getName()),</span><br><span class="line">                (a, b) -&gt; &#123;</span><br><span class="line">                    Set&lt;String&gt; r = <span class="keyword">new</span> HashSet&lt;String&gt;(a);</span><br><span class="line">                    r.addAll(b);</span><br><span class="line">                    <span class="keyword">return</span> r;</span><br><span class="line">                &#125;));</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">s3</span><span class="params">(List&lt;User&gt; list)</span> </span>&#123;</span><br><span class="line">        Map&lt;Integer, User&gt; idToUser = list.stream().collect(</span><br><span class="line">                Collectors.toMap(</span><br><span class="line">                        User::getId,</span><br><span class="line">                        Function.identity(),</span><br><span class="line">                        (existingVal, newVal) -&gt; &#123;</span><br><span class="line">                            <span class="keyword">throw</span> <span class="keyword">new</span> IllegalStateException();</span><br><span class="line">                        &#125;,</span><br><span class="line">                        TreeMap::<span class="keyword">new</span></span><br><span class="line">                )</span><br><span class="line">        );</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="分组、分片"><a href="#分组、分片" class="headerlink" title="分组、分片"></a>分组、分片</h3><p>对流处理结果分组、分片。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">User</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">User</span><span class="params">(Integer id, String name)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.id = id;</span><br><span class="line">        <span class="keyword">this</span>.name = name;</span><br><span class="line">        <span class="keyword">this</span>.email = name + <span class="string">"@qiyi.com"</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">User</span><span class="params">(Integer id, String name, Integer sex)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>(id, name);</span><br><span class="line">        <span class="keyword">this</span>.sex = sex;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> Integer id;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> String name;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> String email;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> Integer sex;</span><br><span class="line">    </span><br><span class="line">    ....</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Sample10</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        User user1 = <span class="keyword">new</span> User(<span class="number">1</span>, <span class="string">"Focus"</span>, <span class="number">1</span>);</span><br><span class="line">        User user2 = <span class="keyword">new</span> User(<span class="number">2</span>, <span class="string">"Tommy"</span>, <span class="number">1</span>);</span><br><span class="line">        User user3 = <span class="keyword">new</span> User(<span class="number">3</span>, <span class="string">"Jack"</span>, <span class="number">1</span>);</span><br><span class="line"></span><br><span class="line">        User user4 = <span class="keyword">new</span> User(<span class="number">4</span>, <span class="string">"Rose"</span>, <span class="number">2</span>);</span><br><span class="line">        User user5 = <span class="keyword">new</span> User(<span class="number">5</span>, <span class="string">"Jane"</span>, <span class="number">2</span>);</span><br><span class="line"></span><br><span class="line">        List&lt;User&gt; list = Arrays.asList(user1, user2, user3, user4, user5);</span><br><span class="line"></span><br><span class="line">        <span class="comment">/** 按性别分组**/</span></span><br><span class="line">        Map&lt;Integer, List&lt;User&gt;&gt; map = list.stream().collect(Collectors.groupingBy(User::getSex));</span><br><span class="line"></span><br><span class="line">        <span class="comment">/** 按ID小于等于3分组**/</span></span><br><span class="line">        Map&lt;Boolean, List&lt;User&gt;&gt; map1 = list.stream().collect(Collectors.partitioningBy(e -&gt; e.getId() &lt;= <span class="number">3</span>));</span><br><span class="line"></span><br><span class="line">        <span class="comment">/** 按性别分组 收集为set**/</span></span><br><span class="line">        Map&lt;Integer, Set&lt;User&gt;&gt; map2 = list.stream().collect(Collectors.groupingBy(User::getSex, Collectors.toSet()));</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>Java8 还提供了其他收集器，用来对分组后元素进行 downstream 处理：</p>
+<ul>
+<li>counting 返回收集元素总个数</li>
+<li>summing (Int|Long|Double) 接受一个函数作为参数，将该函数应用到downstream元素中，求和</li>
+<li>maxBy、minBy 接受一个比较器，生成 downstream 元素中最大值和最小值</li>
+<li>mapping 方法将一个函数应用到 downstream 结果上，并且需要另一个收集器来处理结果</li>
+<li>….</li>
+</ul>
+<h3 id="原始类型流"><a href="#原始类型流" class="headerlink" title="原始类型流"></a>原始类型流</h3><p>将每个整数包装成响应对象很低效，Stream API 提供了 IntStream、LongStream 和 DoubleStream 等类型，专门用来直接存储原始类型值。如果要存 short、char、byte 和 boolean 类型，使用 IntStream；如果要存储 float 类型，使用 DoubleStream。设计者认为，不需要为其他5种原始类型都添加对应的专门类型。</p>
+<p>将原始类型流转换为一个对象流，可以使用 boxed 方法:</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Stream&lt;Integer&gt; integers = IntStream.range(<span class="number">0</span>, <span class="number">100</span>).boxed();</span><br></pre></td></tr></table></figure>
+<p>原始类型流方法与对象流上调用类似，但有以下几点显著区别：</p>
+<ul>
+<li>toArray 返回原始类型数组。</li>
+<li>产生 Optional 结果的方法返回一个 OptionalInt、OptionalLong 或者 OptionalDouble 类型，这些与 Optional 类似，但没有 get 方法，而是对应的 getAsInt、getAsLong 和 getAsDouble。</li>
+<li>方法 sum、average、max 和 min 会返回总和、平均值、最大值和最小值。对象流中没有定义这些方法。</li>
+<li>summaryStatistics 方法产生一个 IntSummaryStatistics、LongSummaryStatistics 或者 DoubleSummaryStatistics 对象。  </li>
+</ul>
+<h3 id="并行流"><a href="#并行流" class="headerlink" title="并行流"></a>并行流</h3><p>流使得并行计算变得容易。处理过程几乎全自动。但必须遵守一些约定。</p>
+<ul>
+<li>创建并行流， Collection.parellelStream, parallel 方法。</li>
+<li>确保传递给并行流操作的函数都是线程安全的。</li>
+</ul>
+<p>有序并不妨碍并行。例如，计算 stream.map(fun) 时，流可以被分片为 n 段，每一段都被并发处理，然后按顺序组合结果。</p>
+<p>执行一个流操作时，不会修改流底层的集合（即使修改是线程安全）。流不会收集它自己的数据—-这些数据总是存在于另一个集合中。如果你想修改原有集合，那么就无法定义流操作的输出。JDK 文档称这种需求为“不干扰”。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//正确</span></span><br><span class="line">List&lt;String&gt; wordList = ...;</span><br><span class="line">Stream&lt;String&gt; words = wordList.stream();</span><br><span class="line">wordList.add(<span class="string">"END"</span>);</span><br><span class="line"><span class="keyword">long</span> n = words.distinct().count();</span><br></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//错误</span></span><br><span class="line">Stream&lt;String&gt; words = wordList.stream();</span><br><span class="line">words.forEach(s -&gt; <span class="keyword">if</span> (s.length() &lt; <span class="number">12</span>) wordList.remove(s));</span><br></pre></td></tr></table></figure>
+          
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
+                <a class="post-title-link" href="/2016/12/13/Java Web/Java8新特性 -- 初识lambda/" itemprop="url">
+                  Java8 -- 初识lambda
                 </a>
               
             
@@ -292,8 +493,8 @@
             
               <span class="post-comments-count">
                 &nbsp; | &nbsp;
-                <a href="/2016/12/13/Java Web/Java8新特性--初识lambda/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/12/13/Java Web/Java8新特性--初识lambda/" itemprop="commentsCount"></span>
+                <a href="/2016/12/13/Java Web/Java8新特性 -- 初识lambda/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/12/13/Java Web/Java8新特性 -- 初识lambda/" itemprop="commentsCount"></span>
                 </a>
               </span>
             
@@ -871,157 +1072,6 @@
 
 
     
-      
-
-  
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-            
-            
-              
-                
-                <a class="post-title-link" href="/2016/05/28/Java Web/深入分析ClassLoader/" itemprop="url">
-                  深入分析ClassLoader
-                </a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            <span class="post-meta-item-icon">
-              <i class="fa fa-calendar-o"></i>
-            </span>
-            <span class="post-meta-item-text">发表于</span>
-            <time itemprop="dateCreated" datetime="2016-05-28T00:00:00+08:00" content="2016-05-28">
-              2016-05-28
-            </time>
-          </span>
-
-          
-            <span class="post-category" >
-              &nbsp; | &nbsp;
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-              
-                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
-                  <a href="/categories/Java-Web/" itemprop="url" rel="index">
-                    <span itemprop="name">Java Web</span>
-                  </a>
-                </span>
-
-                
-                
-
-              
-            </span>
-          
-
-          
-            
-              <span class="post-comments-count">
-                &nbsp; | &nbsp;
-                <a href="/2016/05/28/Java Web/深入分析ClassLoader/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/05/28/Java Web/深入分析ClassLoader/" itemprop="commentsCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-
-          
-          
-
-          
-        </div>
-      </header>
-    
-
-
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>ClassLoader除了能将Class加载到JVM中之外，还能审查每个类该由谁加载。它是一种父优先的等级加载机制。</p>
-<h2 id="ClassLoader等级加载机制"><a href="#ClassLoader等级加载机制" class="headerlink" title="ClassLoader等级加载机制"></a>ClassLoader等级加载机制</h2><ol>
-<li>Bootstrap ClassLoader，主要加载JVM自身工作需要的类，完全由JVM自己控制，外部无法访问，这个ClassLoader不遵守等级加载规则。</li>
-<li>ExtClassLoader，不是JVM亲自实现。服务目标在System.getProperties(“java.ext.dirs”)目录下。</li>
-<li>AppClassLoader，父类是ExtClassLoader，所有在System.getProperties(“java.class.path”)目录下的类都可以被这个类加载器加载，这就是我们常用到的classpath。</li>
-</ol>
-<p>如果我们要实现自己的类加载器，不管是直接实现抽象类ClassLoader，还是继承URLClassLoader或其他子类，它的父加载器都是AppClassLoader，不管调用哪个父类构造器，创建对象都必须最终调用getSystemCLassLoader()作为父加载器，而getSystemClassLoader()方法获取到的正是AppClassLoader。</p>
-<p>Bootstrap ClassLoader并不属于JVM的类层次结构，因为BootstrapClassLoader并没有遵守ClassLoader的加载规则。Bootstrap ClassLoader并没有子类，ExtClassLoader父类也不是Bootstrap ClassLoader，ExtClassLoader并没有父类，应用中能提取到的顶层父类是ExtClassLoader。</p>
-<p>ExtClassLoader和AppClassLoader都位于sun.misc.Launcher类中，它们是Launcher类的内部类，都继承了URLClassLoader类，URLClassLoader实现了抽象类ClassLoader。</p>
-<h2 id="如何加载class文件"><a href="#如何加载class文件" class="headerlink" title="如何加载class文件"></a>如何加载class文件</h2><p>抽象类ClassLoader中并没有定义如何加载，需要子类实现findClass()方法。看一下URLClassLoader实现findClass()过程：    </p>
-<ol>
-<li>通过URLClassPath类取得加载的class文件字节流，找到后读取它的byte字节流。    </li>
-<li>调用defineClass()创建类对象。</li>
-</ol>
-<p>创建URLClassLoader对象会根据传过来的URL数组中路径来判断是文件还是jar包，根据路径的不同分别创建FileLoader和JarLoader，或者使用默认的加载器。</p>
-<h3 id="验证与解析"><a href="#验证与解析" class="headerlink" title="验证与解析"></a>验证与解析</h3><ol>
-<li>字节码验证，确保格式正确，行为正确。</li>
-<li>类准备，准备字段、方法和实现接口所必须的数据结构。</li>
-<li>解析，类装入器装入类引用的其他所有类。    </li>
-<li>初始化对象，该阶段末尾静态字段被初始化默认值。</li>
-</ol>
-<h2 id="实现自己的ClassLoader"><a href="#实现自己的ClassLoader" class="headerlink" title="实现自己的ClassLoader"></a>实现自己的ClassLoader</h2><p>应用场景：    </p>
-<ul>
-<li>在自定义路径下查找自定义的class类文件，也许我们需要的class文件并不总是在classPath下面。    </li>
-<li>对我们自己要加载的类做特殊处理，如保证通过网络传输的安全性，可以将类经过加密后传输，在加载到JVM之前需要对类的字节码再解密。        </li>
-<li>可以定义类的实现机制，例如实现热部署：检查已经加载的class文件是否被修改，如修改可重新加载。    </li>
-</ul>
-<p>JVM表示一个类是否是同一个类有两个条件：    </p>
-<ol>
-<li>检查完整类名是否一致。        </li>
-<li>检查加载这个类的ClassLoader是否是同一个，这里指的是ClassLoader实例是否是同一个。</li>
-</ol>
-
-          
-        
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
   </section>
 
   
@@ -1067,7 +1117,7 @@
         <nav class="site-state motion-element">
           <div class="site-state-item site-state-posts">
             <a href="/archives">
-              <span class="site-state-item-count">27</span>
+              <span class="site-state-item-count">28</span>
               <span class="site-state-item-name">日志</span>
             </a>
           </div>
