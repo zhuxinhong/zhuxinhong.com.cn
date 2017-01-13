@@ -242,6 +242,131 @@
             
               
                 
+                <a class="post-title-link" href="/2015/07/11/redis设计与实现/Redis文件事件/" itemprop="url">
+                  Redis文件事件
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2015-07-11T00:00:00+08:00" content="2015-07-11">
+              2015-07-11
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/Redis设计与实现/" itemprop="url" rel="index">
+                    <span itemprop="name">Redis设计与实现</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                &nbsp; | &nbsp;
+                <a href="/2015/07/11/redis设计与实现/Redis文件事件/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2015/07/11/redis设计与实现/Redis文件事件/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+
+          
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>Redis 服务器是一个事件驱动程序，服务器需要处理以下两类事件：<br>1）文件事件<br>Redis服务器通过套接字与客户端（或其他Redis服务器）进行连接，而文件事件就是服务器对套接字操作的抽象。服务器与客户端（或其他服务器）的通信会产生相应的文件事件，而服务器则通过监听并处理这些时间来完成一系列网络通信操作。<br>2）时间事件<br>Redis服务器中的一些操作（比如serverCron函数）需要在给定的时间点执行，而时间事件就是服务器对这类定时操作的抽象。<br>1.文件事件<br>Redis基于Reactor模式开发了自己的网络事件处理器：这个处理器被称为文件事件处理器：<br>a,文件事件处理器使用I/O多路复用程序来同时监听多个套接字，并根据套接字目前执行的任务来为套接字关联不同的事件处理器。<br>b.当被监听的套接字准备好执行连接应答、读取、写入、关闭等操作时，与操作相对应的文件事件就会产生，调用套接字之前关联好的事件处理器来处理这些事件。<br>虽然文件事件处理器以单线程方式运行，但通过I/O多路复用程序来监听多个套接字，文件事件处理器既实现了高性能的网络通信模型，又可以很好地与Redis服务器中其他同样以单线程方式运行的模块进行对接。  </p>
+<p>2.文件事件处理器<br>4部分：套接字、 I/O多路复用程序 、 文件事件分派器 和 事件处理器。<br>文件事件是对套接字操作的抽象，每当一个套接字准备好执行连接应答、写入、读取、关闭等操作时，就会产生一个文件事件。服务器通常会连接多个套接字，所以多个文件事件可能并发出现。<br>I/O多路复用程序负责监听多个套接字，并向文件事件分派器传送那些产生了事件的套接字。<br>尽管多个文件事件会有并发，但IO复用程序会将所有产生事件的套接字都放到一个队列里面，然后通过这个队列，以有序、同步、每次一个套接字的方式向文件事件分派器传送套接字。当上一个套接字产生的事件被处理完之后（该套接字为事件所关联的事件处理器执行完毕）。IO多路复用程序才会继续向文件事件分派器传送下一个套接字。<br>文件事件分派器接受IO多路复用程序传来的套接字，并根据套接字所产生的事件类型条用相应的事件处理器。<br>服务器会为执行不同任务的套接字关联不同的事件处理器，这些处理器是一个个函数，它们定义了某个事件发生时，服务器应执行的动作。  </p>
+<p>3.IO多路复用程序的实现<br>Redis的IO多路复用程序的所有功能都是通过包装常见的select、epoll、evport和kqueue这些IO多路复用函数库来实现的，每个IO多路复用函数库在Redis源码中都对应一个单独的文件。  </p>
+<p>4.事件的类型<br>IO多路复用程序会监听多个套接字的ae,h/AE_READABLE事件和ae.h/AE_WRITEABLE事件，对应关系如下：<br>a.当套接字变得可读时（客户端对套接字执行write操作，或执行close操作），或者有新的可应答套接字出现时，套接字产生AE_READABLE事件。<br>b.当套接字变得可写时（客户端对套接字执行read操作），套接字产生AE_WRITEABLE事件。<br>如果同时产生2种事件，文件事件分派器会优先处理AE_READABLE事件，完成之后再处理AE_WRITEABLE事件。  </p>
+<p>5.文件事件处理器<br>a.连接应答处理器<br>b.命令请求处理器<br>c.命令回复处理器  </p>
+<p>下面通过一个例子来说明各个处理器的作用：<br>假设一个Redis服务器正在运作，那么这个服务器的监听套接字的AE_READABLE事件应该正处于监听状态之下，而该事件所对应的处理器为连接应答处理器。<br>如果这是有一个Redis客户端向服务器发起连接，那么监听套接字将产生AE_READABLE事件，触发连接应答处理器执行。处理器会对客户端的连接请求进行应答，然后创建客户端套接字，以及客户端状态，并将客户端套接字的AE_READABLE事件与命令请求处理器进行关联，使得客户端可以向主服务器发送命令请求。<br>之后，假设客户端向主服务器发送一个命令请求，客户端套接字将产生AE_READABLE事件，引发命令请求处理器执行，处理器读取客户端的命令内容，然后传给相关程序去执行。<br>执行命令产生的命令回复，需要传送回客户端，服务器会将客户端套接字的AE_WRITEABLE事件与命令回复处理器进行关联。当客户端尝试读取命令回复的时候，客户端套接字将产生AE_WRITEABLE事件，触发命令回复处理器执行，当命令回复处理器将命令回复全部写入到套接字之后，服务器就会接触客户端套接字的AE_WRITEABLE事件与命令回复处理器之间的关联。</p>
+
+          
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
                 <a class="post-title-link" href="/2015/07/11/redis设计与实现/Redis持久化-AOF/" itemprop="url">
                   Redis持久化-AOF
                 </a>
@@ -320,131 +445,6 @@
 <p>3.AOF重写<br>随着服务器运行时间的流逝，AOF文件中的内容会越来越多，可能会对Redis服务器和宿主计算机造成影响。<br>虽然Redis将生成新AOF文件替换旧AOF文件功能命名为AOF文件重写，但实际上，AOF文件重写并不需要对现有AOF文件进行任何读取、分析和写入操作，这个功能是通过读取服务器当前数据库状态来实现的。<br>实际操作中，Redis依次遍历数据库中所有key，并根据key类型的不同，取出相应值并生成对应类型的写入语句。同时，为了避免在执行命令时造成客户端输入缓冲区溢出，重写程序在处理列表、哈希表、集合、有序集合这4种可能会带有多个元素的键时，会先检查键所包含元素的数量，如果数量超过了redis.h/REDIS_AOF_REWRITE_ITEMS_PER_CMD常量的值，那重写程序会使用多条命令来记录键的值。当前版本中，REDIS_AOF_REWRITE_ITEMS_PER_CMD常量值为64，所以每条语句最多会写入64个元素。</p>
 <p>4.AOF后台重写<br>上面介绍的AOF重写可以很好的完成创建一个新AOF文件的任务，但是，这个操作会进行大量的写入操作，所以调用这个函数的线程将被长时间阻塞，因为Redis服务器使用单个线程来处理命令请求，所以如果由服务器调用AOF重写，那么在重写期间，服务器将无法处理客户端发来的请求。<br>Redis并不希望AOF的重写操作造成服务器无法处理请求，所以需要将重写放到子进程里执行，这样做可以达到两个目的：<br>1)子进程执行AOF重写期间，服务器可以继续处理客户端的命令请求。<br>2)子进程带有服务器进程的数据副本，使用子进程而不是线程，可以在避免使用锁的情况下，保证数据安全性。</p>
 <p>不过这里仍然存在一个问题：在子进程执行AOF重写期间，服务器处理客户端的命令请求时，对现有数据库状态进行修改操作，会使得服务器当前数据库状态和重写后的AOF文件所保存的数据库状态不一致。<br>为了解决这个问题，Redis服务器设置了一个AOF重写缓冲区，这个缓冲区在服务器创建子进程之后开始使用，当Redis执行完一个写命令后，它会同时将这个写命令发送给AOF缓冲区和AOF重写缓冲区。<br>以上就是AOF后台重写，即BGREWRITEAOF命令的实现原理。</p>
-
-          
-        
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
-      
-
-  
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-            
-            
-              
-                
-                <a class="post-title-link" href="/2015/07/11/redis设计与实现/Redis文件事件/" itemprop="url">
-                  Redis文件事件
-                </a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            <span class="post-meta-item-icon">
-              <i class="fa fa-calendar-o"></i>
-            </span>
-            <span class="post-meta-item-text">发表于</span>
-            <time itemprop="dateCreated" datetime="2015-07-11T00:00:00+08:00" content="2015-07-11">
-              2015-07-11
-            </time>
-          </span>
-
-          
-            <span class="post-category" >
-              &nbsp; | &nbsp;
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-              
-                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
-                  <a href="/categories/Redis设计与实现/" itemprop="url" rel="index">
-                    <span itemprop="name">Redis设计与实现</span>
-                  </a>
-                </span>
-
-                
-                
-
-              
-            </span>
-          
-
-          
-            
-              <span class="post-comments-count">
-                &nbsp; | &nbsp;
-                <a href="/2015/07/11/redis设计与实现/Redis文件事件/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count ds-thread-count" data-thread-key="2015/07/11/redis设计与实现/Redis文件事件/" itemprop="commentsCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-
-          
-          
-
-          
-        </div>
-      </header>
-    
-
-
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>Redis 服务器是一个事件驱动程序，服务器需要处理以下两类事件：<br>1）文件事件<br>Redis服务器通过套接字与客户端（或其他Redis服务器）进行连接，而文件事件就是服务器对套接字操作的抽象。服务器与客户端（或其他服务器）的通信会产生相应的文件事件，而服务器则通过监听并处理这些时间来完成一系列网络通信操作。<br>2）时间事件<br>Redis服务器中的一些操作（比如serverCron函数）需要在给定的时间点执行，而时间事件就是服务器对这类定时操作的抽象。<br>1.文件事件<br>Redis基于Reactor模式开发了自己的网络事件处理器：这个处理器被称为文件事件处理器：<br>a,文件事件处理器使用I/O多路复用程序来同时监听多个套接字，并根据套接字目前执行的任务来为套接字关联不同的事件处理器。<br>b.当被监听的套接字准备好执行连接应答、读取、写入、关闭等操作时，与操作相对应的文件事件就会产生，调用套接字之前关联好的事件处理器来处理这些事件。<br>虽然文件事件处理器以单线程方式运行，但通过I/O多路复用程序来监听多个套接字，文件事件处理器既实现了高性能的网络通信模型，又可以很好地与Redis服务器中其他同样以单线程方式运行的模块进行对接。  </p>
-<p>2.文件事件处理器<br>4部分：套接字、 I/O多路复用程序 、 文件事件分派器 和 事件处理器。<br>文件事件是对套接字操作的抽象，每当一个套接字准备好执行连接应答、写入、读取、关闭等操作时，就会产生一个文件事件。服务器通常会连接多个套接字，所以多个文件事件可能并发出现。<br>I/O多路复用程序负责监听多个套接字，并向文件事件分派器传送那些产生了事件的套接字。<br>尽管多个文件事件会有并发，但IO复用程序会将所有产生事件的套接字都放到一个队列里面，然后通过这个队列，以有序、同步、每次一个套接字的方式向文件事件分派器传送套接字。当上一个套接字产生的事件被处理完之后（该套接字为事件所关联的事件处理器执行完毕）。IO多路复用程序才会继续向文件事件分派器传送下一个套接字。<br>文件事件分派器接受IO多路复用程序传来的套接字，并根据套接字所产生的事件类型条用相应的事件处理器。<br>服务器会为执行不同任务的套接字关联不同的事件处理器，这些处理器是一个个函数，它们定义了某个事件发生时，服务器应执行的动作。  </p>
-<p>3.IO多路复用程序的实现<br>Redis的IO多路复用程序的所有功能都是通过包装常见的select、epoll、evport和kqueue这些IO多路复用函数库来实现的，每个IO多路复用函数库在Redis源码中都对应一个单独的文件。  </p>
-<p>4.事件的类型<br>IO多路复用程序会监听多个套接字的ae,h/AE_READABLE事件和ae.h/AE_WRITEABLE事件，对应关系如下：<br>a.当套接字变得可读时（客户端对套接字执行write操作，或执行close操作），或者有新的可应答套接字出现时，套接字产生AE_READABLE事件。<br>b.当套接字变得可写时（客户端对套接字执行read操作），套接字产生AE_WRITEABLE事件。<br>如果同时产生2种事件，文件事件分派器会优先处理AE_READABLE事件，完成之后再处理AE_WRITEABLE事件。  </p>
-<p>5.文件事件处理器<br>a.连接应答处理器<br>b.命令请求处理器<br>c.命令回复处理器  </p>
-<p>下面通过一个例子来说明各个处理器的作用：<br>假设一个Redis服务器正在运作，那么这个服务器的监听套接字的AE_READABLE事件应该正处于监听状态之下，而该事件所对应的处理器为连接应答处理器。<br>如果这是有一个Redis客户端向服务器发起连接，那么监听套接字将产生AE_READABLE事件，触发连接应答处理器执行。处理器会对客户端的连接请求进行应答，然后创建客户端套接字，以及客户端状态，并将客户端套接字的AE_READABLE事件与命令请求处理器进行关联，使得客户端可以向主服务器发送命令请求。<br>之后，假设客户端向主服务器发送一个命令请求，客户端套接字将产生AE_READABLE事件，引发命令请求处理器执行，处理器读取客户端的命令内容，然后传给相关程序去执行。<br>执行命令产生的命令回复，需要传送回客户端，服务器会将客户端套接字的AE_WRITEABLE事件与命令回复处理器进行关联。当客户端尝试读取命令回复的时候，客户端套接字将产生AE_WRITEABLE事件，触发命令回复处理器执行，当命令回复处理器将命令回复全部写入到套接字之后，服务器就会接触客户端套接字的AE_WRITEABLE事件与命令回复处理器之间的关联。</p>
 
           
         
@@ -627,130 +627,6 @@
             
               
                 
-                <a class="post-title-link" href="/2015/07/01/redis设计与实现/Redis类型检查和命令多态/" itemprop="url">
-                  Redis类型检查和命令多态
-                </a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            <span class="post-meta-item-icon">
-              <i class="fa fa-calendar-o"></i>
-            </span>
-            <span class="post-meta-item-text">发表于</span>
-            <time itemprop="dateCreated" datetime="2015-07-01T00:00:00+08:00" content="2015-07-01">
-              2015-07-01
-            </time>
-          </span>
-
-          
-            <span class="post-category" >
-              &nbsp; | &nbsp;
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-              
-                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
-                  <a href="/categories/Redis设计与实现/" itemprop="url" rel="index">
-                    <span itemprop="name">Redis设计与实现</span>
-                  </a>
-                </span>
-
-                
-                
-
-              
-            </span>
-          
-
-          
-            
-              <span class="post-comments-count">
-                &nbsp; | &nbsp;
-                <a href="/2015/07/01/redis设计与实现/Redis类型检查和命令多态/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count ds-thread-count" data-thread-key="2015/07/01/redis设计与实现/Redis类型检查和命令多态/" itemprop="commentsCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-
-          
-          
-
-          
-        </div>
-      </header>
-    
-
-
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>Redis中用于操作键的命令基本可以分为2类。</p>
-<p>其中一种是可以对任何类型的键执行，比如DEL,EXPIRE,RENAME,TYPE,OBJECT,TTL等命令。</p>
-<p>另一种只能对特定的键执行，比如：<br>SET,GET,APPEND,STRLEN 等仅限用于字符串的键类型；<br>HDEL,HSET,HGET,HLEN 等仅限用于哈希键类型；<br>RPUSH,LPOP,LINSERT,LLEN 等仅限用于列表键类型；<br>SADD,SPOP,SINTER,SCARD 等仅限用于集合键类型；<br>ZADD,ZCARD,ZRANK,ZSCORE 等仅限用于有序集合键类型；</p>
-<p>在执行一个类型特定命令之前，Redis会先检查输入键类型是否正确，然后再决定是否执行命令。<br>如果键名称正确，再检查键对象是否是执行命令所需的类型，不是的话就返回一个类型错误。</p>
-<p>多态命令的实现除了检查键类型和命令是否匹配外，还会检查键的至对象所使用的编码。例如，LLEN命令。<br>如果列表对象编码为ziplist,，说明对象为压缩列表，程序使用ziplistlen作为底层实现返回列表长度。<br>如果列表对象编码为linkedlist，说明对象为双端链表，程序使用listLength作为底层实现返回链表长度。</p>
-
-          
-        
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
-      
-
-  
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-            
-            
-              
-                
                 <a class="post-title-link" href="/2015/07/01/redis设计与实现/Redis持久化-RDB/" itemprop="url">
                   Redis持久化-RDB
                 </a>
@@ -824,6 +700,143 @@
             <p>RDB持久化可以自动，也可以手动，这个功能将某个时间点上的数据库状态保存到一个经过压缩的二进制文件中。</p>
 <p>SAVE命令会阻塞服务，执行完成前客户端的所有请求都会拒绝。<br>BGSAVE命令会新建一个子进程执行持久化操作，不阻塞服务。</p>
 <p>服务器状态维护了一个dirty计数器以及一个lastsave属性，供RDB持久化策略使用。<br>dirty计数器记录距离上一次成功执行SAVE或BGSAVE操作后，服务器中所有数据库进行了多少次修改操作（增删改）；<br>lastsave属性是一个unix时间戳，记录上一次RDB持久化的时间。</p>
+
+          
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
+                <a class="post-title-link" href="/2015/07/01/redis设计与实现/Redis中的数据库/" itemprop="url">
+                  Redis中的数据库
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2015-07-01T00:00:00+08:00" content="2015-07-01">
+              2015-07-01
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/Redis设计与实现/" itemprop="url" rel="index">
+                    <span itemprop="name">Redis设计与实现</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                &nbsp; | &nbsp;
+                <a href="/2015/07/01/redis设计与实现/Redis中的数据库/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2015/07/01/redis设计与实现/Redis中的数据库/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+
+          
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>Redis服务器的所有数据库都保存在服务器状态 redis.h/redisServer结构的db数组中，db数组中每项都是一个 redis.h/redisDb结构，代表一个数据库实例。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">struct redisServer &#123;</span><br><span class="line">	//...</span><br><span class="line">	int dbnum;</span><br><span class="line">	//...</span><br><span class="line">	redisDb *db;</span><br><span class="line">	//...</span><br><span class="line">&#125; ;</span><br></pre></td></tr></table></figure>
+<p>初始化数据库实例默认是16个，可以用过select 0~15 来切换。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">typeof struct redisClient &#123;</span><br><span class="line">	//...</span><br><span class="line">	//记录客户端当前正在使用的数据库</span><br><span class="line">	redisDb *db;</span><br><span class="line">	//...</span><br><span class="line">&#125; redisClient;</span><br></pre></td></tr></table></figure></p>
+<p>redisDb 结构中的dict字典保存了数据库中的所有键值对，这个字典称之为键空间。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">typeof struct redisDb &#123;</span><br><span class="line">	//...</span><br><span class="line">	dict *dict</span><br><span class="line">	//...</span><br><span class="line">&#125; redisDb;</span><br></pre></td></tr></table></figure></p>
+<p>我们在对键进行增删改查操作时候，其实就是在对dict的字典结构进行对应操作。</p>
+<p>读写键的维护操作：<br>1.读取一个key后(读和写都要先读)，服务器会更新键空间命中次数和不命中次数。这2个值可以在INFO命令的status属性 keyspace_hit和keyspace_misses查看。<br>2.读取一个key后，服务器会更新key的LRU(最后一次使用)时间，这个值可以用于计算key的闲置时间，使用Object idletime $key 命令可以查看。<br>3.读取一个key时，发现该key已过期，会先删除。<br>4.如果有watch命令监视了某个key，服务器在对该key进行修改后，会将这个键标记为脏(dirty)，从而让此key暴露给事物。<br>5.服务器每修改一个key后，会对脏键计数器+1，这个计数器会触发redis的持久化以及复制操作。<br>6.如果服务器开启了数据库通知功能，那么在key被修改后，redis会按配置发送相应的通知。</p>
+<p>Redis有4个命令可以设置键的过期时间：</p>
+<ol>
+<li>expire <key> <ttl> 设置key的生存时间为ttl秒；</ttl></key></li>
+<li>pexpire <key> <ttk> 设置key的生存时间为ttl毫秒； </ttk></key></li>
+<li>expireat <key> <ts> 设置key的过期时间为ts的秒数时间戳；</ts></key></li>
+<li>pexpireat <key> <ts> 设置key的过期时间为ts的毫秒数时间戳；</ts></key></li>
+</ol>
+<p>实际上 expire, pexpire, expireat 3个命令都是使用pexpireat实现的，只需要转换时间单位就行了。</p>
+<p>redisDb结构中，有一个expires字典保存了所有key的过期时间，这个字典称之为过期字典。<br>typeof struct redisDb {<br>//…<br>dict *expires;<br>//…<br>} redisDb;</p>
+<p>当一个key被设为过期后，redisDb中键空间字典和过期字典中的键重复，并不会出现重复对象，2个key指向的都是同一个对象。</p>
+<p>key过期删除策略：<br>1.定时删除：设置过期键的时候，创意一个定时器；<br>2.惰性删除：放任过期键不管，每次访问时，判断是否过期，如过期则删除；<br>3.定期删除：每隔一段时间，redis会扫描过期键，发现过期则删除；</p>
+<p>Redis实际使用的是惰性删除和定期删除2种配合使用。<br>定期删除函数执行步骤：<br>1.从一定量的数据库中去除一定数量的随机键检查，删除其中的过期键；<br>2.全局变量current_db会记录当前函数检查的进度，并在下一次调用时，接着上一次的进度处理。<br>3.随着函数不断被执行，所有过期键都会被检查到，这时将current_db变量重置为0，再开始新一轮的检查。</p>
 
           
         
@@ -951,7 +964,7 @@
         <div class="copyright" >
   
   &copy; 
-  <span itemprop="copyrightYear">2016</span>
+  <span itemprop="copyrightYear">2017</span>
   <span class="with-love">
     <i class="fa fa-heart"></i>
   </span>

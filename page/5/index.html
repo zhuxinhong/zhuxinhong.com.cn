@@ -242,8 +242,8 @@
             
               
                 
-                <a class="post-title-link" href="/2015/07/01/redis设计与实现/Redis中的数据库/" itemprop="url">
-                  Redis中的数据库
+                <a class="post-title-link" href="/2015/07/01/redis设计与实现/Redis类型检查和命令多态/" itemprop="url">
+                  Redis类型检查和命令多态
                 </a>
               
             
@@ -286,8 +286,8 @@
             
               <span class="post-comments-count">
                 &nbsp; | &nbsp;
-                <a href="/2015/07/01/redis设计与实现/Redis中的数据库/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count ds-thread-count" data-thread-key="2015/07/01/redis设计与实现/Redis中的数据库/" itemprop="commentsCount"></span>
+                <a href="/2015/07/01/redis设计与实现/Redis类型检查和命令多态/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2015/07/01/redis设计与实现/Redis类型检查和命令多态/" itemprop="commentsCount"></span>
                 </a>
               </span>
             
@@ -312,148 +312,11 @@
       
         
           
-            <p>Redis服务器的所有数据库都保存在服务器状态 redis.h/redisServer结构的db数组中，db数组中每项都是一个 redis.h/redisDb结构，代表一个数据库实例。</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">struct redisServer &#123;</span><br><span class="line">	//...</span><br><span class="line">	int dbnum;</span><br><span class="line">	//...</span><br><span class="line">	redisDb *db;</span><br><span class="line">	//...</span><br><span class="line">&#125; ;</span><br></pre></td></tr></table></figure>
-<p>初始化数据库实例默认是16个，可以用过select 0~15 来切换。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">typeof struct redisClient &#123;</span><br><span class="line">	//...</span><br><span class="line">	//记录客户端当前正在使用的数据库</span><br><span class="line">	redisDb *db;</span><br><span class="line">	//...</span><br><span class="line">&#125; redisClient;</span><br></pre></td></tr></table></figure></p>
-<p>redisDb 结构中的dict字典保存了数据库中的所有键值对，这个字典称之为键空间。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">typeof struct redisDb &#123;</span><br><span class="line">	//...</span><br><span class="line">	dict *dict</span><br><span class="line">	//...</span><br><span class="line">&#125; redisDb;</span><br></pre></td></tr></table></figure></p>
-<p>我们在对键进行增删改查操作时候，其实就是在对dict的字典结构进行对应操作。</p>
-<p>读写键的维护操作：<br>1.读取一个key后(读和写都要先读)，服务器会更新键空间命中次数和不命中次数。这2个值可以在INFO命令的status属性 keyspace_hit和keyspace_misses查看。<br>2.读取一个key后，服务器会更新key的LRU(最后一次使用)时间，这个值可以用于计算key的闲置时间，使用Object idletime $key 命令可以查看。<br>3.读取一个key时，发现该key已过期，会先删除。<br>4.如果有watch命令监视了某个key，服务器在对该key进行修改后，会将这个键标记为脏(dirty)，从而让此key暴露给事物。<br>5.服务器每修改一个key后，会对脏键计数器+1，这个计数器会触发redis的持久化以及复制操作。<br>6.如果服务器开启了数据库通知功能，那么在key被修改后，redis会按配置发送相应的通知。</p>
-<p>Redis有4个命令可以设置键的过期时间：</p>
-<ol>
-<li>expire <key> <ttl> 设置key的生存时间为ttl秒；</ttl></key></li>
-<li>pexpire <key> <ttk> 设置key的生存时间为ttl毫秒； </ttk></key></li>
-<li>expireat <key> <ts> 设置key的过期时间为ts的秒数时间戳；</ts></key></li>
-<li>pexpireat <key> <ts> 设置key的过期时间为ts的毫秒数时间戳；</ts></key></li>
-</ol>
-<p>实际上 expire, pexpire, expireat 3个命令都是使用pexpireat实现的，只需要转换时间单位就行了。</p>
-<p>redisDb结构中，有一个expires字典保存了所有key的过期时间，这个字典称之为过期字典。<br>typeof struct redisDb {<br>//…<br>dict *expires;<br>//…<br>} redisDb;</p>
-<p>当一个key被设为过期后，redisDb中键空间字典和过期字典中的键重复，并不会出现重复对象，2个key指向的都是同一个对象。</p>
-<p>key过期删除策略：<br>1.定时删除：设置过期键的时候，创意一个定时器；<br>2.惰性删除：放任过期键不管，每次访问时，判断是否过期，如过期则删除；<br>3.定期删除：每隔一段时间，redis会扫描过期键，发现过期则删除；</p>
-<p>Redis实际使用的是惰性删除和定期删除2种配合使用。<br>定期删除函数执行步骤：<br>1.从一定量的数据库中去除一定数量的随机键检查，删除其中的过期键；<br>2.全局变量current_db会记录当前函数检查的进度，并在下一次调用时，接着上一次的进度处理。<br>3.随着函数不断被执行，所有过期键都会被检查到，这时将current_db变量重置为0，再开始新一轮的检查。</p>
-
-          
-        
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
-      
-
-  
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-            
-            
-              
-                
-                <a class="post-title-link" href="/2015/06/28/redis设计与实现/Redis哈希对象/" itemprop="url">
-                  Redis哈希对象
-                </a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            <span class="post-meta-item-icon">
-              <i class="fa fa-calendar-o"></i>
-            </span>
-            <span class="post-meta-item-text">发表于</span>
-            <time itemprop="dateCreated" datetime="2015-06-28T00:00:00+08:00" content="2015-06-28">
-              2015-06-28
-            </time>
-          </span>
-
-          
-            <span class="post-category" >
-              &nbsp; | &nbsp;
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-              
-                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
-                  <a href="/categories/Redis设计与实现/" itemprop="url" rel="index">
-                    <span itemprop="name">Redis设计与实现</span>
-                  </a>
-                </span>
-
-                
-                
-
-              
-            </span>
-          
-
-          
-            
-              <span class="post-comments-count">
-                &nbsp; | &nbsp;
-                <a href="/2015/06/28/redis设计与实现/Redis哈希对象/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count ds-thread-count" data-thread-key="2015/06/28/redis设计与实现/Redis哈希对象/" itemprop="commentsCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-
-          
-          
-
-          
-        </div>
-      </header>
-    
-
-
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>哈希对象编码可以是ziplist或者hashtable。</p>
-<p>ziplist编码的哈希对象使用压缩列表作为底层实现。有新的键值对要保存时，程序会先将键值对的键推到列表表尾，再将键值对的值推到列表表尾。</p>
-<p>hashtable编码的哈希对象使用字典作为底层实现，哈希对象中的每个键值对都是用一个字典键值对来保存。</p>
-<p>当哈希对象满足下面2个条件时，哈希对象使用ziplist编码，其余都使用hashtable编码：<br>a.哈希对象保存所有键值对的键和值字符长度都小于64字节；<br>b.哈希对象保存的键值对数量小于512个；</p>
-<p>上述2个条件的阀值是可以修改的，在配置文件中的 hash-max-ziplist-value 和 hash-max-ziplist-entries 选项中。</p>
+            <p>Redis中用于操作键的命令基本可以分为2类。</p>
+<p>其中一种是可以对任何类型的键执行，比如DEL,EXPIRE,RENAME,TYPE,OBJECT,TTL等命令。</p>
+<p>另一种只能对特定的键执行，比如：<br>SET,GET,APPEND,STRLEN 等仅限用于字符串的键类型；<br>HDEL,HSET,HGET,HLEN 等仅限用于哈希键类型；<br>RPUSH,LPOP,LINSERT,LLEN 等仅限用于列表键类型；<br>SADD,SPOP,SINTER,SCARD 等仅限用于集合键类型；<br>ZADD,ZCARD,ZRANK,ZSCORE 等仅限用于有序集合键类型；</p>
+<p>在执行一个类型特定命令之前，Redis会先检查输入键类型是否正确，然后再决定是否执行命令。<br>如果键名称正确，再检查键对象是否是执行命令所需的类型，不是的话就返回一个类型错误。</p>
+<p>多态命令的实现除了检查键类型和命令是否匹配外，还会检查键的至对象所使用的编码。例如，LLEN命令。<br>如果列表对象编码为ziplist,，说明对象为压缩列表，程序使用ziplistlen作为底层实现返回列表长度。<br>如果列表对象编码为linkedlist，说明对象为双端链表，程序使用listLength作为底层实现返回链表长度。</p>
 
           
         
@@ -579,6 +442,130 @@
 <p>对于Redis保存的键值对来说，键总是一个字符串对象，而值可以是上述对象中的任意对象。使用TYPE命令返回的结果是数据库对应键的值对象类型。</p>
 <p>encoding 记录对象底层数据结构的实现。使用OBJECT ENCODING 可查看一个数据库键的值对象编码。</p>
 <p>Redis对象的内存回收采用的是类似JVM垃圾回收的方法之一  引用计数法。</p>
+
+          
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
+                <a class="post-title-link" href="/2015/06/28/redis设计与实现/Redis哈希对象/" itemprop="url">
+                  Redis哈希对象
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2015-06-28T00:00:00+08:00" content="2015-06-28">
+              2015-06-28
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/Redis设计与实现/" itemprop="url" rel="index">
+                    <span itemprop="name">Redis设计与实现</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                &nbsp; | &nbsp;
+                <a href="/2015/06/28/redis设计与实现/Redis哈希对象/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2015/06/28/redis设计与实现/Redis哈希对象/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+
+          
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>哈希对象编码可以是ziplist或者hashtable。</p>
+<p>ziplist编码的哈希对象使用压缩列表作为底层实现。有新的键值对要保存时，程序会先将键值对的键推到列表表尾，再将键值对的值推到列表表尾。</p>
+<p>hashtable编码的哈希对象使用字典作为底层实现，哈希对象中的每个键值对都是用一个字典键值对来保存。</p>
+<p>当哈希对象满足下面2个条件时，哈希对象使用ziplist编码，其余都使用hashtable编码：<br>a.哈希对象保存所有键值对的键和值字符长度都小于64字节；<br>b.哈希对象保存的键值对数量小于512个；</p>
+<p>上述2个条件的阀值是可以修改的，在配置文件中的 hash-max-ziplist-value 和 hash-max-ziplist-entries 选项中。</p>
 
           
         
@@ -951,7 +938,7 @@
         <div class="copyright" >
   
   &copy; 
-  <span itemprop="copyrightYear">2016</span>
+  <span itemprop="copyrightYear">2017</span>
   <span class="with-love">
     <i class="fa fa-heart"></i>
   </span>
