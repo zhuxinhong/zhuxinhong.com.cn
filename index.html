@@ -242,6 +242,358 @@
             
               
                 
+                <a class="post-title-link" href="/2017/03/23/Java Web/可能错过的Java7特性/" itemprop="url">
+                  Java7 -- 可能错过的Java7特性
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2017-03-23T00:00:00+08:00" content="2017-03-23">
+              2017-03-23
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/Java-Web/" itemprop="url" rel="index">
+                    <span itemprop="name">Java Web</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                &nbsp; | &nbsp;
+                <a href="/2017/03/23/Java Web/可能错过的Java7特性/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2017/03/23/Java Web/可能错过的Java7特性/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+
+          
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h1 id="可能错过的Java7特性"><a href="#可能错过的Java7特性" class="headerlink" title="可能错过的Java7特性"></a>可能错过的Java7特性</h1><ul>
+<li>异常改进</li>
+<li>文件IO</li>
+<li>equals、hashCode和CompareTo方法</li>
+<li>其他</li>
+</ul>
+<h2 id="异常改进"><a href="#异常改进" class="headerlink" title="异常改进"></a>异常改进</h2><h3 id="try-with-resources"><a href="#try-with-resources" class="headerlink" title="try-with-resources"></a>try-with-resources</h3><p>Java7 提供了一个简单实用的代码格式</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">打开一个资源</span><br><span class="line"><span class="keyword">try</span>	&#123;</span><br><span class="line">	实用该资源</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">finally</span> &#123;</span><br><span class="line">	关闭该资源</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>其中资源所属类必须实现了 AutoCloseable 接口。</p>
+<p>void close() throws Exception</p>
+<p>try-with-resources 语句最简形式如下</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">try</span> (Resource res = ...) &#123;</span><br><span class="line">	使用 res</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>当 try 语句块退出时，会自动调用 res.close() 方法。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">try</span> (Scanner in = <span class="keyword">new</span> Scanner(Paths.get(File.separator, <span class="string">"data"</span>, <span class="string">"word"</span>))) &#123;</span><br><span class="line">    <span class="keyword">while</span> (in.hasNext()) &#123;                                                 </span><br><span class="line">        System.out.println(in.next());                                     </span><br><span class="line">    &#125;                                                                      </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>当代码块像往常一样退出或发生异常时，都会调用 in.close() 方法，就如同你之前使用 finally 一样。</p>
+<h3 id="忽略异常"><a href="#忽略异常" class="headerlink" title="忽略异常"></a>忽略异常</h3><p>无论何时使用输入或输出，在异常产生后如何关闭资源都是一个麻烦的问题。假设产生了一个 IOException ，接下来关闭资源事， close 方法又抛出了另一个异常。</p>
+<p>实际在Java中，finally分支中抛出的异常会丢弃掉之前的异常。</p>
+<p>try-with-resources 修正了这个行为。当 AutoCloseable 的 close 方法抛出异常时，原来的异常会被重新抛出，而调用 close 方法产生的异常会被捕获，并被标注为“被忽略”的异常。</p>
+<h3 id="捕获多个异常"><a href="#捕获多个异常" class="headerlink" title="捕获多个异常"></a>捕获多个异常</h3><p>假设多个异常的行为一致，允许将多个异常写在一个 catch 分支中：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">try</span> &#123;</span><br><span class="line">	</span><br><span class="line">&#125; <span class="keyword">catch</span> (FileNotFoundException | UnknownHostException ex) &#123;</span><br><span class="line"></span><br><span class="line">&#125; <span class="keyword">catch</span> (IOException ex)&#123;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>只有当捕获的异常均不是其他异常的子类时，才能用这种方法。</p>
+<h3 id="ReflectiveOperationException"><a href="#ReflectiveOperationException" class="headerlink" title="ReflectiveOperationException"></a>ReflectiveOperationException</h3><p>在调用一个反射方法时，不得不捕获许多不相关的检查器异常。例如，创建一个类并调用它的 main 方法：</p>
+<p>Class.forName(className).getMethod(“main”).invoke(null, new String[]{});</p>
+<p>该语句可能会导致一个 ClassNotFoundException、NoSuchMethodException、IllegalAccessException 或者 InvocationTargetException。</p>
+<p>Java7 修复了这一设计上的缺陷，引入了一个新的父类 ReflectiveOperationException, 这样就可以通过这一个异常来捕获其他所有子异常。</p>
+<h2 id="使用文件"><a href="#使用文件" class="headerlink" title="使用文件"></a>使用文件</h2><p>文件处理上，Java7 的 Path 接口取代了 File 类。</p>
+<h3 id="Path-Paths"><a href="#Path-Paths" class="headerlink" title="Path Paths"></a>Path Paths</h3><h3 id="Files"><a href="#Files" class="headerlink" title="Files"></a>Files</h3><p>Files 类可以快速实现一些常用的文件 IO 操作，比之前的读写文件编码简洁太多。例如：</p>
+<h4 id="读写文件"><a href="#读写文件" class="headerlink" title="读写文件"></a>读写文件</h4><p>读取一个文件全部内容</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">byte</span>[] bytes = Files.readAllBytes(path);</span><br></pre></td></tr></table></figure>
+<p>将文件内容读取为一个字符串</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">String content = <span class="keyword">new</span> String(bytes, StandardCharsets.UTF_8);</span><br></pre></td></tr></table></figure>
+<p>按行读取文件</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">List&lt;String&gt; lines = Files.readAllLines(path);</span><br></pre></td></tr></table></figure>
+<p>将字符串写入文件</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Files.write(path, <span class="string">"content"</span>.getBytes(StandardCharsets.UTF_8));</span><br></pre></td></tr></table></figure>
+<p>按行来写入文件</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">List&lt;String&gt; lines = Arrays.asList(<span class="string">"abc"</span>, <span class="string">"xyz"</span>);</span><br><span class="line">Files.write(path, lines);</span><br></pre></td></tr></table></figure>
+<p>将内容追加到文件</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">List&lt;String&gt; lines = Arrays.asList(<span class="string">"abc"</span>, <span class="string">"xyz"</span>);</span><br><span class="line">Files.write(path, lines, StandardOpenOption.APPEND);</span><br></pre></td></tr></table></figure>
+<p>默认情况下，Files 类的所有方法都使用 UTF-8 来读取或写入字符。</p>
+<p>处理一般大小文本文件时，通常最简单方法是将文件内容作为一个字符串或者字符串列表进行处理。如果文件很大，或者是二进制文件，仍然可以使用熟悉的 stream 类或者 reader/writer 类。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">InputStream in = Files.newInputStream(path);</span><br><span class="line">OutputStream out = Files.newOutPutStream(path);</span><br><span class="line">Reader reader = Files.newBufferedReader(path);</span><br><span class="line">Writer writer = Files.newBufferedWriter(path);</span><br></pre></td></tr></table></figure>
+<p>这些方便的方法可以帮你省去处理 FileInputStream、FileOutputStream、BufferedReader 或者 BufferedWriter 时的工作。</p>
+<p>如果希望将一个 InputStream 中的内容保存到一个文件中，可以使用</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Files.copy(in, path);</span><br></pre></td></tr></table></figure>
+<p>相反，可以将某个文件内容复制到一个 OutputStream 中。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Files.copy(path, out);</span><br></pre></td></tr></table></figure>
+<h4 id="创建文件和目录"><a href="#创建文件和目录" class="headerlink" title="创建文件和目录"></a>创建文件和目录</h4><p>创建目录                </p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Files.createDirectories(path);</span><br></pre></td></tr></table></figure>
+<p>创建空文件</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Files.createFile(path);</span><br></pre></td></tr></table></figure>
+<p>文件已经存在会抛异常，对已有文件的检查和创建都属于原子操作，所以如果文件不存在，那么它一定会在其他线程之前创建该文件。</p>
+<h4 id="复制、移动和删除文件"><a href="#复制、移动和删除文件" class="headerlink" title="复制、移动和删除文件"></a>复制、移动和删除文件</h4><p>复制</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Files.copy(fromPath, toPath);</span><br></pre></td></tr></table></figure>
+<p>移动</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Files.move(fromPath, toPath);</span><br></pre></td></tr></table></figure>
+<p>如果目标文件或目录存在，copy 或 move 方法会失败。如果希望覆盖目标文件，使用 REPLACE_EXISTING 选项。如果希望复制所有文件属性，使用 COPY_ATTRIBUTES 选项，也可同时提供这两个选项：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Files.copy(fromPath, toPath, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.COPY_ATTRIBUTES);</span><br></pre></td></tr></table></figure>
+<p>可指定使用原子方式来执行移动，这样要么移动操作成功完成，要么源文件依然存在：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Files.move(fromPath, toPath, StandardCopyOption.ATOMIC_MOVE);</span><br></pre></td></tr></table></figure>
+<p>删除</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Files.delete(path);</span><br></pre></td></tr></table></figure>
+<p>如果文件不存在会抛异常，可能希望使用另一个方法：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">boolean</span> deleted = Files.deleteIfExists(path);</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">没有直接删除或复制非空目录的方法。要实现请参考 FileVisitor 接口的API文档。</span><br></pre></td></tr></table></figure>
+<h2 id="equals、hashcode、和-compareTo-方法"><a href="#equals、hashcode、和-compareTo-方法" class="headerlink" title="equals、hashcode、和 compareTo 方法"></a>equals、hashcode、和 compareTo 方法</h2><h3 id="安全的-Null-值相等测试"><a href="#安全的-Null-值相等测试" class="headerlink" title="安全的 Null 值相等测试"></a>安全的 Null 值相等测试</h3><p>假设需要为下面的类实现 equals 方法：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Person</span> </span>&#123;</span><br><span class="line">	<span class="keyword">private</span> String first;</span><br><span class="line">	<span class="keyword">private</span> String last;</span><br><span class="line">	...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>首先，你不得不将参数转换为一个 Person 对象：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">equals</span><span class="params">(Object otherObject)</span> </span>&#123;</span><br><span class="line">	<span class="keyword">if</span> (<span class="keyword">this</span> == otherObject) <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">	<span class="keyword">if</span> (otherObject == <span class="keyword">null</span>) <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">	<span class="keyword">if</span> (<span class="keyword">this</span>.getClass() != otherObject.getClass()) <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">	Person other = (Person) otherObject;</span><br><span class="line">	...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>Java7出现后，再不用担心 first 或者 last 可能为空，只需调用</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">return</span> Obejcts.equals(a, b);</span><br></pre></td></tr></table></figure>
+<p>如果 a 和 b 都是 null，则返回 true；如果只有 a 为 null，则返回 false；其他情况则返回 a.equals(b)。</p>
+<h3 id="计算哈希码"><a href="#计算哈希码" class="headerlink" title="计算哈希码"></a>计算哈希码</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">return</span> Objects.hash(first, last);</span><br></pre></td></tr></table></figure>
+<p>Objects.hash 只是会调用从 Java5 开始就存在的 Arrays.hash 方法。但他不是一个支持可变参数的方法。</p>
+<h3 id="toString-NaN"><a href="#toString-NaN" class="headerlink" title="toString()"></a>toString()</h3><p>String.valueOf(obj)，可以安全处理 null 对象。如果 obj 为 null，会返回字符串 “null”。如果不喜欢这种方式，可以调用 Objects.toString 方法，并提供一个用于 null 对象的值。例如，Objects.toString(obj, “”);</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span><br><span class="line"> * Returns the result of calling &#123;<span class="doctag">@code</span> toString&#125; on the first</span><br><span class="line"> * argument if the first argument is not &#123;<span class="doctag">@code</span> null&#125; and returns</span><br><span class="line"> * the second argument otherwise.</span><br><span class="line"> *</span><br><span class="line"> * <span class="doctag">@param</span> o an object</span><br><span class="line"> * <span class="doctag">@param</span> nullDefault string to return if the first argument is</span><br><span class="line"> *        &#123;<span class="doctag">@code</span> null&#125;</span><br><span class="line"> * <span class="doctag">@return</span> the result of calling &#123;<span class="doctag">@code</span> toString&#125; on the first</span><br><span class="line"> * argument if it is not &#123;<span class="doctag">@code</span> null&#125; and the second argument</span><br><span class="line"> * otherwise.</span><br><span class="line"> * <span class="doctag">@see</span> Objects#toString(Object)</span><br><span class="line"> */</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> String <span class="title">toString</span><span class="params">(Object o, String nullDefault)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> (o != <span class="keyword">null</span>) ? o.toString() : nullDefault;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="比较数值类型对象"><a href="#比较数值类型对象" class="headerlink" title="比较数值类型对象"></a>比较数值类型对象</h3><p>使用静态方法 Integer.compare </p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">int</span> diff = Integer.compare(x, other.x);</span><br><span class="line"><span class="keyword">if</span> (diff != <span class="number">0</span>) <span class="keyword">return</span> diff;</span><br><span class="line"><span class="keyword">return</span> Integer.compare(y, other.y);</span><br></pre></td></tr></table></figure>
+<p>过去某些开发人员会使用 new Integer(x).compareTo(other.x)的方式，但这会创建两个会自动装箱/拆箱的整形对象。相比之下，静态方法 compare 使用的是 int 参数。</p>
+<p>此外，Long、Short、Byte、和 Boolean 也都提供了各自的静态方法 compare。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Double 和 Float 中的静态方法 compare 从 Java1.2 开始就存在了。</span><br></pre></td></tr></table></figure>
+<h2 id="其他"><a href="#其他" class="headerlink" title="其他"></a>其他</h2><h3 id="字符串转数字"><a href="#字符串转数字" class="headerlink" title="字符串转数字"></a>字符串转数字</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">double</span> x = Double.parseDouble(<span class="string">"+1.0"</span>);</span><br><span class="line"><span class="keyword">int</span> n = Integer.parseInt(<span class="string">"+1"</span>);</span><br></pre></td></tr></table></figure>
+<p>在 Java7 之前，+1 一直不是一个有效整数。</p>
+<p>现在这个问题已经在所有通过字符串来构造 int、long、short、byte 和 BigInteger 的方法中被修复了，还包括包装类、处理十六进制和八进制数输入的 decode 方法，一级生成包装类对象的 valueOf 方法。BigInteger(String) 也被修复了。</p>
+<h3 id="全局-Logger"><a href="#全局-Logger" class="headerlink" title="全局 Logger"></a>全局 Logger</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> Logger <span class="title">getGlobal</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="comment">// In order to break a cyclic dependence between the LogManager</span></span><br><span class="line">    <span class="comment">// and Logger static initializers causing deadlocks, the global</span></span><br><span class="line">    <span class="comment">// logger is created with a special constructor that does not</span></span><br><span class="line">    <span class="comment">// initialize its log manager.</span></span><br><span class="line">    <span class="comment">//</span></span><br><span class="line">    <span class="comment">// If an application calls Logger.getGlobal() before any logger</span></span><br><span class="line">    <span class="comment">// has been initialized, it is therefore possible that the</span></span><br><span class="line">    <span class="comment">// LogManager class has not been initialized yet, and therefore</span></span><br><span class="line">    <span class="comment">// Logger.global.manager will be null.</span></span><br><span class="line">    <span class="comment">//</span></span><br><span class="line">    <span class="comment">// In order to finish the initialization of the global logger, we</span></span><br><span class="line">    <span class="comment">// will therefore call LogManager.getLogManager() here.</span></span><br><span class="line">    <span class="comment">//</span></span><br><span class="line">    <span class="comment">// To prevent race conditions we also need to call</span></span><br><span class="line">    <span class="comment">// LogManager.getLogManager() unconditionally here.</span></span><br><span class="line">    <span class="comment">// Indeed we cannot rely on the observed value of global.manager,</span></span><br><span class="line">    <span class="comment">// because global.manager will become not null somewhere during</span></span><br><span class="line">    <span class="comment">// the initialization of LogManager.</span></span><br><span class="line">    <span class="comment">// If two threads are calling getGlobal() concurrently, one thread</span></span><br><span class="line">    <span class="comment">// will see global.manager null and call LogManager.getLogManager(),</span></span><br><span class="line">    <span class="comment">// but the other thread could come in at a time when global.manager</span></span><br><span class="line">    <span class="comment">// is already set although ensureLogManagerInitialized is not finished</span></span><br><span class="line">    <span class="comment">// yet...</span></span><br><span class="line">    <span class="comment">// Calling LogManager.getLogManager() unconditionally will fix that.</span></span><br><span class="line"></span><br><span class="line">    LogManager.getLogManager();</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Now the global LogManager should be initialized,</span></span><br><span class="line">    <span class="comment">// and the global logger should have been added to</span></span><br><span class="line">    <span class="comment">// it, unless we were called within the constructor of a LogManager</span></span><br><span class="line">    <span class="comment">// subclass installed as LogManager, in which case global.manager</span></span><br><span class="line">    <span class="comment">// would still be null, and global will be lazily initialized later on.</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> global;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="Null-检查"><a href="#Null-检查" class="headerlink" title="Null 检查"></a>Null 检查</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span><br><span class="line"> * Checks that the specified object reference is not &#123;<span class="doctag">@code</span> null&#125;. This</span><br><span class="line"> * method is designed primarily for doing parameter validation in methods</span><br><span class="line"> * and constructors, as demonstrated below:</span><br><span class="line"> * &lt;blockquote&gt;&lt;pre&gt;</span><br><span class="line"> * public Foo(Bar bar) &#123;</span><br><span class="line"> *     this.bar = Objects.requireNonNull(bar);</span><br><span class="line"> * &#125;</span><br><span class="line"> * &lt;/pre&gt;&lt;/blockquote&gt;</span><br><span class="line"> *</span><br><span class="line"> * <span class="doctag">@param</span> obj the object reference to check for nullity</span><br><span class="line"> * <span class="doctag">@param</span> &lt;T&gt; the type of the reference</span><br><span class="line"> * <span class="doctag">@return</span> &#123;<span class="doctag">@code</span> obj&#125; if not &#123;<span class="doctag">@code</span> null&#125;</span><br><span class="line"> * <span class="doctag">@throws</span> NullPointerException if &#123;<span class="doctag">@code</span> obj&#125; is &#123;<span class="doctag">@code</span> null&#125;</span><br><span class="line"> */</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> &lt;T&gt; <span class="function">T <span class="title">requireNonNull</span><span class="params">(T obj)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (obj == <span class="keyword">null</span>)</span><br><span class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> NullPointerException();</span><br><span class="line">    <span class="keyword">return</span> obj;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span><br><span class="line"> * Checks that the specified object reference is not &#123;<span class="doctag">@code</span> null&#125; and</span><br><span class="line"> * throws a customized &#123;<span class="doctag">@link</span> NullPointerException&#125; if it is. This method</span><br><span class="line"> * is designed primarily for doing parameter validation in methods and</span><br><span class="line"> * constructors with multiple parameters, as demonstrated below:</span><br><span class="line"> * &lt;blockquote&gt;&lt;pre&gt;</span><br><span class="line"> * public Foo(Bar bar, Baz baz) &#123;</span><br><span class="line"> *     this.bar = Objects.requireNonNull(bar, "bar must not be null");</span><br><span class="line"> *     this.baz = Objects.requireNonNull(baz, "baz must not be null");</span><br><span class="line"> * &#125;</span><br><span class="line"> * &lt;/pre&gt;&lt;/blockquote&gt;</span><br><span class="line"> *</span><br><span class="line"> * <span class="doctag">@param</span> obj     the object reference to check for nullity</span><br><span class="line"> * <span class="doctag">@param</span> message detail message to be used in the event that a &#123;<span class="doctag">@code</span></span><br><span class="line"> *                NullPointerException&#125; is thrown</span><br><span class="line"> * <span class="doctag">@param</span> &lt;T&gt; the type of the reference</span><br><span class="line"> * <span class="doctag">@return</span> &#123;<span class="doctag">@code</span> obj&#125; if not &#123;<span class="doctag">@code</span> null&#125;</span><br><span class="line"> * <span class="doctag">@throws</span> NullPointerException if &#123;<span class="doctag">@code</span> obj&#125; is &#123;<span class="doctag">@code</span> null&#125;</span><br><span class="line"> */</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> &lt;T&gt; <span class="function">T <span class="title">requireNonNull</span><span class="params">(T obj, String message)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (obj == <span class="keyword">null</span>)</span><br><span class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> NullPointerException(message);</span><br><span class="line">    <span class="keyword">return</span> obj;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="ProcessBuilder"><a href="#ProcessBuilder" class="headerlink" title="ProcessBuilder"></a>ProcessBuilder</h3><p>Java5 之前，Runtime.exec 方法是在 Java 中执行一个外部命令的唯一方式。Java5 添加了 ProcessBuilder 类，加强了对 OS 进程的控制，尤其是通过 ProcessBuilder，你可以改变工作目录。</p>
+<p>Java7 添加了一些新方法，使得开发人员能方便地将进程的标准输入、输出及错误重定向到文件中。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">  <span class="function"><span class="keyword">public</span> Redirect <span class="title">redirectInput</span><span class="params">()</span> </span>&#123;</span><br><span class="line">       <span class="keyword">return</span> (redirects == <span class="keyword">null</span>) ? Redirect.PIPE : redirects[<span class="number">0</span>];</span><br><span class="line">  &#125;</span><br><span class="line">  </span><br><span class="line">  <span class="function"><span class="keyword">public</span> Redirect <span class="title">redirectOutput</span><span class="params">()</span> </span>&#123;</span><br><span class="line">       <span class="keyword">return</span> (redirects == <span class="keyword">null</span>) ? Redirect.PIPE : redirects[<span class="number">1</span>];</span><br><span class="line">  &#125;</span><br><span class="line">  </span><br><span class="line">  <span class="function"><span class="keyword">public</span> ProcessBuilder <span class="title">redirectInput</span><span class="params">(File file)</span> </span>&#123;</span><br><span class="line">       <span class="keyword">return</span> redirectInput(Redirect.from(file));</span><br><span class="line">  &#125;</span><br><span class="line">  </span><br><span class="line">  <span class="function"><span class="keyword">public</span> ProcessBuilder <span class="title">redirectOutput</span><span class="params">(File file)</span> </span>&#123;</span><br><span class="line">       <span class="keyword">return</span> redirectOutput(Redirect.to(file));</span><br><span class="line">  &#125;</span><br><span class="line">  </span><br><span class="line">  <span class="function"><span class="keyword">public</span> Redirect <span class="title">redirectError</span><span class="params">()</span> </span>&#123;</span><br><span class="line">       <span class="keyword">return</span> (redirects == <span class="keyword">null</span>) ? Redirect.PIPE : redirects[<span class="number">2</span>];</span><br><span class="line">  &#125;</span><br><span class="line">  </span><br><span class="line">  <span class="function"><span class="keyword">public</span> ProcessBuilder <span class="title">redirectError</span><span class="params">(File file)</span> </span>&#123;</span><br><span class="line">       <span class="keyword">return</span> redirectError(Redirect.to(file));</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+<h3 id="URLClassLoader"><a href="#URLClassLoader" class="headerlink" title="URLClassLoader"></a>URLClassLoader</h3><p>Java7 只是添加了一个用来关闭该类加载器的 close 方法，URLClassLoader 类现在实现了 AutoCloseable 接口，因此可使用 try-with-resources 语句来避免可能出现的资源泄露。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">URLClassLoader</span> <span class="keyword">extends</span> <span class="title">SecureClassLoader</span> <span class="keyword">implements</span> <span class="title">Closeable</span> </span>&#123;</span><br><span class="line">	...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="BitSet"><a href="#BitSet" class="headerlink" title="BitSet"></a>BitSet</h3><p>BitSet 是一个表示 bit 序列的整数集合。该集合可以根据整数 i 来设置第 i 个 bit 位的值。这使得集合操作非常搞笑。求并集、交集、补集只不过是简单的按位或、与、非运算。</p>
+<p>Java7 添加了一些构造 BitSet 的方法：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> BitSet <span class="title">valueOf</span><span class="params">(<span class="keyword">byte</span>[] bytes)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> BitSet.valueOf(ByteBuffer.wrap(bytes));</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> BitSet <span class="title">valueOf</span><span class="params">(ByteBuffer bb)</span> </span>&#123;</span><br><span class="line">    bb = bb.slice().order(ByteOrder.LITTLE_ENDIAN);</span><br><span class="line">    <span class="keyword">int</span> n;</span><br><span class="line">    <span class="keyword">for</span> (n = bb.remaining(); n &gt; <span class="number">0</span> &amp;&amp; bb.get(n - <span class="number">1</span>) == <span class="number">0</span>; n--)</span><br><span class="line">        ;</span><br><span class="line">    <span class="keyword">long</span>[] words = <span class="keyword">new</span> <span class="keyword">long</span>[(n + <span class="number">7</span>) / <span class="number">8</span>];</span><br><span class="line">    bb.limit(n);</span><br><span class="line">    <span class="keyword">int</span> i = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">while</span> (bb.remaining() &gt;= <span class="number">8</span>)</span><br><span class="line">        words[i++] = bb.getLong();</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> remaining = bb.remaining(), j = <span class="number">0</span>; j &lt; remaining; j++)</span><br><span class="line">        words[i] |= (bb.get() &amp; <span class="number">0xffL</span>) &lt;&lt; (<span class="number">8</span> * j);</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">new</span> BitSet(words);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> BitSet <span class="title">valueOf</span><span class="params">(<span class="keyword">long</span>[] longs)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">int</span> n;</span><br><span class="line">    <span class="keyword">for</span> (n = longs.length; n &gt; <span class="number">0</span> &amp;&amp; longs[n - <span class="number">1</span>] == <span class="number">0</span>; n--)</span><br><span class="line">        ;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">new</span> BitSet(Arrays.copyOf(longs, n));</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> BitSet <span class="title">valueOf</span><span class="params">(LongBuffer lb)</span> </span>&#123;</span><br><span class="line">    lb = lb.slice();</span><br><span class="line">    <span class="keyword">int</span> n;</span><br><span class="line">    <span class="keyword">for</span> (n = lb.remaining(); n &gt; <span class="number">0</span> &amp;&amp; lb.get(n - <span class="number">1</span>) == <span class="number">0</span>; n--)</span><br><span class="line">        ;</span><br><span class="line">    <span class="keyword">long</span>[] words = <span class="keyword">new</span> <span class="keyword">long</span>[n];</span><br><span class="line">    lb.get(words);</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">new</span> BitSet(words);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+          
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
+                <a class="post-title-link" href="/2017/01/23/编写高质量代码/类、对象及方法/" itemprop="url">
+                  类、对象及方法
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2017-01-23T00:00:00+08:00" content="2017-01-23">
+              2017-01-23
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/编写高质量代码/" itemprop="url" rel="index">
+                    <span itemprop="name">编写高质量代码</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                &nbsp; | &nbsp;
+                <a href="/2017/01/23/编写高质量代码/类、对象及方法/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2017/01/23/编写高质量代码/类、对象及方法/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+
+          
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <ul>
+<li><a href="#构造函数尽量简化">构造函数尽量简化</a></li>
+</ul>
+<h3 id="构造函数尽量简化"><a href="#构造函数尽量简化" class="headerlink" title="构造函数尽量简化"></a>构造函数尽量简化</h3><p>看一段代码</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Sample2</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        Server s = <span class="keyword">new</span> SimpleServer(<span class="number">1000</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">abstract</span> <span class="class"><span class="keyword">class</span> <span class="title">Server</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> DEFAULT_PORT = <span class="number">40000</span>;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">Server</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">int</span> port = getPort();</span><br><span class="line">        System.out.println(<span class="string">"端口号:"</span> + port);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">protected</span> <span class="keyword">abstract</span> <span class="keyword">int</span> <span class="title">getPort</span><span class="params">()</span></span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">SimpleServer</span> <span class="keyword">extends</span> <span class="title">Server</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">int</span> port = <span class="number">100</span>;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">SimpleServer</span><span class="params">(<span class="keyword">int</span> _port)</span> </span>&#123;</span><br><span class="line">        port = _port;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">protected</span> <span class="keyword">int</span> <span class="title">getPort</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> Math.random() &gt; <span class="number">0.5</span> ? port : DEFAULT_PORT;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>多次执行，结果只有2种，永远不会出现“端口号:100”或是”端口号:1000”</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">端口号:40000</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">端口号:0</span><br></pre></td></tr></table></figure>
+<p>子类实例化时，会先初始化父类（这里只是初始化不是生成父类对象），也就是初始化父类的变量，调用父类的构造函数，然后再初始化子类的变量，调用子类构造函数。</p>
+<p>接着分析上面的程序，执行过程如下：</p>
+<ol>
+<li>子类SimpleServer的构造函数接收int类型参数：1000。</li>
+<li>父类初始化常变量，DEFAULT_PORT初始化为40000。</li>
+<li>执行父类午餐构造函数，即子类的有参构造默认包含了super()方法。</li>
+<li>父类构造函数执行到getPort，调用子类实现。</li>
+<li>子类的getPort返回port值（注意，此时port变量还未赋值，是0）或DEFAULT_PORT（此时是40000）了。</li>
+<li>父类初始化完毕，开始初始化子类实例变量，port赋值100。</li>
+<li>执行子类构造函数，port被重新赋值为1000.</li>
+<li>子类SimpleServer实例化结束，对象创建完毕。</li>
+</ol>
+
+          
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
                 <a class="post-title-link" href="/2016/12/19/Java Web/Java8新特性 -- StreamAPI/" itemprop="url">
                   Java8 -- StreamAPI
                 </a>
@@ -748,353 +1100,6 @@
 
 
     
-      
-
-  
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-            
-            
-              
-                
-                <a class="post-title-link" href="/2016/07/05/HBase/初识HBase/" itemprop="url">
-                  初识HBase
-                </a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            <span class="post-meta-item-icon">
-              <i class="fa fa-calendar-o"></i>
-            </span>
-            <span class="post-meta-item-text">发表于</span>
-            <time itemprop="dateCreated" datetime="2016-07-05T00:00:00+08:00" content="2016-07-05">
-              2016-07-05
-            </time>
-          </span>
-
-          
-            <span class="post-category" >
-              &nbsp; | &nbsp;
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-              
-                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
-                  <a href="/categories/HBase/" itemprop="url" rel="index">
-                    <span itemprop="name">HBase</span>
-                  </a>
-                </span>
-
-                
-                
-
-              
-            </span>
-          
-
-          
-            
-              <span class="post-comments-count">
-                &nbsp; | &nbsp;
-                <a href="/2016/07/05/HBase/初识HBase/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/07/05/HBase/初识HBase/" itemprop="commentsCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-
-          
-          
-
-          
-        </div>
-      </header>
-    
-
-
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h2 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h2><p>HBase是一个构建在HDFS之上、分布式、面向列的开源数据库，由Google BigTable的开源实现，它主要用于存储海量数据，是Hadoop生态系统中的重要一员。</p>
-<h2 id="HBase优势"><a href="#HBase优势" class="headerlink" title="HBase优势"></a>HBase优势</h2><h3 id="1-成熟"><a href="#1-成熟" class="headerlink" title="1.成熟"></a>1.成熟</h3><ul>
-<li>社区成熟    </li>
-<li>理论充分经过实践</li>
-<li>丰富的工具支持, hbck、phoenix、solr</li>
-</ul>
-<h3 id="2-高效"><a href="#2-高效" class="headerlink" title="2.高效"></a>2.高效</h3><ul>
-<li>将随机嘟列转化为顺序读写，适应高并发写入</li>
-<li>均衡效果好读写性能和机器数保持线性关系</li>
-<li>行中没有保存数据的列不占存储空间</li>
-</ul>
-<h3 id="3-分布式特性"><a href="#3-分布式特性" class="headerlink" title="3.分布式特性"></a>3.分布式特性</h3><ul>
-<li>基于HDFS、Zookeeper</li>
-<li>一致性、可用性、分区容忍性</li>
-<li>大数据存储</li>
-<li>易扩展</li>
-</ul>
-<h2 id="HBase表特点"><a href="#HBase表特点" class="headerlink" title="HBase表特点"></a>HBase表特点</h2><ul>
-<li>大：一个表可以有数十亿行，上百万列</li>
-<li>面向列：面向列（族）的存储和权限访问，列（族）独立索引</li>
-<li>稀疏：对于为空（null）的列，并不占用存储空间，因此，表可以设计的非常稀疏</li>
-<li>数据类型单一：HBase中的数据类型都是字符串(string)</li>
-<li>无模式：每行都有一个可排序的主键和任意多的列，列可以根据需要动态增加，同一张表中不同的行可以有截然不同的列</li>
-</ul>
-<h2 id="HBase-VS-RDBMS"><a href="#HBase-VS-RDBMS" class="headerlink" title="HBase VS RDBMS"></a>HBase VS RDBMS</h2><ul>
-<li>数据类型<br>HBase中的数据都是字符串类型</li>
-<li>数据操作<br>HBase只有普通的增删改查等操作，没有表之间的关联查询</li>
-<li>存储模式<br>HBase是基于列式存储的，而RDBMS是基于行式存储的</li>
-<li>应用场景<br>HBase适合存储大量数据，查询效率极高</li>
-</ul>
-<hr>
-<h2 id="HBase概念"><a href="#HBase概念" class="headerlink" title="HBase概念"></a>HBase概念</h2><h3 id="1-主键"><a href="#1-主键" class="headerlink" title="1.主键"></a>1.主键</h3><ul>
-<li>用来检索记录的主键</li>
-<li>访问HBase表中的行，只有三种方式：<ol>
-<li>通过单个Row Key访问</li>
-<li>通过Row Key的range</li>
-<li>全表扫描</li>
-</ol>
-</li>
-<li>主键为任意字符串，最大长度为64kb，按字典顺序存储，在HBase内部保存为字节数组</li>
-</ul>
-<h3 id="2-列族"><a href="#2-列族" class="headerlink" title="2.列族"></a>2.列族</h3><ul>
-<li>列族在创建表的时候声明，一个列族可以包含多个列，列中的数据都是以二进制形式存在，没有数据类型</li>
-<li>列族是一些列的集合</li>
-<li>一个列族所有列成员是有着相同的前缀。比如，列courses:histor和courses:math都是列族courses的成员，冒号是列族的分隔符，用来区分前缀和列名</li>
-</ul>
-<h3 id="3-时间戳与存储单元"><a href="#3-时间戳与存储单元" class="headerlink" title="3.时间戳与存储单元"></a>3.时间戳与存储单元</h3><ul>
-<li>HBase中通过row和columns确定的为一个存贮单元称为cell。每个cell都保存着同一份数据的多个版本。</li>
-<li>在写入数据时，时间戳可以由HBase自动赋值（当前系统时间精确到毫秒），也可以显示赋值。</li>
-<li>每个cell中，不用版本的数据按照时间的倒序排序。</li>
-</ul>
-<h2 id="HBase数据模型"><a href="#HBase数据模型" class="headerlink" title="HBase数据模型"></a>HBase数据模型</h2><h3 id="HBase存储细节"><a href="#HBase存储细节" class="headerlink" title="HBase存储细节"></a>HBase存储细节</h3><ul>
-<li>每个列族存储在HDFS上的一个单独文件夹中</li>
-<li>Key和Version number会在每个列族中存储一份</li>
-<li>空值不会被保存</li>
-</ul>
-
-          
-        
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
-      
-
-  
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-            
-            
-              
-                
-                <a class="post-title-link" href="/2016/06/07/Scala/Scala基础/" itemprop="url">
-                  Scala基础
-                </a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            <span class="post-meta-item-icon">
-              <i class="fa fa-calendar-o"></i>
-            </span>
-            <span class="post-meta-item-text">发表于</span>
-            <time itemprop="dateCreated" datetime="2016-06-07T00:00:00+08:00" content="2016-06-07">
-              2016-06-07
-            </time>
-          </span>
-
-          
-            <span class="post-category" >
-              &nbsp; | &nbsp;
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-              
-                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
-                  <a href="/categories/Scala/" itemprop="url" rel="index">
-                    <span itemprop="name">Scala</span>
-                  </a>
-                </span>
-
-                
-                
-
-              
-            </span>
-          
-
-          
-            
-              <span class="post-comments-count">
-                &nbsp; | &nbsp;
-                <a href="/2016/06/07/Scala/Scala基础/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/06/07/Scala/Scala基础/" itemprop="commentsCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-
-          
-          
-
-          
-        </div>
-      </header>
-    
-
-
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h2 id="变量"><a href="#变量" class="headerlink" title="变量"></a>变量</h2><ul>
-<li>val，定义immutable variable，不可变        </li>
-<li>var，定义mutable variable，可变</li>
-<li>lazy val，惰性常量    </li>
-</ul>
-<h2 id="数据类型"><a href="#数据类型" class="headerlink" title="数据类型"></a>数据类型</h2><p>超级父类 Any</p>
-<p>Byte, Short, Int, Long, Char, String, Float, Double, Boolean</p>
-<p>null表示对象引用类型为空，nothing表示程序异常终止。</p>
-<figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">scala&gt; <span class="function"><span class="keyword">def</span> <span class="title">foo</span></span>()=<span class="keyword">throw</span> <span class="keyword">new</span> <span class="type">Exception</span>(<span class="string">"error"</span>)</span><br><span class="line">foo: ()<span class="type">Nothing</span></span><br></pre></td></tr></table></figure>
-<p>String构建与Java的String之上，新增字符串插值特性。</p>
-<figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> name = <span class="string">"Hello"</span>	</span><br><span class="line"><span class="string">s"new name is <span class="subst">$&#123;name&#125;</span>"</span></span><br></pre></td></tr></table></figure>
-<p>可以不显示指定变量类型，Scala会自动进行类型推导。</p>
-<h2 id="代码块"><a href="#代码块" class="headerlink" title="代码块"></a>代码块</h2><figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">&#123;exp1 ;exp2&#125;</span><br><span class="line"></span><br><span class="line">&#123;</span><br><span class="line">exp1</span><br><span class="line">exp2</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>表达式可以写在一行，分号分隔。也可以写多行。</p>
-<h2 id="函数"><a href="#函数" class="headerlink" title="函数"></a>函数</h2><figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">functionName</span></span>( param: <span class="type">ParamType</span>): <span class="type">ReturnType</span> = &#123;</span><br><span class="line">	<span class="comment">//function body: expressions</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">scala&gt; <span class="function"><span class="keyword">def</span> <span class="title">add</span></span>(x:<span class="type">Int</span>, y:<span class="type">Int</span>)= &#123;x+y&#125;</span><br><span class="line">add: (x: <span class="type">Int</span>, y: <span class="type">Int</span>)<span class="type">Int</span></span><br><span class="line"></span><br><span class="line">scala&gt; add(<span class="number">1</span>,<span class="number">1</span>)</span><br><span class="line">res4: <span class="type">Int</span> = <span class="number">2</span></span><br><span class="line"></span><br><span class="line">scala&gt; <span class="function"><span class="keyword">def</span> <span class="title">add</span></span>(x:<span class="type">Int</span>, y:<span class="type">Int</span>):<span class="type">Int</span>= &#123;x+y&#125;</span><br><span class="line">add: (x: <span class="type">Int</span>, y: <span class="type">Int</span>)<span class="type">Int</span></span><br><span class="line"></span><br><span class="line">scala&gt; add(<span class="number">1</span>,<span class="number">1</span>)</span><br><span class="line">res5: <span class="type">Int</span> = <span class="number">2</span></span><br></pre></td></tr></table></figure>
-<p>多个参数用逗号分隔。</p>
-<h2 id="if表达式"><a href="#if表达式" class="headerlink" title="if表达式"></a>if表达式</h2><figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (logical_exp) valA <span class="keyword">else</span> valB</span><br></pre></td></tr></table></figure>
-<p>和Java类似。</p>
-<h2 id="for表达式"><a href="#for表达式" class="headerlink" title="for表达式"></a>for表达式</h2><figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">scala&gt; <span class="keyword">val</span> l = <span class="type">List</span>(<span class="string">"a"</span>, <span class="string">"b"</span>, <span class="string">"c"</span>)</span><br><span class="line">l: <span class="type">List</span>[<span class="type">String</span>] = <span class="type">List</span>(a, b, c)</span><br><span class="line"></span><br><span class="line">scala&gt; <span class="keyword">for</span> (</span><br><span class="line">s &lt;- l</span><br><span class="line">) println(s)</span><br><span class="line">a</span><br><span class="line">b</span><br><span class="line">c</span><br></pre></td></tr></table></figure>
-<h2 id="try表达式"><a href="#try表达式" class="headerlink" title="try表达式"></a>try表达式</h2><figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">try</span>&#123; &#125;</span><br><span class="line"><span class="keyword">catch</span>&#123; &#125;</span><br><span class="line"><span class="keyword">finally</span>&#123; &#125;</span><br></pre></td></tr></table></figure>
-<p>与Java不同，try是表达式，不是关键字。</p>
-<figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">try</span>&#123;</span><br><span class="line">	<span class="type">Integer</span>.parseInt(<span class="string">"abc"</span>)</span><br><span class="line">&#125; <span class="keyword">catch</span> &#123;</span><br><span class="line">	<span class="keyword">case</span> _ =&gt; <span class="number">0</span></span><br><span class="line">&#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">	println(<span class="string">"always be printed"</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h2 id="match表达式"><a href="#match表达式" class="headerlink" title="match表达式"></a>match表达式</h2><figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">exp <span class="keyword">match</span> &#123;</span><br><span class="line">	<span class="keyword">case</span> p1 =&gt; val1</span><br><span class="line">	<span class="keyword">case</span> p2 =&gt; val2</span><br><span class="line">	...</span><br><span class="line">	<span class="keyword">case</span> _ =&gt; valn</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> code = <span class="number">1</span></span><br><span class="line"><span class="keyword">val</span> result_match = code <span class="keyword">match</span> &#123;</span><br><span class="line">	<span class="keyword">case</span> <span class="number">1</span> =&gt; <span class="string">"ONE"</span></span><br><span class="line">	<span class="keyword">case</span> <span class="number">2</span> =&gt; <span class="string">"TWO"</span></span><br><span class="line">	<span class="keyword">case</span> _ =&gt; <span class="string">"OTHERS"</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>_ 表示通配，相当于Java中switch语句的default关键字。</p>
-<h2 id="求值策略"><a href="#求值策略" class="headerlink" title="求值策略"></a>求值策略</h2><ul>
-<li>Call By Value 对函数实参求值，且仅求值一次</li>
-<li>Call By Name    函数实参每次在函数体内被用到时都会求值</li>
-</ul>
-<p>Scala默认使用Call By Value<br>如果函数形参类型以 =&gt; 开头，那么会使用Call By Name        </p>
-<p>def foo(x: Int) = x //call by value<br>def foo(x: =&gt; Int) = x //call by name    </p>
-<p>call by name在调用时不会解析入参中的表达式，call by value则相反。</p>
-<h2 id="函数-1"><a href="#函数-1" class="headerlink" title="函数"></a>函数</h2><p>Scala函数特性：    </p>
-<ol>
-<li>把函数作为实参传递给另一个函数。    </li>
-<li>把函数作为返回值。    </li>
-<li>把函数赋值给变量。    </li>
-<li>把函数存储在数据结构里。    </li>
-<li>函数和普通变量一样，具有函数的类型。</li>
-</ol>
-<h2 id="函数类型"><a href="#函数类型" class="headerlink" title="函数类型"></a>函数类型</h2><p>函数类型格式为 A =&gt; B ，表示一个接受类型A的参数，并返回类型B的函数。</p>
-<p>例子： Int =&gt; String 是把整型映射为字符串的函数类型。</p>
-<h2 id="高阶函数"><a href="#高阶函数" class="headerlink" title="高阶函数"></a>高阶函数</h2><p>用函数作为形参或返回值的函数，称为高阶函数。</p>
-<figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">operate</span></span>(f: (<span class="type">Int</span>, <span class="type">Int</span>) =&gt; <span class="type">Int</span>) = &#123;</span><br><span class="line">	f(<span class="number">4</span>, <span class="number">4</span>)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">greeting</span></span>() = (name: <span class="type">String</span>) =&gt; &#123;<span class="string">"hello"</span> + <span class="string">" "</span> + name&#125;	<span class="comment">//匿名函数</span></span><br></pre></td></tr></table></figure>
-<h2 id="柯里化"><a href="#柯里化" class="headerlink" title="柯里化"></a>柯里化</h2><p>柯里化函数，把具有多个参数的函数转换为一条函数链，每个节点上是单一参数。</p>
-<p>例子：以下2个add函数定义是等价的</p>
-<figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">add</span></span>(x: <span class="type">Int</span>, y: <span class="type">Int</span>) = x + y	</span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">add</span></span>(x: <span class="type">Int</span>)(y: <span class="type">Int</span>) = x + y <span class="comment">//Scala柯里化语法</span></span><br></pre></td></tr></table></figure>
-<h2 id="尾递归函数"><a href="#尾递归函数" class="headerlink" title="尾递归函数"></a>尾递归函数</h2><p>尾递归函数中所有递归形式的调用都出现在函数的末尾。</p>
-<p>当编译器检测到一个函数调用是尾递归的时候，它就覆盖当前的活动记录而不是在栈中去创建一个新的。（避免堆栈内存溢出）</p>
-<p>例子：</p>
-<figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@annotation</span>.tailrec</span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">factorial</span></span>(n: <span class="type">Int</span>, m: <span class="type">Int</span>): <span class="type">Int</span> =</span><br><span class="line">	<span class="keyword">if</span> (n &lt;= <span class="number">0</span>) m</span><br><span class="line">	<span class="keyword">else</span> factoria(n<span class="number">-1</span>, m*n)</span><br><span class="line">factorial(<span class="number">5</span>, <span class="number">1</span>)</span><br></pre></td></tr></table></figure>
-<figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">sum</span></span>(f: <span class="type">Int</span> =&gt; <span class="type">Int</span>)(a: <span class="type">Int</span>)(b: <span class="type">Int</span>): <span class="type">Int</span> = &#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@annotation</span>.tailrec</span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">loop</span></span>(n: <span class="type">Int</span>, acc: <span class="type">Int</span>): <span class="type">Int</span> = &#123;</span><br><span class="line">      <span class="keyword">if</span> (n &gt; b) &#123;</span><br><span class="line">        println(<span class="string">s"n=<span class="subst">$&#123;n&#125;</span>, acc=<span class="subst">$&#123;acc&#125;</span>"</span>)</span><br><span class="line">        acc</span><br><span class="line">      &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        println(<span class="string">s"n=<span class="subst">$&#123;n&#125;</span>, acc=<span class="subst">$&#123;acc&#125;</span>"</span>)</span><br><span class="line">        loop(n + <span class="number">1</span>, acc + f(n))</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    loop(a, <span class="number">0</span>)</span><br><span class="line">&#125;</span><br><span class="line">  </span><br><span class="line">  sum(x =&gt; x)(<span class="number">1</span>)(<span class="number">5</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment">//输出</span></span><br><span class="line">n=<span class="number">1</span>, acc=<span class="number">0</span></span><br><span class="line">n=<span class="number">2</span>, acc=<span class="number">1</span></span><br><span class="line">n=<span class="number">3</span>, acc=<span class="number">3</span></span><br><span class="line">n=<span class="number">4</span>, acc=<span class="number">6</span></span><br><span class="line">n=<span class="number">5</span>, acc=<span class="number">10</span></span><br><span class="line">n=<span class="number">6</span>, acc=<span class="number">15</span></span><br></pre></td></tr></table></figure>
-
-          
-        
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
   </section>
 
   
@@ -1140,7 +1145,7 @@
         <nav class="site-state motion-element">
           <div class="site-state-item site-state-posts">
             <a href="/archives">
-              <span class="site-state-item-count">28</span>
+              <span class="site-state-item-count">30</span>
               <span class="site-state-item-name">日志</span>
             </a>
           </div>
@@ -1157,7 +1162,7 @@
           
             <div class="site-state-item site-state-tags">
               <a href="/tags">
-                <span class="site-state-item-count">13</span>
+                <span class="site-state-item-count">14</span>
                 <span class="site-state-item-name">标签</span>
               </a>
             </div>
