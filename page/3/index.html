@@ -858,8 +858,8 @@
             
               
                 
-                <a class="post-title-link" href="/2015/07/22/redis设计与实现/Redis服务器单机数据库的实现/" itemprop="url">
-                  Redis服务器单机数据库的实现
+                <a class="post-title-link" href="/2015/07/22/redis设计与实现/Redis客户端/" itemprop="url">
+                  Redis客户端
                 </a>
               
             
@@ -902,8 +902,8 @@
             
               <span class="post-comments-count">
                 &nbsp; | &nbsp;
-                <a href="/2015/07/22/redis设计与实现/Redis服务器单机数据库的实现/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count ds-thread-count" data-thread-key="2015/07/22/redis设计与实现/Redis服务器单机数据库的实现/" itemprop="commentsCount"></span>
+                <a href="/2015/07/22/redis设计与实现/Redis客户端/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2015/07/22/redis设计与实现/Redis客户端/" itemprop="commentsCount"></span>
                 </a>
               </span>
             
@@ -928,26 +928,20 @@
       
         
           
-            <p>Redis命令请求的执行过程：</p>
-<p>1.发送命令请求<br>客户端将命令请求转换成协议格式，通过连接到服务器的套接字发送给服务器。</p>
-<p>2.读取命令请求<br>1）读取套接字协议格式的请求，保存到客户端状态的缓冲输入区。<br>2）分析缓冲区命令，提取命令参数及个数，分别保存到客户端状态的argv属性和argc属性。<br>3）调用命令执行器。</p>
-<p>3.命令执行器</p>
-<p>1）查找实现命令：根据客户端状态的argv[0]参数，查找参数指定的命令，保存到客户端状态的cmd属性。<br>2）执行预备操作：检查客户端cmd属性指向、参数个数、身份验证是否合法等等一系列服务器和客户端状态的校验。<br>3）调用命令的实现函数：函数调用产生setCommand(client)将产生一个 “+OK\r\n” 回复，保存到客户端的buf属性。<br>4）执行后续工作：根据配置执行相应操作，例如慢查询日志、AOF持久化、主从服务。</p>
-<p>4.将命令回复发送给客户端：将协议格式的命令回复 +“OK\r\n”发送给客户端。<br>5.客户端接收并打印命令回复：将协议回复的 “OK\r\n” 转换成 “OK\n” 打印给用户。</p>
-<p>Redis服务器中serverCron函数每隔100ms执行一次，该函数负责管理服务器资源并保持服务器良好运转。  </p>
+            <p>通过使用由I/O多路复用技术实现的文件事件处理器，Redis服务器使用单线程单进程的方式来处理命令请求，并与多个客户端进行网络通信。<br>redisClient结构保存客户端的数据结构：  </p>
 <ul>
-<li>更新服务器时间缓存  </li>
-<li>更新LRU时钟  </li>
-<li>更新服务器每秒执行命令次数  </li>
-<li>更新服务器内存峰值记录  </li>
-<li>处理SIGTERM信号  </li>
-<li>管理客户端资源  </li>
-<li>管理数据库资源  </li>
-<li>执行被延迟的BGREWRITEAOF  </li>
-<li>检查持久化操作的运行状态  </li>
-<li>将AOP缓冲区内容写入AOF文件  </li>
-<li>关闭异步客户端  </li>
-<li>增加cronloops计数器的值  </li>
+<li>套接字描述符  </li>
+<li>名字  </li>
+<li>标志位  </li>
+<li>正在使用的数据库指针，数据库号码    </li>
+<li>当前要执行的命令、参数、参数个数，以及指向命令实现函数的指针  </li>
+<li>输入缓冲和输出缓冲  </li>
+<li>复制状态信息和复制所需数据结构  </li>
+<li>执行BRPOP、BLPOP等列表阻塞命令时使用的数据结构  </li>
+<li>事物状态，执行WATCH命令用到的数据结构  </li>
+<li>执行发布和订阅用到的数据结构  </li>
+<li>身份验证标志  </li>
+<li>创建时间、最后一次通信时间，输出缓冲区大小超出软性限制的事件  </li>
 </ul>
 
           
