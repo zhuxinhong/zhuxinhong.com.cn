@@ -81,7 +81,7 @@
 <meta name="description" content="时光如白马，稍纵即逝。术业有专攻，一生做好一件事真的很重要。">
 <meta property="og:type" content="website">
 <meta property="og:title" content="zhuxinhong blog">
-<meta property="og:url" content="http://zhuxinhong.github.io/categories/Java-Web/page/2/index.html">
+<meta property="og:url" content="http://zhuxinhong.github.io/page/7/index.html">
 <meta property="og:site_name" content="zhuxinhong blog">
 <meta property="og:description" content="时光如白马，稍纵即逝。术业有专攻，一生做好一件事真的很重要。">
 <meta name="twitter:card" content="summary">
@@ -107,9 +107,9 @@
 
 
 
-  <link rel="canonical" href="http://zhuxinhong.github.io/categories/Java-Web/page/2/"/>
+  <link rel="canonical" href="http://zhuxinhong.github.io/page/7/"/>
 
-  <title> 分类: Java Web | zhuxinhong blog </title>
+  <title> zhuxinhong blog </title>
 </head>
 
 <body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
@@ -130,7 +130,9 @@
     
   
 
-  <div class="container one-collumn sidebar-position-left  ">
+  <div class="container one-collumn sidebar-position-left 
+   page-home 
+ ">
     <div class="headband"></div>
 
     <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
@@ -217,96 +219,144 @@
         <div class="content-wrap">
           <div id="content" class="content">
             
+  <section id="posts" class="posts-expand">
+    
+      
 
-  <section id="posts" class="posts-collapse">
-    <div class="collection-title">
-      <h2 >
-        Java Web
-        <small>分类</small>
-      </h2>
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
+                <a class="post-title-link" href="/2015/06/23/redis设计与实现/Redis简单动态字符串/" itemprop="url">
+                  Redis简单动态字符串
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2015-06-23T00:00:00+08:00" content="2015-06-23">
+              2015-06-23
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/Redis设计与实现/" itemprop="url" rel="index">
+                    <span itemprop="name">Redis设计与实现</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                &nbsp; | &nbsp;
+                <a href="/2015/06/23/redis设计与实现/Redis简单动态字符串/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2015/06/23/redis设计与实现/Redis简单动态字符串/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+
+          
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>Redis使用SDS(simple dynamic string)用作字符串默认实现。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">struct sdshdr&#123;</span><br><span class="line">	//已使用buf数组的字节数量，也就是字符串长度</span><br><span class="line">	int len;</span><br><span class="line">	//未使用的长度</span><br><span class="line">	int free;</span><br><span class="line">	//保存字符串</span><br><span class="line">	char buf[];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<ul>
+<li><p>SDS遵循C语言字符串以空字符串结尾，保留1个字节的空字符串’\0’，该空串不记入len中。</p>
+</li>
+<li><p>C语言中，获取字符串长度需要遍历整个字符串，时间复杂度为O(n)，SDS中有len属性维护长度，时间复杂度为O(1)，Java里面String不可变，初始化的时候就记录了长度，时间复杂度啊也是O(n)。</p>
+</li>
+<li><p>SDS空间分配策略杜绝缓冲区溢出的可能。当需要对SDS进行修改时，API会先检查SDS剩余空间是否满足需求，如不满足会自动扩容。</p>
+</li>
+<li><p>SDS内存分配策略：  </p>
+</li>
+</ul>
+<ol>
+<li><p>空间预分配:  当SDS长度(len)小于1MB，程序会分配和len同样大小的未使用空间，这是len===free。例如修改后字符串长度为13字节，就会分配13字节的未使用空间，此时buf=len+free+1=13+13+1=27字节，其中1是’\0’。当SDS被修改后长度大于1MB，程序会分配1MB的未使用空间。即使len=50MB，也还是分配1MB的未使用空间。通过空间预分配策略，Redis可以有效减少连续修改字符串操作引起的内存分配次数。</p>
+</li>
+<li><p>惰性空间释放:    当SDS字符串进行缩短操作时，程序不会立即重新分配内存来回收多的字节，而是用free记录，等待将来使用。例如SDS：abcxyz，修改成abc，SDS并不会释放多余出来的3个字节，而是将free=free+3，以备将来字符串增长操作时使用。</p>
+</li>
+</ol>
+<ul>
+<li>SDS是二进制安全的。</li>
+</ul>
+
+          
+        
+      
     </div>
 
-    
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
       
 
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <h1 class="post-title">
-        
-            <a class="post-title-link" href="/2016/05/18/Java Web/NIO的工作机制/" itemprop="url">
-              
-                <span itemprop="name">NIO工作机制</span>
-              
-            </a>
-        
-      </h1>
-
-      <div class="post-meta">
-        <time class="post-time" itemprop="dateCreated"
-              datetime="2016-05-18T00:00:00+08:00"
-              content="2016-05-18" >
-          05-18
-        </time>
-      </div>
-
-    </header>
-  </article>
-
-
-    
       
 
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <h1 class="post-title">
-        
-            <a class="post-title-link" href="/2016/05/17/Java Web/深入分析IO工作机制/" itemprop="url">
-              
-                <span itemprop="name">深入分析I/O工作机制</span>
-              
-            </a>
-        
-      </h1>
-
-      <div class="post-meta">
-        <time class="post-time" itemprop="dateCreated"
-              datetime="2016-05-17T00:00:00+08:00"
-              content="2016-05-17" >
-          05-17
-        </time>
-      </div>
-
-    </header>
-  </article>
-
-
-    
       
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <h1 class="post-title">
-        
-            <a class="post-title-link" href="/2016/05/11/Java Web/DNS域名解析过程/" itemprop="url">
-              
-                <span itemprop="name">DNS域名解析过程</span>
-              
-            </a>
-        
-      </h1>
-
-      <div class="post-meta">
-        <time class="post-time" itemprop="dateCreated"
-              datetime="2016-05-11T00:00:00+08:00"
-              content="2016-05-11" >
-          05-11
-        </time>
-      </div>
-
-    </header>
+      
+        <div class="post-eof"></div>
+      
+    </footer>
   </article>
 
 
@@ -315,9 +365,8 @@
 
   
   <nav class="pagination">
-    <a class="extend prev" rel="prev" href="/categories/Java-Web/"><i class="fa fa-angle-left"></i></a><a class="page-number" href="/categories/Java-Web/">1</a><span class="page-number current">2</span>
+    <a class="extend prev" rel="prev" href="/page/6/"><i class="fa fa-angle-left"></i></a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/6/">6</a><span class="page-number current">7</span>
   </nav>
-
 
 
 

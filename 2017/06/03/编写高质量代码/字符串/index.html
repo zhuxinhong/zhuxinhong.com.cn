@@ -62,7 +62,7 @@
 <link href="/css/main.css?v=5.0.1" rel="stylesheet" type="text/css" />
 
 
-  <meta name="keywords" content="Java,JVM," />
+  <meta name="keywords" content="Java," />
 
 
 
@@ -78,25 +78,28 @@
 
 
 
-<meta name="description" content="ClassLoader除了能将Class加载到JVM中之外，还能审查每个类该由谁加载。它是一种父优先的等级加载机制。
-ClassLoader等级加载机制
-Bootstrap ClassLoader，主要加载JVM自身工作需要的类，完全由JVM自己控制，外部无法访问，这个ClassLoader不遵守等级加载规则。
-ExtClassLoader，不是JVM亲自实现。服务目标在System.getPro">
+<meta name="description" content="字符串拼接方法
+
+字符串拼接方法对一个字符串进行拼接有三种方法：加号、concat 及 StringBuilder （或 StringBuffer）的 append 方法，这三者之间有什么区别吗？
+12str += “c”;str = str.concat(&quot;c&quot;);
+上面两种不同字符串拼接方式、循环5万次后检查执行时间，加号方式执行时间为 2000ms，而 concat 方法执行时间为 685">
 <meta property="og:type" content="article">
-<meta property="og:title" content="深入分析ClassLoader">
-<meta property="og:url" content="http://zhuxinhong.github.io/2016/05/28/Java Web/深入分析ClassLoader/index.html">
+<meta property="og:title" content="字符串">
+<meta property="og:url" content="http://zhuxinhong.github.io/2017/06/03/编写高质量代码/字符串/index.html">
 <meta property="og:site_name" content="zhuxinhong blog">
-<meta property="og:description" content="ClassLoader除了能将Class加载到JVM中之外，还能审查每个类该由谁加载。它是一种父优先的等级加载机制。
-ClassLoader等级加载机制
-Bootstrap ClassLoader，主要加载JVM自身工作需要的类，完全由JVM自己控制，外部无法访问，这个ClassLoader不遵守等级加载规则。
-ExtClassLoader，不是JVM亲自实现。服务目标在System.getPro">
-<meta property="og:updated_time" content="2016-06-08T10:28:53.000Z">
+<meta property="og:description" content="字符串拼接方法
+
+字符串拼接方法对一个字符串进行拼接有三种方法：加号、concat 及 StringBuilder （或 StringBuffer）的 append 方法，这三者之间有什么区别吗？
+12str += “c”;str = str.concat(&quot;c&quot;);
+上面两种不同字符串拼接方式、循环5万次后检查执行时间，加号方式执行时间为 2000ms，而 concat 方法执行时间为 685">
+<meta property="og:updated_time" content="2017-06-03T00:59:14.000Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="深入分析ClassLoader">
-<meta name="twitter:description" content="ClassLoader除了能将Class加载到JVM中之外，还能审查每个类该由谁加载。它是一种父优先的等级加载机制。
-ClassLoader等级加载机制
-Bootstrap ClassLoader，主要加载JVM自身工作需要的类，完全由JVM自己控制，外部无法访问，这个ClassLoader不遵守等级加载规则。
-ExtClassLoader，不是JVM亲自实现。服务目标在System.getPro">
+<meta name="twitter:title" content="字符串">
+<meta name="twitter:description" content="字符串拼接方法
+
+字符串拼接方法对一个字符串进行拼接有三种方法：加号、concat 及 StringBuilder （或 StringBuffer）的 append 方法，这三者之间有什么区别吗？
+12str += “c”;str = str.concat(&quot;c&quot;);
+上面两种不同字符串拼接方式、循环5万次后检查执行时间，加号方式执行时间为 2000ms，而 concat 方法执行时间为 685">
 
 
 
@@ -117,9 +120,9 @@ ExtClassLoader，不是JVM亲自实现。服务目标在System.getPro">
 
 
 
-  <link rel="canonical" href="http://zhuxinhong.github.io/2016/05/28/Java Web/深入分析ClassLoader/"/>
+  <link rel="canonical" href="http://zhuxinhong.github.io/2017/06/03/编写高质量代码/字符串/"/>
 
-  <title> 深入分析ClassLoader | zhuxinhong blog </title>
+  <title> 字符串 | zhuxinhong blog </title>
 </head>
 
 <body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
@@ -249,7 +252,7 @@ ExtClassLoader，不是JVM亲自实现。服务目标在System.getPro">
             
             
               
-                深入分析ClassLoader
+                字符串
               
             
           </h1>
@@ -261,8 +264,8 @@ ExtClassLoader，不是JVM亲自实现。服务目标在System.getPro">
               <i class="fa fa-calendar-o"></i>
             </span>
             <span class="post-meta-item-text">发表于</span>
-            <time itemprop="dateCreated" datetime="2016-05-28T00:00:00+08:00" content="2016-05-28">
-              2016-05-28
+            <time itemprop="dateCreated" datetime="2017-06-03T00:00:00+08:00" content="2017-06-03">
+              2017-06-03
             </time>
           </span>
 
@@ -275,8 +278,8 @@ ExtClassLoader，不是JVM亲自实现。服务目标在System.getPro">
               <span class="post-meta-item-text">分类于</span>
               
                 <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
-                  <a href="/categories/Java-Web/" itemprop="url" rel="index">
-                    <span itemprop="name">Java Web</span>
+                  <a href="/categories/编写高质量代码/" itemprop="url" rel="index">
+                    <span itemprop="name">编写高质量代码</span>
                   </a>
                 </span>
 
@@ -291,8 +294,8 @@ ExtClassLoader，不是JVM亲自实现。服务目标在System.getPro">
             
               <span class="post-comments-count">
                 &nbsp; | &nbsp;
-                <a href="/2016/05/28/Java Web/深入分析ClassLoader/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/05/28/Java Web/深入分析ClassLoader/" itemprop="commentsCount"></span>
+                <a href="/2017/06/03/编写高质量代码/字符串/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2017/06/03/编写高质量代码/字符串/" itemprop="commentsCount"></span>
                 </a>
               </span>
             
@@ -315,38 +318,25 @@ ExtClassLoader，不是JVM亲自实现。服务目标在System.getPro">
       
 
       
-        <p>ClassLoader除了能将Class加载到JVM中之外，还能审查每个类该由谁加载。它是一种父优先的等级加载机制。</p>
-<h2 id="ClassLoader等级加载机制"><a href="#ClassLoader等级加载机制" class="headerlink" title="ClassLoader等级加载机制"></a>ClassLoader等级加载机制</h2><ol>
-<li>Bootstrap ClassLoader，主要加载JVM自身工作需要的类，完全由JVM自己控制，外部无法访问，这个ClassLoader不遵守等级加载规则。</li>
-<li>ExtClassLoader，不是JVM亲自实现。服务目标在System.getProperties(“java.ext.dirs”)目录下。</li>
-<li>AppClassLoader，父类是ExtClassLoader，所有在System.getProperties(“java.class.path”)目录下的类都可以被这个类加载器加载，这就是我们常用到的classpath。</li>
-</ol>
-<p>如果我们要实现自己的类加载器，不管是直接实现抽象类ClassLoader，还是继承URLClassLoader或其他子类，它的父加载器都是AppClassLoader，不管调用哪个父类构造器，创建对象都必须最终调用getSystemCLassLoader()作为父加载器，而getSystemClassLoader()方法获取到的正是AppClassLoader。</p>
-<p>Bootstrap ClassLoader并不属于JVM的类层次结构，因为BootstrapClassLoader并没有遵守ClassLoader的加载规则。Bootstrap ClassLoader并没有子类，ExtClassLoader父类也不是Bootstrap ClassLoader，ExtClassLoader并没有父类，应用中能提取到的顶层父类是ExtClassLoader。</p>
-<p>ExtClassLoader和AppClassLoader都位于sun.misc.Launcher类中，它们是Launcher类的内部类，都继承了URLClassLoader类，URLClassLoader实现了抽象类ClassLoader。</p>
-<h2 id="如何加载class文件"><a href="#如何加载class文件" class="headerlink" title="如何加载class文件"></a>如何加载class文件</h2><p>抽象类ClassLoader中并没有定义如何加载，需要子类实现findClass()方法。看一下URLClassLoader实现findClass()过程：    </p>
-<ol>
-<li>通过URLClassPath类取得加载的class文件字节流，找到后读取它的byte字节流。    </li>
-<li>调用defineClass()创建类对象。</li>
-</ol>
-<p>创建URLClassLoader对象会根据传过来的URL数组中路径来判断是文件还是jar包，根据路径的不同分别创建FileLoader和JarLoader，或者使用默认的加载器。</p>
-<h3 id="验证与解析"><a href="#验证与解析" class="headerlink" title="验证与解析"></a>验证与解析</h3><ol>
-<li>字节码验证，确保格式正确，行为正确。</li>
-<li>类准备，准备字段、方法和实现接口所必须的数据结构。</li>
-<li>解析，类装入器装入类引用的其他所有类。    </li>
-<li>初始化对象，该阶段末尾静态字段被初始化默认值。</li>
-</ol>
-<h2 id="实现自己的ClassLoader"><a href="#实现自己的ClassLoader" class="headerlink" title="实现自己的ClassLoader"></a>实现自己的ClassLoader</h2><p>应用场景：    </p>
-<ul>
-<li>在自定义路径下查找自定义的class类文件，也许我们需要的class文件并不总是在classPath下面。    </li>
-<li>对我们自己要加载的类做特殊处理，如保证通过网络传输的安全性，可以将类经过加密后传输，在加载到JVM之前需要对类的字节码再解密。        </li>
-<li>可以定义类的实现机制，例如实现热部署：检查已经加载的class文件是否被修改，如修改可重新加载。    </li>
+        <ul>
+<li><a href="#字符串拼接方法">字符串拼接方法</a></li>
 </ul>
-<p>JVM表示一个类是否是同一个类有两个条件：    </p>
+<h3 id="字符串拼接方法"><a href="#字符串拼接方法" class="headerlink" title="字符串拼接方法"></a>字符串拼接方法</h3><p>对一个字符串进行拼接有三种方法：加号、concat 及 StringBuilder （或 StringBuffer）的 append 方法，这三者之间有什么区别吗？</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">str += “c”;</span><br><span class="line">str = str.concat(<span class="string">"c"</span>);</span><br></pre></td></tr></table></figure>
+<p>上面两种不同字符串拼接方式、循环5万次后检查执行时间，加号方式执行时间为 2000ms，而 concat 方法执行时间为 685ms，时间相差一倍，如果使用 StringBuilder，执行时间 7ms。从这个试验中可以看出 append 方法最快，concat 其次，加号最慢。</p>
+<h5 id="加号方法"><a href="#加号方法" class="headerlink" title="加号方法"></a>加号方法</h5><p>编译器对字符串的加号做了优化，它会使用 StringBuilder 的 append 方法追加，讲道理它的执行时间也应该在 10ms 以内，不过它最终是通过 toString 方法转换成 String 字符串的，例子中的代码与如下代码相同：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">str = <span class="keyword">new</span> StringBuilder(str).append(<span class="string">"c"</span>).toString();</span><br></pre></td></tr></table></figure>
+<p>这与纯粹使用 StringBuilder 的 append 方法是不同的：</p>
 <ol>
-<li>检查完整类名是否一致。        </li>
-<li>检查加载这个类的ClassLoader是否是同一个，这里指的是ClassLoader实例是否是同一个。</li>
+<li>每次循环都会创建一个 StringBuilder 对象</li>
+<li>每次执行完毕都要调用 toString 方法将其转换为字符串</li>
 </ol>
+<h5 id="concat-方法"><a href="#concat-方法" class="headerlink" title="concat 方法"></a>concat 方法</h5><p>我们看一下 concat 源码实现：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> String <span class="title">concat</span><span class="params">(String str)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">int</span> otherLen = str.length();</span><br><span class="line">        <span class="keyword">if</span> (otherLen == <span class="number">0</span>) &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">this</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">int</span> len = value.length;</span><br><span class="line">        <span class="keyword">char</span> buf[] = Arrays.copyOf(value, len + otherLen);</span><br><span class="line">        str.getChars(buf, len);</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> String(buf, <span class="keyword">true</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>整体看上去是一个数组拷贝，虽然在内存中处理都是原子性操作，速度非常快。不过最后的 return 语句，每次 concat 操作都会新创建一个 String 对象，这就是 concat 速度慢下来的真正原因。</p>
+<h5 id="append-方法"><a href="#append-方法" class="headerlink" title="append 方法"></a>append 方法</h5><p>StringBuilder 的 append 方法直接由父类 AbstractStringBuilder 实现，代码如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> AbstractStringBuilder <span class="title">append</span><span class="params">(String str)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (str == <span class="keyword">null</span>)</span><br><span class="line">        <span class="keyword">return</span> appendNull();</span><br><span class="line">    <span class="keyword">int</span> len = str.length();</span><br><span class="line">    ensureCapacityInternal(count + len);</span><br><span class="line">    str.getChars(<span class="number">0</span>, len, value, count);</span><br><span class="line">    count += len;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">this</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>整个 append 方法都在做字符数组处理，加上后数组拷贝，这些都是基本的数据处理，没有新建任何对象，所以速度也就最快了。</p>
 
       
     </div>
@@ -371,8 +361,6 @@ ExtClassLoader，不是JVM亲自实现。服务目标在System.getPro">
           
             <a href="/tags/Java/" rel="tag">#Java</a>
           
-            <a href="/tags/JVM/" rel="tag">#JVM</a>
-          
         </div>
       
 
@@ -380,17 +368,13 @@ ExtClassLoader，不是JVM亲自实现。服务目标在System.getPro">
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2016/05/22/Java Web/Tomcat的系统架构/" rel="next" title="Tomcat系统架构">
-                <i class="fa fa-chevron-left"></i> Tomcat系统架构
+              <a href="/2017/03/23/Java Web/可能错过的Java7特性/" rel="next" title="Java7 -- 可能错过的Java7特性">
+                <i class="fa fa-chevron-left"></i> Java7 -- 可能错过的Java7特性
               </a>
             
           </div>
 
           <div class="post-nav-prev post-nav-item">
-            
-              <a href="/2016/06/07/Scala/Scala基础/" rel="prev" title="Scala基础">
-                Scala基础 <i class="fa fa-chevron-right"></i>
-              </a>
             
           </div>
         </div>
@@ -416,8 +400,8 @@ ExtClassLoader，不是JVM亲自实现。服务目标在System.getPro">
           
   <div class="comments" id="comments">
     
-      <div class="ds-thread" data-thread-key="2016/05/28/Java Web/深入分析ClassLoader/"
-           data-title="深入分析ClassLoader" data-url="http://zhuxinhong.github.io/2016/05/28/Java Web/深入分析ClassLoader/">
+      <div class="ds-thread" data-thread-key="2017/06/03/编写高质量代码/字符串/"
+           data-title="字符串" data-url="http://zhuxinhong.github.io/2017/06/03/编写高质量代码/字符串/">
       </div>
     
   </div>
@@ -508,7 +492,7 @@ ExtClassLoader，不是JVM亲自实现。服务目标在System.getPro">
               
             
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#ClassLoader等级加载机制"><span class="nav-number">1.</span> <span class="nav-text">ClassLoader等级加载机制</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#如何加载class文件"><span class="nav-number">2.</span> <span class="nav-text">如何加载class文件</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#验证与解析"><span class="nav-number">2.1.</span> <span class="nav-text">验证与解析</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#实现自己的ClassLoader"><span class="nav-number">3.</span> <span class="nav-text">实现自己的ClassLoader</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#字符串拼接方法"><span class="nav-number">1.</span> <span class="nav-text">字符串拼接方法</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#加号方法"><span class="nav-number">1.0.1.</span> <span class="nav-text">加号方法</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#concat-方法"><span class="nav-number">1.0.2.</span> <span class="nav-text">concat 方法</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#append-方法"><span class="nav-number">1.0.3.</span> <span class="nav-text">append 方法</span></a></li></ol></li></ol></li></ol></div>
             
           </div>
         </section>
