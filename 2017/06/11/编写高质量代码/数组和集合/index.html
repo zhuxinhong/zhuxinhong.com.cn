@@ -1,0 +1,675 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/vendors/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+ 
+
+
+
+
+<link href="/vendors/font-awesome/css/font-awesome.min.css?v=4.4.0" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.0.1" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="Java," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="http://static.hdslb.com/images/favicon.ico?v=5.0.1" />
+
+
+
+
+
+
+<meta name="description" content="不同的列表选择不同的遍历方法
+子列表只是原列表的一个视图
+优雅的集合运算
+
+不同的列表选择不同的遍历方法案例：统计一个省的各科高考平均值，比如数学平均分，使用纯 Java 算法来解决，看代码：
+1234567891011121314151617181920212223242526272829303132333435363738public static void main(String[] ar">
+<meta property="og:type" content="article">
+<meta property="og:title" content="数组和集合">
+<meta property="og:url" content="http://zhuxinhong.github.io/2017/06/11/编写高质量代码/数组和集合/index.html">
+<meta property="og:site_name" content="zhuxinhong blog">
+<meta property="og:description" content="不同的列表选择不同的遍历方法
+子列表只是原列表的一个视图
+优雅的集合运算
+
+不同的列表选择不同的遍历方法案例：统计一个省的各科高考平均值，比如数学平均分，使用纯 Java 算法来解决，看代码：
+1234567891011121314151617181920212223242526272829303132333435363738public static void main(String[] ar">
+<meta property="og:updated_time" content="2017-06-11T09:25:41.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="数组和集合">
+<meta name="twitter:description" content="不同的列表选择不同的遍历方法
+子列表只是原列表的一个视图
+优雅的集合运算
+
+不同的列表选择不同的遍历方法案例：统计一个省的各科高考平均值，比如数学平均分，使用纯 Java 算法来解决，看代码：
+1234567891011121314151617181920212223242526272829303132333435363738public static void main(String[] ar">
+
+
+
+<script type="text/javascript" id="hexo.configuration">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    scheme: 'Pisces',
+    sidebar: {"position":"left","display":"post"},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: 0,
+      author: '博主'
+    }
+  };
+</script>
+
+
+
+
+  <link rel="canonical" href="http://zhuxinhong.github.io/2017/06/11/编写高质量代码/数组和集合/"/>
+
+  <title> 数组和集合 | zhuxinhong blog </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container one-collumn sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-meta ">
+  
+
+  <div class="custom-logo-site-title">
+    <a href="/"  class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <span class="site-title">zhuxinhong blog</span>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+  <p class="site-subtitle">java coder</p>
+</div>
+
+<div class="site-nav-toggle">
+  <button>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+  </button>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                数组和集合
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2017-06-11T00:00:00+08:00" content="2017-06-11">
+              2017-06-11
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/编写高质量代码/" itemprop="url" rel="index">
+                    <span itemprop="name">编写高质量代码</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                &nbsp; | &nbsp;
+                <a href="/2017/06/11/编写高质量代码/数组和集合/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2017/06/11/编写高质量代码/数组和集合/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+
+          
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <ul>
+<li><a href="#不同的列表选择不同的遍历方法">不同的列表选择不同的遍历方法</a></li>
+<li><a href="#子列表只是原列表的一个视图">子列表只是原列表的一个视图</a></li>
+<li><a href="#优雅的集合运算">优雅的集合运算</a></li>
+</ul>
+<h2 id="不同的列表选择不同的遍历方法"><a href="#不同的列表选择不同的遍历方法" class="headerlink" title="不同的列表选择不同的遍历方法"></a>不同的列表选择不同的遍历方法</h2><p>案例：统计一个省的各科高考平均值，比如数学平均分，使用纯 Java 算法来解决，看代码：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">int</span> stuNum = <span class="number">80</span> * <span class="number">10000</span>;</span><br><span class="line">    List&lt;Integer&gt; scores = <span class="keyword">new</span> ArrayList&lt;Integer&gt;(stuNum);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; stuNum; i++) &#123;</span><br><span class="line">        scores.add(<span class="keyword">new</span> Random().nextInt(<span class="number">150</span>));</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    foreach(scores);</span><br><span class="line">    get(scores);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">foreach</span><span class="params">(List&lt;Integer&gt; list)</span> </span>&#123;</span><br><span class="line">    Long start = System.currentTimeMillis();</span><br><span class="line"></span><br><span class="line">    Integer sum = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">for</span> (Integer i : list) &#123;</span><br><span class="line">        sum += i;</span><br><span class="line">    &#125;</span><br><span class="line">    System.out.println(<span class="string">"avg score: "</span> + sum / list.size());</span><br><span class="line"></span><br><span class="line">    Long end = System.currentTimeMillis();</span><br><span class="line">    System.out.println(end - start);</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">get</span><span class="params">(List&lt;Integer&gt; list)</span> </span>&#123;</span><br><span class="line">    Long start = System.currentTimeMillis();</span><br><span class="line"></span><br><span class="line">    Integer sum = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; list.size(); i++) &#123;</span><br><span class="line">        sum += list.get(i);</span><br><span class="line">    &#125;</span><br><span class="line">    System.out.println(<span class="string">"avg score: "</span> + sum / list.size());</span><br><span class="line"></span><br><span class="line">    Long end = System.currentTimeMillis();</span><br><span class="line">    System.out.println(end - start);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>执行结果：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">avg score: 74</span><br><span class="line">42</span><br><span class="line">avg score: 74</span><br><span class="line">19</span><br></pre></td></tr></table></figure>
+<p>发现不使用 foreach 方式遍历列表，采用下标方式遍历，效率翻倍提高，这是为什么？</p>
+<p>这是因为 ArrayList 数组实现了 RandomAccess 接口（随机存取接口），这也就标志着 ArrayList 是一个可以随机存取的列表。在 Java 中，RandomAccess 和 Cloneable、Serializable 一样，都是标志性接口，一般不需要实现，只是用来表明其实现类具有某种特质，实现了 RandomAccess 表明这个类可以随机存取，对我们的 ArrayList 来说也就标志着其数据元素之间没有关联，即两个位置相邻的元素之间没有相互依赖和索引关系，可以随机访问和存储。</p>
+<p> 我们知道，Java 中的 foreach 语法是 iterator 的变形用法，也就是说上面的 foreach 与下面的代码等价：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> (Iterator&lt;Integer&gt; i = list.iterator(); i.hasNext();)&#123;</span><br><span class="line">  sum += i.next();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>我们再想想什么是迭代器，迭代器是 23 个设计模式中的一种，“提供一种方法访问同一个容器对象中的各个元素、同时又无须暴露该对象的内部细节”，也就是说对于 ArrayList，需要先创建一个迭代器容器、然后屏蔽内部遍历细节，对外提供 hasNext、next 等方法。问题是 ArrayList 实现了 RandomAccess 接口，已表明元素之间本来没有关系，可是为了使用迭代器就需要强制建立一种互相”知晓“的关系，比如上一个元素可以判断是否有下一个元素，以及与下一个元素是什么关系等，这也就是通过 foreach 遍历耗时的原因。</p>
+<p>Java 为 ArrayList 加上了 RandomAccess 接口，就是在告诉我们要使用下标方式遍历会更快，接着又有一个问题：为什么不把 RandomAccess 加到所有 List 实现上呢？</p>
+<p>因为有些 List 实现类不是随机存取的，而是有序存取的，比如 LinkedList，它实现了双向链表。LinkedList 中的两个元素本来就是有关联的，我知道你的存在，你也知道我的存在。既然元素之间已经有关联关系了，使用 foreach 也就是迭代器方式必然效率更高。</p>
+<p>可能大家还想测试一下下标方式遍历 LinkedList 元素的情况，其实不用测试也能想到效率非常低下，我们看源码：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">Node&lt;E&gt; <span class="title">node</span><span class="params">(<span class="keyword">int</span> index)</span> </span>&#123;</span><br><span class="line">    <span class="comment">// assert isElementIndex(index);</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (index &lt; (size &gt;&gt; <span class="number">1</span>)) &#123;</span><br><span class="line">        Node&lt;E&gt; x = first;</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; index; i++)</span><br><span class="line">            x = x.next;</span><br><span class="line">        <span class="keyword">return</span> x;</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        Node&lt;E&gt; x = last;</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = size - <span class="number">1</span>; i &gt; index; i--)</span><br><span class="line">            x = x.prev;</span><br><span class="line">        <span class="keyword">return</span> x;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>程序会先判断输入的下标与中间值（size 右移一位，也就是除以2了）的关系，小于中间值则从头开始正向搜索，大于中间值则从尾节点反向搜索，想想看，每次的 get 方法都是一个遍历，”性能“从何说起。</p>
+<p>明白了随机存起列表和有序存取列表的区别，我们的 average 方法就必须重构了，以便实现不同的列表采用不同的遍历方式：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">int</span> sum = <span class="number">0</span>;</span><br><span class="line">      <span class="keyword">if</span> (list <span class="keyword">instanceof</span> RandomAccess) &#123;</span><br><span class="line">          <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; list.size(); i++) &#123;</span><br><span class="line">              sum += list.get(i);</span><br><span class="line">          &#125;</span><br><span class="line">      &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">          <span class="keyword">for</span> (Integer i : list) &#123;</span><br><span class="line">              sum += i;</span><br><span class="line">          &#125;</span><br><span class="line">      &#125;</span><br><span class="line">      System.out.println(<span class="string">"avg score: "</span> + sum / list.size());</span><br></pre></td></tr></table></figure>
+<h2 id="子列表只是原列表的一个视图"><a href="#子列表只是原列表的一个视图" class="headerlink" title="子列表只是原列表的一个视图"></a>子列表只是原列表的一个视图</h2><p>List 接口提供了 subList 方法，返回一个列表的子列表，看代码：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">    List&lt;String&gt; c = <span class="keyword">new</span> ArrayList&lt;&gt;();</span><br><span class="line">    c.add(<span class="string">"A"</span>);</span><br><span class="line">    c.add(<span class="string">"B"</span>);</span><br><span class="line">    List&lt;String&gt; c1 = <span class="keyword">new</span> ArrayList&lt;&gt;(c);</span><br><span class="line">    List&lt;String&gt; c2 = c.subList(<span class="number">0</span>, c.size());</span><br><span class="line">    c2.add(<span class="string">"C"</span>);</span><br><span class="line">    System.out.println(<span class="string">"c == c1 ? "</span> + c.equals(c1));</span><br><span class="line">    System.out.println(<span class="string">"c == c2 ? "</span> + c.equals(c2));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>输出结果：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">c == c1 ? false</span><br><span class="line">c == c2 ? true</span><br></pre></td></tr></table></figure>
+<p>这和 String 类的 subString 刚好相反，我们从源代码来分析，subList 源码：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> List&lt;E&gt; <span class="title">subList</span><span class="params">(<span class="keyword">int</span> fromIndex, <span class="keyword">int</span> toIndex)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> (<span class="keyword">this</span> <span class="keyword">instanceof</span> RandomAccess ?</span><br><span class="line">            <span class="keyword">new</span> RandomAccessSubList&lt;&gt;(<span class="keyword">this</span>, fromIndex, toIndex) :</span><br><span class="line">            <span class="keyword">new</span> SubList&lt;&gt;(<span class="keyword">this</span>, fromIndex, toIndex));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>subList 方法是由 AbstractList 实现的，它会根据是不是 RandomAccess 来提供不同的 SubList 实现。再看看 SubList 代码：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line">SubList(AbstractList&lt;E&gt; list, <span class="keyword">int</span> fromIndex, <span class="keyword">int</span> toIndex) &#123;</span><br><span class="line">    <span class="keyword">if</span> (fromIndex &lt; <span class="number">0</span>)</span><br><span class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> IndexOutOfBoundsException(<span class="string">"fromIndex = "</span> + fromIndex);</span><br><span class="line">    <span class="keyword">if</span> (toIndex &gt; list.size())</span><br><span class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> IndexOutOfBoundsException(<span class="string">"toIndex = "</span> + toIndex);</span><br><span class="line">    <span class="keyword">if</span> (fromIndex &gt; toIndex)</span><br><span class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> IllegalArgumentException(<span class="string">"fromIndex("</span> + fromIndex +</span><br><span class="line">                                           <span class="string">") &gt; toIndex("</span> + toIndex + <span class="string">")"</span>);</span><br><span class="line">    l = list;</span><br><span class="line">    offset = fromIndex;</span><br><span class="line">    size = toIndex - fromIndex;</span><br><span class="line">    <span class="keyword">this</span>.modCount = l.modCount;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> E <span class="title">set</span><span class="params">(<span class="keyword">int</span> index, E element)</span> </span>&#123;</span><br><span class="line">    rangeCheck(index);</span><br><span class="line">    checkForComodification();</span><br><span class="line">    <span class="keyword">return</span> l.set(index+offset, element);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> E <span class="title">get</span><span class="params">(<span class="keyword">int</span> index)</span> </span>&#123;</span><br><span class="line">    rangeCheck(index);</span><br><span class="line">    checkForComodification();</span><br><span class="line">    <span class="keyword">return</span> l.get(index+offset);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">add</span><span class="params">(<span class="keyword">int</span> index, E element)</span> </span>&#123;</span><br><span class="line">    rangeCheckForAdd(index);</span><br><span class="line">    checkForComodification();</span><br><span class="line">    l.add(index+offset, element);</span><br><span class="line">    <span class="keyword">this</span>.modCount = l.modCount;</span><br><span class="line">    size++;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> E <span class="title">remove</span><span class="params">(<span class="keyword">int</span> index)</span> </span>&#123;</span><br><span class="line">    rangeCheck(index);</span><br><span class="line">    checkForComodification();</span><br><span class="line">    E result = l.remove(index+offset);</span><br><span class="line">    <span class="keyword">this</span>.modCount = l.modCount;</span><br><span class="line">    size--;</span><br><span class="line">    <span class="keyword">return</span> result;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>通过这段代码，了解了 subList 方法实现原理：它返回的 SubList 类也是 AbstractList 子类，其所有方法如 get、set、add、remove 等都是在原始列表上的操作，它自身并没有生成一个数组或是链表，也就是子列表只是原列表的一个视图，所有的修改动作都反映在了原列表上。</p>
+<h2 id="优雅的集合运算"><a href="#优雅的集合运算" class="headerlink" title="优雅的集合运算"></a>优雅的集合运算</h2><h3 id="并集"><a href="#并集" class="headerlink" title="并集"></a>并集</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">list1.addAll(list2);</span><br></pre></td></tr></table></figure>
+<h3 id="交集"><a href="#交集" class="headerlink" title="交集"></a>交集</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">list1.retainAll(list2);</span><br></pre></td></tr></table></figure>
+<p>该方法会删除 list1 中没有出现在 list2 中的元素。</p>
+<h3 id="差集"><a href="#差集" class="headerlink" title="差集"></a>差集</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">list1.removeAll(list2);</span><br></pre></td></tr></table></figure>
+<h3 id="无重复的并集"><a href="#无重复的并集" class="headerlink" title="无重复的并集"></a>无重复的并集</h3><p>什么叫无重复的并集？并集是集合 A 加集合 B，如果集合 A 和集合 B 有交集（也就是并集的元素数量大于0），就需要确保并集的结果中只有一份交集，此为无重复的并集。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">list2.removeAll(list1);</span><br><span class="line">list1.addAll(list2);</span><br></pre></td></tr></table></figure>
+<p>有人可能有疑问，求出两个集合的并集，转变为 HashSet 剔除重复元素不就解决问题了吗？其实是不行的，比如集合 A 有 10 个元素（其中有两个元素值相同），集合 B 有 8 个元素，它们的交集有 2 个元素，我们可以计算出它们的并集是 18 个元素，而无重复的并集有 16 个元素，但是如果使用 HashSet，算出来则只有 15 个元素，因为把集合 A 中原本重复的元素也剔除掉了。</p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Java/" rel="tag">#Java</a>
+          
+        </div>
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/06/03/编写高质量代码/字符串/" rel="next" title="字符串">
+                <i class="fa fa-chevron-left"></i> 字符串
+              </a>
+            
+          </div>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+      <div class="ds-thread" data-thread-key="2017/06/11/编写高质量代码/数组和集合/"
+           data-title="数组和集合" data-url="http://zhuxinhong.github.io/2017/06/11/编写高质量代码/数组和集合/">
+      </div>
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel ">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="http://o7s628cn2.bkt.clouddn.com/image/avatar.png"
+               alt="Focus_cn" />
+          <p class="site-author-name" itemprop="name">Focus_cn</p>
+          <p class="site-description motion-element" itemprop="description">时光如白马，稍纵即逝。术业有专攻，一生做好一件事真的很重要。</p>
+        </div>
+        <nav class="site-state motion-element">
+          <div class="site-state-item site-state-posts">
+            <a href="/archives">
+              <span class="site-state-item-count">32</span>
+              <span class="site-state-item-name">日志</span>
+            </a>
+          </div>
+
+          
+            <div class="site-state-item site-state-categories">
+              <a href="/categories">
+                <span class="site-state-item-count">8</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            <div class="site-state-item site-state-tags">
+              <a href="/tags">
+                <span class="site-state-item-count">14</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+        
+        
+
+        
+        
+
+      </section>
+
+      
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+            
+              
+            
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#不同的列表选择不同的遍历方法"><span class="nav-number">1.</span> <span class="nav-text">不同的列表选择不同的遍历方法</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#子列表只是原列表的一个视图"><span class="nav-number">2.</span> <span class="nav-text">子列表只是原列表的一个视图</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#优雅的集合运算"><span class="nav-number">3.</span> <span class="nav-text">优雅的集合运算</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#并集"><span class="nav-number">3.1.</span> <span class="nav-text">并集</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#交集"><span class="nav-number">3.2.</span> <span class="nav-text">交集</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#差集"><span class="nav-number">3.3.</span> <span class="nav-text">差集</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#无重复的并集"><span class="nav-number">3.4.</span> <span class="nav-text">无重复的并集</span></a></li></ol></li></ol></div>
+            
+          </div>
+        </section>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Focus_cn</span>
+</div>
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Pisces
+  </a>
+</div>
+
+        
+
+        
+      </div>
+    </footer>
+
+    <div class="back-to-top">
+      <i class="fa fa-arrow-up"></i>
+    </div>
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+  
+  <script type="text/javascript" src="/vendors/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/vendors/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/vendors/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/vendors/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/vendors/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/vendors/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.0.1"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.0.1"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.0.1"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.0.1"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.0.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.0.1"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.0.1"></script>
+
+
+
+  
+
+  
+    
+  
+
+  <script type="text/javascript">
+    var duoshuoQuery = {short_name:"focus-cn"};
+    (function() {
+      var ds = document.createElement('script');
+      ds.type = 'text/javascript';ds.async = true;
+      ds.id = 'duoshuo-script';
+      ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+      ds.charset = 'UTF-8';
+      (document.getElementsByTagName('head')[0]
+      || document.getElementsByTagName('body')[0]).appendChild(ds);
+    })();
+  </script>
+
+  
+    
+    <script src="/vendors/ua-parser-js/dist/ua-parser.min.js?v=0.7.9"></script>
+    <script src="/js/src/hook-duoshuo.js"></script>
+  
+
+
+
+
+
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
