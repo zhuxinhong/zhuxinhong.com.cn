@@ -105,7 +105,7 @@ type  对象的类型REDIS_STRING 字符串对象">
     fancybox: true,
     motion: true,
     duoshuo: {
-      userId: 0,
+      userId: undefined,
       author: '博主'
     }
   };
@@ -286,13 +286,6 @@ type  对象的类型REDIS_STRING 字符串对象">
 
           
             
-              <span class="post-comments-count">
-                &nbsp; | &nbsp;
-                <a href="/2015/06/28/redis设计与实现/Redis对象/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count ds-thread-count" data-thread-key="2015/06/28/redis设计与实现/Redis对象/" itemprop="commentsCount"></span>
-                </a>
-              </span>
-            
           
 
           
@@ -349,8 +342,8 @@ type  对象的类型REDIS_STRING 字符串对象">
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2015/06/27/redis设计与实现/Redis压缩列表/" rel="next" title="Redis压缩列表">
-                <i class="fa fa-chevron-left"></i> Redis压缩列表
+              <a href="/2015/06/27/redis设计与实现/Redis跳跃表/" rel="next" title="Redis跳跃表">
+                <i class="fa fa-chevron-left"></i> Redis跳跃表
               </a>
             
           </div>
@@ -384,10 +377,6 @@ type  对象的类型REDIS_STRING 字符串对象">
 
           
   <div class="comments" id="comments">
-    
-      <div class="ds-thread" data-thread-key="2015/06/28/redis设计与实现/Redis对象/"
-           data-title="Redis对象" data-url="http://zhuxinhong.github.io/2015/06/28/redis设计与实现/Redis对象/">
-      </div>
     
   </div>
 
@@ -424,8 +413,8 @@ type  对象的类型REDIS_STRING 字符串对象">
         <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
           <img class="site-author-image" itemprop="image"
                src="http://o7s628cn2.bkt.clouddn.com/image/avatar.png"
-               alt="Focus_cn" />
-          <p class="site-author-name" itemprop="name">Focus_cn</p>
+               alt="祝欣鸿" />
+          <p class="site-author-name" itemprop="name">祝欣鸿</p>
           <p class="site-description motion-element" itemprop="description">时光如白马，稍纵即逝。术业有专攻，一生做好一件事真的很重要。</p>
         </div>
         <nav class="site-state motion-element">
@@ -500,7 +489,7 @@ type  对象的类型REDIS_STRING 字符串对象">
   <span class="with-love">
     <i class="fa fa-heart"></i>
   </span>
-  <span class="author" itemprop="copyrightHolder">Focus_cn</span>
+  <span class="author" itemprop="copyrightHolder">祝欣鸿</span>
 </div>
 
 <div class="powered-by">
@@ -598,30 +587,9 @@ type  对象的类型REDIS_STRING 字符串对象">
 
   
 
-  
-    
-  
-
-  <script type="text/javascript">
-    var duoshuoQuery = {short_name:"focus-cn"};
-    (function() {
-      var ds = document.createElement('script');
-      ds.type = 'text/javascript';ds.async = true;
-      ds.id = 'duoshuo-script';
-      ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
-      ds.charset = 'UTF-8';
-      (document.getElementsByTagName('head')[0]
-      || document.getElementsByTagName('body')[0]).appendChild(ds);
-    })();
-  </script>
-
-  
-    
-    <script src="/vendors/ua-parser-js/dist/ua-parser.min.js?v=0.7.9"></script>
-    <script src="/js/src/hook-duoshuo.js"></script>
-  
 
 
+  
 
 
 

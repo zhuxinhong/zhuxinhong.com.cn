@@ -105,7 +105,7 @@ AOF持久化功能实现分为命令追加(append)、文件写入(write)和文�
     fancybox: true,
     motion: true,
     duoshuo: {
-      userId: 0,
+      userId: undefined,
       author: '博主'
     }
   };
@@ -286,13 +286,6 @@ AOF持久化功能实现分为命令追加(append)、文件写入(write)和文�
 
           
             
-              <span class="post-comments-count">
-                &nbsp; | &nbsp;
-                <a href="/2015/07/11/redis设计与实现/Redis持久化-AOF/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count ds-thread-count" data-thread-key="2015/07/11/redis设计与实现/Redis持久化-AOF/" itemprop="commentsCount"></span>
-                </a>
-              </span>
-            
           
 
           
@@ -351,16 +344,16 @@ AOF持久化功能实现分为命令追加(append)、文件写入(write)和文�
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2015/07/04/redis设计与实现/RedisRDB文件结构/" rel="next" title="RedisRDB文件结构">
-                <i class="fa fa-chevron-left"></i> RedisRDB文件结构
+              <a href="/2015/07/11/redis设计与实现/Redis文件事件/" rel="next" title="Redis文件事件">
+                <i class="fa fa-chevron-left"></i> Redis文件事件
               </a>
             
           </div>
 
           <div class="post-nav-prev post-nav-item">
             
-              <a href="/2015/07/11/redis设计与实现/Redis文件事件/" rel="prev" title="Redis文件事件">
-                Redis文件事件 <i class="fa fa-chevron-right"></i>
+              <a href="/2015/07/12/redis设计与实现/Redis时间事件/" rel="prev" title="Redis时间事件">
+                Redis时间事件 <i class="fa fa-chevron-right"></i>
               </a>
             
           </div>
@@ -386,10 +379,6 @@ AOF持久化功能实现分为命令追加(append)、文件写入(write)和文�
 
           
   <div class="comments" id="comments">
-    
-      <div class="ds-thread" data-thread-key="2015/07/11/redis设计与实现/Redis持久化-AOF/"
-           data-title="Redis持久化-AOF" data-url="http://zhuxinhong.github.io/2015/07/11/redis设计与实现/Redis持久化-AOF/">
-      </div>
     
   </div>
 
@@ -426,8 +415,8 @@ AOF持久化功能实现分为命令追加(append)、文件写入(write)和文�
         <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
           <img class="site-author-image" itemprop="image"
                src="http://o7s628cn2.bkt.clouddn.com/image/avatar.png"
-               alt="Focus_cn" />
-          <p class="site-author-name" itemprop="name">Focus_cn</p>
+               alt="祝欣鸿" />
+          <p class="site-author-name" itemprop="name">祝欣鸿</p>
           <p class="site-description motion-element" itemprop="description">时光如白马，稍纵即逝。术业有专攻，一生做好一件事真的很重要。</p>
         </div>
         <nav class="site-state motion-element">
@@ -502,7 +491,7 @@ AOF持久化功能实现分为命令追加(append)、文件写入(write)和文�
   <span class="with-love">
     <i class="fa fa-heart"></i>
   </span>
-  <span class="author" itemprop="copyrightHolder">Focus_cn</span>
+  <span class="author" itemprop="copyrightHolder">祝欣鸿</span>
 </div>
 
 <div class="powered-by">
@@ -600,30 +589,9 @@ AOF持久化功能实现分为命令追加(append)、文件写入(write)和文�
 
   
 
-  
-    
-  
-
-  <script type="text/javascript">
-    var duoshuoQuery = {short_name:"focus-cn"};
-    (function() {
-      var ds = document.createElement('script');
-      ds.type = 'text/javascript';ds.async = true;
-      ds.id = 'duoshuo-script';
-      ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
-      ds.charset = 'UTF-8';
-      (document.getElementsByTagName('head')[0]
-      || document.getElementsByTagName('body')[0]).appendChild(ds);
-    })();
-  </script>
-
-  
-    
-    <script src="/vendors/ua-parser-js/dist/ua-parser.min.js?v=0.7.9"></script>
-    <script src="/js/src/hook-duoshuo.js"></script>
-  
 
 
+  
 
 
 
