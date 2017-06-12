@@ -242,6 +242,145 @@
             
               
                 
+                <a class="post-title-link" href="/2016/05/11/Java Web/DNS域名解析过程/" itemprop="url">
+                  DNS域名解析过程
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2016-05-11T00:00:00+08:00" content="2016-05-11">
+              2016-05-11
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/Java-Web/" itemprop="url" rel="index">
+                    <span itemprop="name">Java Web</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+
+          
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>当用户在浏览器输入www.abc.com，DNS解析将会有将近10个步骤。</p>
+<ol>
+<li>浏览器检查缓存有没有该域名对应的IP。如果有，这个解析过程就结束。浏览器缓存域名是有限制的，不仅大小有限制，时间也有限制，通过TTL属性设置域名缓存时间。</li>
+<li>浏览器缓存中没有，检查操作系统缓存中是否有解析结果。如果有，解析结束。没有的话，请求域名服务器解析该域名。</li>
+<li><p>网络配置有配置DNS服务器地址，操作系统把域名发送给这里的LDNS。Linux下通过以下命令查看。  </p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cat /etc/resolv.conf</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>LDNS未命中，直接到Root Server域名服务器请求解析。</p>
+</li>
+<li>根域名服务器返回本地域名服务器一个服务器地址(gTLD Server)。gTLD是国际顶级域名服务器，如.com、.cn、.org等，全球只有13台左右。</li>
+<li>本地域名服务器再向上一步返回的gTLD服务器发送请求。</li>
+<li>gTLD服务器查找并返回此域名对应的Name Server域名服务器地址，这个Name Server通常就是你注册的域名服务器。</li>
+<li>Name Server域名服务器查询存储的域名和IP映射关系，正常情况下查询到目标IP记录，连同一个TTL值返回给DNS Server域名服务器。</li>
+<li>返回该域名对应的IP和TTL值，Local DNS Server会缓存该记录。</li>
+<li>解析结果返回给用户，用户根据TTL值缓存这个记录。</li>
+</ol>
+<p>实际过程中，可能不止这个10个步骤，如Name Server有多级或者有个GTM负载均衡控制，这都会影响域名解析的过程。</p>
+<h1 id="跟踪域名解析过程"><a href="#跟踪域名解析过程" class="headerlink" title="跟踪域名解析过程"></a>跟踪域名解析过程</h1><h2 id="dig"><a href="#dig" class="headerlink" title="dig"></a>dig</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line">--- ~ » dig www.google.com</span><br><span class="line"></span><br><span class="line">; &lt;&lt;&gt;&gt; DiG 9.8.3-P1 &lt;&lt;&gt;&gt; www.google.com</span><br><span class="line">;; global options: +cmd</span><br><span class="line">;; Got answer:</span><br><span class="line">;; -&gt;&gt;HEADER&lt;&lt;- opcode: QUERY, status: NOERROR, id: 50606</span><br><span class="line">;; flags: qr rd ra; QUERY: 1, ANSWER: 16, AUTHORITY: 0, ADDITIONAL: 0</span><br><span class="line"></span><br><span class="line">;; QUESTION SECTION:</span><br><span class="line">;www.google.com.			IN	A</span><br><span class="line"></span><br><span class="line">;; ANSWER SECTION:</span><br><span class="line">www.google.com.		299	IN	A	61.238.239.35</span><br><span class="line">www.google.com.		299	IN	A	61.238.239.20</span><br><span class="line">www.google.com.		299	IN	A	61.238.239.24</span><br><span class="line">www.google.com.		299	IN	A	61.238.239.59</span><br><span class="line">www.google.com.		299	IN	A	61.238.239.29</span><br><span class="line">www.google.com.		299	IN	A	61.238.239.30</span><br><span class="line">www.google.com.		299	IN	A	61.238.239.45</span><br><span class="line">www.google.com.		299	IN	A	61.238.239.40</span><br><span class="line">www.google.com.		299	IN	A	61.238.239.55</span><br><span class="line">www.google.com.		299	IN	A	61.238.239.34</span><br><span class="line">www.google.com.		299	IN	A	61.238.239.44</span><br><span class="line">www.google.com.		299	IN	A	61.238.239.49</span><br><span class="line">www.google.com.		299	IN	A	61.238.239.54</span><br><span class="line">www.google.com.		299	IN	A	61.238.239.25</span><br><span class="line">www.google.com.		299	IN	A	61.238.239.39</span><br><span class="line">www.google.com.		299	IN	A	61.238.239.50</span><br><span class="line"></span><br><span class="line">;; Query time: 61 msec</span><br><span class="line">;; SERVER: 8.8.8.8#53(8.8.8.8)</span><br><span class="line">;; WHEN: Wed May 11 21:04:56 2016</span><br><span class="line">;; MSG SIZE  rcvd: 288</span><br><span class="line"></span><br><span class="line">--- ~ »</span><br></pre></td></tr></table></figure>
+<h2 id="dig-cmd"><a href="#dig-cmd" class="headerlink" title="dig +cmd"></a>dig +cmd</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line">--- ~ » dig +printcmd www.taobao.com</span><br><span class="line">Invalid option: +printcmd</span><br><span class="line">Usage:  dig [@global-server] [domain] [q-type] [q-class] &#123;q-opt&#125;</span><br><span class="line">            &#123;global-d-opt&#125; host [@local-server] &#123;local-d-opt&#125;</span><br><span class="line">            [ host [@local-server] &#123;local-d-opt&#125; [...]]</span><br><span class="line"></span><br><span class="line">Use &quot;dig -h&quot; (or &quot;dig -h | more&quot;) for complete list of options</span><br><span class="line">--- ~ » dig +cmd www.taobao.com                                                                                                                                        1 ↵</span><br><span class="line"></span><br><span class="line">; &lt;&lt;&gt;&gt; DiG 9.8.3-P1 &lt;&lt;&gt;&gt; +cmd www.taobao.com</span><br><span class="line">;; global options: +cmd</span><br><span class="line">;; Got answer:</span><br><span class="line">;; -&gt;&gt;HEADER&lt;&lt;- opcode: QUERY, status: NOERROR, id: 62882</span><br><span class="line">;; flags: qr rd ra; QUERY: 1, ANSWER: 2, AUTHORITY: 0, ADDITIONAL: 0</span><br><span class="line"></span><br><span class="line">;; QUESTION SECTION:</span><br><span class="line">;www.taobao.com.			IN	A</span><br><span class="line"></span><br><span class="line">;; ANSWER SECTION:</span><br><span class="line">www.taobao.com.		71	IN	CNAME	www.taobao.com.danuoyi.tbcache.com.</span><br><span class="line">www.taobao.com.danuoyi.tbcache.com. 599	IN A	205.204.104.227</span><br><span class="line"></span><br><span class="line">;; Query time: 73 msec</span><br><span class="line">;; SERVER: 8.8.8.8#53(8.8.8.8)</span><br><span class="line">;; WHEN: Wed May 11 21:07:41 2016</span><br><span class="line">;; MSG SIZE  rcvd: 93</span><br><span class="line"></span><br><span class="line">--- ~ »</span><br></pre></td></tr></table></figure>
+<h2 id="dig-trace"><a href="#dig-trace" class="headerlink" title="dig +trace"></a>dig +trace</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line">--- ~ » dig www.google.com +trace                                                                                                                                      9 ↵</span><br><span class="line"></span><br><span class="line">; &lt;&lt;&gt;&gt; DiG 9.8.3-P1 &lt;&lt;&gt;&gt; www.google.com +trace</span><br><span class="line">;; global options: +cmd</span><br><span class="line">.			5236	IN	NS	a.root-servers.net.</span><br><span class="line">.			5236	IN	NS	b.root-servers.net.</span><br><span class="line">.			5236	IN	NS	c.root-servers.net.</span><br><span class="line">.			5236	IN	NS	d.root-servers.net.</span><br><span class="line">.			5236	IN	NS	e.root-servers.net.</span><br><span class="line">.			5236	IN	NS	f.root-servers.net.</span><br><span class="line">.			5236	IN	NS	g.root-servers.net.</span><br><span class="line">.			5236	IN	NS	h.root-servers.net.</span><br><span class="line">.			5236	IN	NS	i.root-servers.net.</span><br><span class="line">.			5236	IN	NS	j.root-servers.net.</span><br><span class="line">.			5236	IN	NS	k.root-servers.net.</span><br><span class="line">.			5236	IN	NS	l.root-servers.net.</span><br><span class="line">.			5236	IN	NS	m.root-servers.net.</span><br><span class="line">;; Received 228 bytes from 8.8.8.8#53(8.8.8.8) in 63 ms</span><br><span class="line"></span><br><span class="line">com.			172800	IN	NS	m.gtld-servers.net.</span><br><span class="line">com.			172800	IN	NS	e.gtld-servers.net.</span><br><span class="line">com.			172800	IN	NS	d.gtld-servers.net.</span><br><span class="line">com.			172800	IN	NS	b.gtld-servers.net.</span><br><span class="line">com.			172800	IN	NS	j.gtld-servers.net.</span><br><span class="line">com.			172800	IN	NS	f.gtld-servers.net.</span><br><span class="line">com.			172800	IN	NS	g.gtld-servers.net.</span><br><span class="line">com.			172800	IN	NS	l.gtld-servers.net.</span><br><span class="line">com.			172800	IN	NS	k.gtld-servers.net.</span><br><span class="line">com.			172800	IN	NS	h.gtld-servers.net.</span><br><span class="line">com.			172800	IN	NS	i.gtld-servers.net.</span><br><span class="line">com.			172800	IN	NS	a.gtld-servers.net.</span><br><span class="line">com.			172800	IN	NS	c.gtld-servers.net.</span><br><span class="line">;; Received 504 bytes from 192.5.5.241#53(192.5.5.241) in 38 ms</span><br><span class="line"></span><br><span class="line">;; connection timed out; no servers could be reached</span><br><span class="line">--- ~ »</span><br></pre></td></tr></table></figure>
+<h1 id="几种域名解析方式"><a href="#几种域名解析方式" class="headerlink" title="几种域名解析方式"></a>几种域名解析方式</h1><ul>
+<li>A记录，指定域名对应IP。</li>
+<li>MX记录，表示Mail Exchange，将某个域名下邮件服务器指向自己Mail Server。正常通过Web请求仍然解析A记录IP。</li>
+<li>CNAME记录，Canonical Name(别名解析)。</li>
+<li>NS记录，为某个域名指定DNS解析服务器。</li>
+<li>TXT记录，为某个主机名或域名设置说明。</li>
+</ul>
+
+          
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
                 <a class="post-title-link" href="/2016/05/07/深入理解Java虚拟机/运行时数据区域/" itemprop="url">
                   Java内存区域与内存溢出异常
                 </a>
@@ -762,126 +901,6 @@
 
 
     
-      
-
-  
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-            
-            
-              
-                
-                <a class="post-title-link" href="/2015/07/11/redis设计与实现/Redis持久化-AOF/" itemprop="url">
-                  Redis持久化-AOF
-                </a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            <span class="post-meta-item-icon">
-              <i class="fa fa-calendar-o"></i>
-            </span>
-            <span class="post-meta-item-text">发表于</span>
-            <time itemprop="dateCreated" datetime="2015-07-11T00:00:00+08:00" content="2015-07-11">
-              2015-07-11
-            </time>
-          </span>
-
-          
-            <span class="post-category" >
-              &nbsp; | &nbsp;
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-              
-                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
-                  <a href="/categories/Redis设计与实现/" itemprop="url" rel="index">
-                    <span itemprop="name">Redis设计与实现</span>
-                  </a>
-                </span>
-
-                
-                
-
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-
-          
-          
-
-          
-        </div>
-      </header>
-    
-
-
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>Redis提供了AOF(Append Only File)持久化功能，AOF通过保存服务器所执行命令来记录数据库状态的，和MySQL记录增删改的log有点像哈。</p>
-<p>AOF持久化功能实现分为命令追加(append)、文件写入(write)和文件同步(sync)三个步骤。</p>
-<p>1.AOF命令追加<br>当开启AOF持久化功能时，服务器会在执行完一个写命令后，会以协议格式将执行的写命令追加到服务器状态的aof_buf缓冲区末尾。</p>
-<p>2.AOF文件写入和同步<br>Redis服务进程就是一个事件循环，循环中的文件事件负责接受客户端的命令请求，以及向客户端发送命令回复，而时间事件则负责执行像serverCron函数这样需要定时运行的函数。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">def eventLoop():</span><br><span class="line"><span class="keyword">while</span> True:</span><br><span class="line">	//处理文件事件，接收命令以及发送命令</span><br><span class="line">	//处理命令时可能会有新内容被追加到aof_buf中</span><br><span class="line">	processFileEvents()</span><br><span class="line">	//处理时间事件</span><br><span class="line">	processTimeEvents()</span><br><span class="line">	//考虑是否将aof_buf中内容写入和保存到aof文件</span><br><span class="line">	flushAppendOnlyFile()</span><br></pre></td></tr></table></figure></p>
-<p>flushAppendOnlyFile函数的行为由服务器配置的appendfsync选项值来决定。<br>appendfsync配置：<br>always : 服务器在每个事件循环都要将aof_buf缓冲区的所有内容写到AOF文件，并同步，效率最慢，但最安全。<br>everysec : 服务器在每个事件循环都将aof_bug缓冲区的所有文件写到AOF文件，并且每隔1s就在子线程中对AOF文件做同步，效率快。<br>no : 服务器在每个事件循环都将aof_bug缓冲区的所有文件写到AOF文件，此模式下的flushAppendOnlyFile无须执行同步操作，同步AOF文件由操作系统决定，写入速度最快。</p>
-<p>3.AOF重写<br>随着服务器运行时间的流逝，AOF文件中的内容会越来越多，可能会对Redis服务器和宿主计算机造成影响。<br>虽然Redis将生成新AOF文件替换旧AOF文件功能命名为AOF文件重写，但实际上，AOF文件重写并不需要对现有AOF文件进行任何读取、分析和写入操作，这个功能是通过读取服务器当前数据库状态来实现的。<br>实际操作中，Redis依次遍历数据库中所有key，并根据key类型的不同，取出相应值并生成对应类型的写入语句。同时，为了避免在执行命令时造成客户端输入缓冲区溢出，重写程序在处理列表、哈希表、集合、有序集合这4种可能会带有多个元素的键时，会先检查键所包含元素的数量，如果数量超过了redis.h/REDIS_AOF_REWRITE_ITEMS_PER_CMD常量的值，那重写程序会使用多条命令来记录键的值。当前版本中，REDIS_AOF_REWRITE_ITEMS_PER_CMD常量值为64，所以每条语句最多会写入64个元素。</p>
-<p>4.AOF后台重写<br>上面介绍的AOF重写可以很好的完成创建一个新AOF文件的任务，但是，这个操作会进行大量的写入操作，所以调用这个函数的线程将被长时间阻塞，因为Redis服务器使用单个线程来处理命令请求，所以如果由服务器调用AOF重写，那么在重写期间，服务器将无法处理客户端发来的请求。<br>Redis并不希望AOF的重写操作造成服务器无法处理请求，所以需要将重写放到子进程里执行，这样做可以达到两个目的：<br>1)子进程执行AOF重写期间，服务器可以继续处理客户端的命令请求。<br>2)子进程带有服务器进程的数据副本，使用子进程而不是线程，可以在避免使用锁的情况下，保证数据安全性。</p>
-<p>不过这里仍然存在一个问题：在子进程执行AOF重写期间，服务器处理客户端的命令请求时，对现有数据库状态进行修改操作，会使得服务器当前数据库状态和重写后的AOF文件所保存的数据库状态不一致。<br>为了解决这个问题，Redis服务器设置了一个AOF重写缓冲区，这个缓冲区在服务器创建子进程之后开始使用，当Redis执行完一个写命令后，它会同时将这个写命令发送给AOF缓冲区和AOF重写缓冲区。<br>以上就是AOF后台重写，即BGREWRITEAOF命令的实现原理。</p>
-
-          
-        
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
   </section>
 
   
@@ -927,7 +946,7 @@
         <nav class="site-state motion-element">
           <div class="site-state-item site-state-posts">
             <a href="/archives">
-              <span class="site-state-item-count">32</span>
+              <span class="site-state-item-count">33</span>
               <span class="site-state-item-name">日志</span>
             </a>
           </div>
@@ -935,7 +954,7 @@
           
             <div class="site-state-item site-state-categories">
               <a href="/categories">
-                <span class="site-state-item-count">8</span>
+                <span class="site-state-item-count">7</span>
                 <span class="site-state-item-name">分类</span>
               </a>
             </div>
@@ -944,7 +963,7 @@
           
             <div class="site-state-item site-state-tags">
               <a href="/tags">
-                <span class="site-state-item-count">14</span>
+                <span class="site-state-item-count">13</span>
                 <span class="site-state-item-name">标签</span>
               </a>
             </div>
