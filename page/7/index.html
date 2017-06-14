@@ -242,8 +242,8 @@
             
               
                 
-                <a class="post-title-link" href="/2015/06/25/redis设计与实现/Redis字典的实现/" itemprop="url">
-                  Redis字典
+                <a class="post-title-link" href="/2016/05/18/Java Web/NIO的工作机制/" itemprop="url">
+                  NIO工作机制
                 </a>
               
             
@@ -256,8 +256,8 @@
               <i class="fa fa-calendar-o"></i>
             </span>
             <span class="post-meta-item-text">发表于</span>
-            <time itemprop="dateCreated" datetime="2015-06-25T00:00:00+08:00" content="2015-06-25">
-              2015-06-25
+            <time itemprop="dateCreated" datetime="2016-05-18T00:00:00+08:00" content="2016-05-18">
+              2016-05-18
             </time>
           </span>
 
@@ -270,8 +270,8 @@
               <span class="post-meta-item-text">分类于</span>
               
                 <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
-                  <a href="/categories/Redis设计与实现/" itemprop="url" rel="index">
-                    <span itemprop="name">Redis设计与实现</span>
+                  <a href="/categories/Java-Web/" itemprop="url" rel="index">
+                    <span itemprop="name">Java Web</span>
                   </a>
                 </span>
 
@@ -305,264 +305,223 @@
       
         
           
-            <p>字典就是我们熟悉的map，键值对(key-value pair)的抽象数据结构。Redis数据库就是使用字典来作为底层实现的。<br>先介绍下数据结构：<br>1.哈希表<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">typeof struct dictht &#123;</span><br><span class="line">	//哈希表数组</span><br><span class="line">	dictEntry   **table;</span><br><span class="line">	//哈希表大小</span><br><span class="line">	unsigned long size;</span><br><span class="line">	//哈希表大小掩码，用于计算索引</span><br><span class="line">	//总是等于size-1</span><br><span class="line">	unsigned long sizemask;</span><br><span class="line">	//已有节点数量</span><br><span class="line">	unsigned long used;</span><br><span class="line">&#125; dictht;</span><br></pre></td></tr></table></figure></p>
-<p>这种数据结构很好理解，和Java里面HashMap实现差不多。哈希表里面每个节点都是一个entry对象。</p>
-<p>2.哈希表节点<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">typeof struct dictEntry &#123;</span><br><span class="line">	//键</span><br><span class="line">	void *key;</span><br><span class="line">	//值</span><br><span class="line">	union &#123;</span><br><span class="line">	void *val;</span><br><span class="line">	unit64_t u64;</span><br><span class="line">	int64_t s64;</span><br><span class="line">&#125; v;</span><br><span class="line"></span><br><span class="line">//指向下个哈希表节点，形成链表</span><br><span class="line">struct dictEntry *next;</span><br><span class="line">&#125; dictEntry;</span><br></pre></td></tr></table></figure></p>
-<p>key属性存着键值对中的键，v属性存值。键可以是一个指针，也可以是一个unit64_t整数，或是一个int^4_t整数。C语言没了解过，这种奇怪的整数也不知道什么意思，姑且理解为Java里面的hashCode吧。<br>next属性指向链表中的下一个节点，这点和Java一样，当多个对象哈希值相同时，就造成hash冲突，多个对象的索引值都落在同一索引下标上，该节点的数据结构为链表，需要遍历该链表才能找到对应元素。</p>
-<p>3.字典数据结构<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">typeof struct dict &#123;</span><br><span class="line">	//类型特定函数</span><br><span class="line">	dictType *<span class="built_in">type</span>;</span><br><span class="line">	//私有数据</span><br><span class="line">	void *privdata;</span><br><span class="line">	//哈希表</span><br><span class="line">	dictht ht[2];</span><br><span class="line">	//<span class="built_in">rehash</span>索引</span><br><span class="line">	//当<span class="built_in">rehash</span>不再进行时，值为-1</span><br><span class="line">	int rehashidx;</span><br><span class="line">&#125; dict;</span><br></pre></td></tr></table></figure></p>
-<p>type属性和privdata属性针对不同类型的键值对，为创建多态字典设置的。<br>type属性是一个指向dictType结构的指针，每个dictType保存了一簇用于操作特定类型键值对的函数，Redis会为用途不同的字典设置不同的类型特定函数。<br>privdata属性保存了需要传给那些类型特定函数的可选参数。</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">typeof struct dictType &#123;</span><br><span class="line">	//计算哈希值的函数</span><br><span class="line">	unsigned int (*<span class="built_in">hash</span>Function) (const void *key);</span><br><span class="line">	//复制键的函数</span><br><span class="line">	void *(*keyDup) (void *privdata, const void *key);</span><br><span class="line">	//复制值的函数</span><br><span class="line">	void *(*valDup)(void *privdata, const void *obj);</span><br><span class="line">	//对比键的函数</span><br><span class="line">	int (*keyCompare) (void *privdata, const void *key1, const void *key2);</span><br><span class="line">	//销毁键的函数</span><br><span class="line">	void (*keyDestructor) (void *privdata, void *key);</span><br><span class="line">	//销毁值的函数</span><br><span class="line">	void (*valDestructor) (void *privdata, void *obj);</span><br><span class="line">&#125; dictType;</span><br></pre></td></tr></table></figure>
-<p>ht属性是一个包含2个索引的数组，每个位置都是一个dictht哈希表，一般使用ht[0]，ht[1]用于存放对ht[0]哈希表进行rehash的结果。<br>rehashidx记录目前rehash进度，当前没有执行rehash，值为-1。</p>
-<p>1.Redis 字典 Hash算法<br>根据key计算hash值<br>hash = dict -&gt; type -&gt; hashFunction(key);<br>根据sizemask属性和哈希值,计算出索引,ht[x]可以是ht[0]或ht[1]<br>index = hash &amp; dict -&gt; ht[x].sizemask;<br>Redis使用MurmurHash2算法计算键的哈希值，优点在于即使输入的键是有规律的，算法仍能给出一个很好的随机分布性。</p>
-<p>2.解决Hash冲突<br>当2个或多个不同对象的Hash值相同时，会被分配到哈希表的同一个索引上，此时就称之为哈希冲突。<br>Redis采用链地址法解决键冲突，每个哈希节点都有一个next指针，由此指针构成一个单向链表，新添加的元素在链表表头。</p>
-<p>3.rehash<br>负载因子 = 哈希表节点数量/哈希表大小<br>load_factor = ht[0].used / ht[0].size<br>当哈希表的操作不断进行，需要把哈希表的负载因子保持在一个合理范围内，需要对哈希表进行扩容或缩容操作，2种操作都通过执行再散列操作来执行(rehash)：<br>a.为字典的ht[1]分配空间，如果是扩容操作，ht[1]的空间为ht[0]的节点数量2倍;如果是缩容,ht[1]的空间为ht[0]节点数量的一半。<br>b.将ht[0]中的所有键值对rehash到ht[1]上面：rehash需要重新计算键的哈希值和索引值，然后放在ht[1]的指定位置上。<br>c.当ht[0]所有键值对都迁移到ht[1]上之后，释放ht[0]，就是将ht[0]表置为空表，再将ht[1]置为ht[0],并将ht[1]新建一个大小为0的空哈希表。</p>
-<p>4.渐进式rehash<br>上面讲到rehash过程中，需要将ht[0]上的键值对迁移到ht[1]上，但这个过程并不是一次性操作完成的。如果需要一次性完成，就必须对当前哈希表进行锁表操作，锁表期间会导致服务的不可用，所以rehash操作需要分多次、渐进式的完成。<br>a.为ht[1]分配空间，字典同时持有ht[0]和ht[1]两个哈希表<br>b.将rehashidx值置为0，表示rehash工作开始。<br>c.rehash期间，所有对字典执行的读写操作，都会在ht[0]和ht[1]两个表上操作，读操作如果在ht[0]上找到，会把结果rehash到ht[1]上，如果未找到会到ht[1]上去找，保存操作只会存在ht[1]上，当rehash工作完成之后,rehashidx++;<br>d.随着字典操作的不断执行，最终ht[0]上所有节点会全部rehash到ht[1]上，这时将rehashidx值置为-1，表示rehash完成。</p>
-
-          
-        
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
-      
-
-  
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-            
-            
-              
-                
-                <a class="post-title-link" href="/2015/06/24/redis设计与实现/Redis链表数据结构/" itemprop="url">
-                  Redis链表数据结构
-                </a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            <span class="post-meta-item-icon">
-              <i class="fa fa-calendar-o"></i>
-            </span>
-            <span class="post-meta-item-text">发表于</span>
-            <time itemprop="dateCreated" datetime="2015-06-24T00:00:00+08:00" content="2015-06-24">
-              2015-06-24
-            </time>
-          </span>
-
-          
-            <span class="post-category" >
-              &nbsp; | &nbsp;
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-              
-                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
-                  <a href="/categories/Redis设计与实现/" itemprop="url" rel="index">
-                    <span itemprop="name">Redis设计与实现</span>
-                  </a>
-                </span>
-
-                
-                
-
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-
-          
-          
-
-          
-        </div>
-      </header>
-    
-
-
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">typeof struct listNode &#123;</span><br><span class="line">	//前置节点</span><br><span class="line">	struct listNode *prev;</span><br><span class="line">	//后置节点</span><br><span class="line">	struct listNode *next;</span><br><span class="line">	//节点的值</span><br><span class="line">	void *value；</span><br><span class="line">	&#125; listNode;</span><br><span class="line">	链接的数据结构：</span><br><span class="line">	typeof struct list &#123;</span><br><span class="line">	//表头节点</span><br><span class="line">	listNode *head;</span><br><span class="line">	//表尾节点</span><br><span class="line">	listNode *tail;</span><br><span class="line">	//节点数量</span><br><span class="line">	unsiged long len;</span><br><span class="line">	//节点复制函数</span><br><span class="line">	void *(*dup) (void *ptr);</span><br><span class="line">	//节点释放函数</span><br><span class="line">	void (*free) (void *ptr);</span><br><span class="line">	//节点对比函数</span><br><span class="line">	int (*match) (void *ptr, void *key);</span><br><span class="line">&#125; list;</span><br></pre></td></tr></table></figure>
-
-          
-        
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
-      
-
-  
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-            
-            
-              
-                
-                <a class="post-title-link" href="/2015/06/23/redis设计与实现/Redis简单动态字符串/" itemprop="url">
-                  Redis简单动态字符串
-                </a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            <span class="post-meta-item-icon">
-              <i class="fa fa-calendar-o"></i>
-            </span>
-            <span class="post-meta-item-text">发表于</span>
-            <time itemprop="dateCreated" datetime="2015-06-23T00:00:00+08:00" content="2015-06-23">
-              2015-06-23
-            </time>
-          </span>
-
-          
-            <span class="post-category" >
-              &nbsp; | &nbsp;
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-              
-                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
-                  <a href="/categories/Redis设计与实现/" itemprop="url" rel="index">
-                    <span itemprop="name">Redis设计与实现</span>
-                  </a>
-                </span>
-
-                
-                
-
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-
-          
-          
-
-          
-        </div>
-      </header>
-    
-
-
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>Redis使用SDS(simple dynamic string)用作字符串默认实现。</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">struct sdshdr&#123;</span><br><span class="line">	//已使用buf数组的字节数量，也就是字符串长度</span><br><span class="line">	int len;</span><br><span class="line">	//未使用的长度</span><br><span class="line">	int free;</span><br><span class="line">	//保存字符串</span><br><span class="line">	char buf[];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<ul>
-<li><p>SDS遵循C语言字符串以空字符串结尾，保留1个字节的空字符串’\0’，该空串不记入len中。</p>
-</li>
-<li><p>C语言中，获取字符串长度需要遍历整个字符串，时间复杂度为O(n)，SDS中有len属性维护长度，时间复杂度为O(1)，Java里面String不可变，初始化的时候就记录了长度，时间复杂度啊也是O(n)。</p>
-</li>
-<li><p>SDS空间分配策略杜绝缓冲区溢出的可能。当需要对SDS进行修改时，API会先检查SDS剩余空间是否满足需求，如不满足会自动扩容。</p>
-</li>
-<li><p>SDS内存分配策略：  </p>
-</li>
-</ul>
+            <h1 id="NIO的工作方式"><a href="#NIO的工作方式" class="headerlink" title="NIO的工作方式"></a>NIO的工作方式</h1><h2 id="NIO工作机制"><a href="#NIO工作机制" class="headerlink" title="NIO工作机制"></a>NIO工作机制</h2><p>NIO引入了Channel、Buffer和Selector，Channel是高速通道，Buffer是高速通道上的具体单位，Selector是调度器。当我们调用write()往SendQ写数据时，当一次写的数据超过SendQ长度时需要按照SendQ的长度进行分割，在这个过程中需要将用户空间数据和内核地址空间进行切换，而这个切换不是你可以控制的，但在Buffer中我们可以控制Buffer的容量、是否扩容以及如何扩容。</p>
+<p>调用Selector的静态工厂创建一个选择器，创建一个服务端的Channel，绑定到一个Socket对象，并把这个通信信道注册到选择器上，把这个通信信道设置为非阻塞模式。然后就可以调用Selector的selectedKeys方法来检查已经注册在这个选择器上的所有通信信道是否有需要的事件发生，如果与某个事件发生，将会返回所有的SelectionKey，通过这个对象的Channel方法就可以就可以取得这个通信信道对象，从而读取通信的数据，而这里读取的数据是Buffer，这个Buffer是我们可以控制的缓冲器。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">selector</span><span class="params">()</span> <span class="keyword">throws</span> IOException </span>&#123;</span><br><span class="line">        ByteBuffer buffer = ByteBuffer.allocate(<span class="number">1024</span>);</span><br><span class="line">        Selector selector = Selector.open();</span><br><span class="line">        ServerSocketChannel ssc = ServerSocketChannel.open();</span><br><span class="line">        ssc.configureBlocking(<span class="keyword">false</span>); <span class="comment">//设置为非阻塞方式</span></span><br><span class="line">        ssc.register(selector, SelectionKey.OP_ACCEPT);</span><br><span class="line">        <span class="keyword">while</span> (<span class="keyword">true</span>) &#123;</span><br><span class="line">            Set selectedKeys = selector.selectedKeys();</span><br><span class="line">            Iterator it = selectedKeys.iterator();</span><br><span class="line">            <span class="keyword">while</span> (it.hasNext()) &#123;</span><br><span class="line">                SelectionKey key = (SelectionKey) it.next();</span><br><span class="line">                <span class="keyword">if</span> ((key.readyOps() &amp; SelectionKey.OP_ACCEPT) == SelectionKey.OP_ACCEPT) &#123;</span><br><span class="line">                    ServerSocketChannel ssChannel = (ServerSocketChannel) key.channel();</span><br><span class="line">                    SocketChannel sc = ssChannel.accept(); <span class="comment">//接受到服务端请求</span></span><br><span class="line">                    sc.configureBlocking(<span class="keyword">false</span>);</span><br><span class="line">                    sc.register(selector, SelectionKey.OP_READ);</span><br><span class="line">                    it.remove();</span><br><span class="line">                &#125; <span class="keyword">else</span> <span class="keyword">if</span> ((key.readyOps() &amp; SelectionKey.OP_READ) == SelectionKey.OP_READ) &#123;</span><br><span class="line">                    SocketChannel sc = (SocketChannel) key.channel();</span><br><span class="line">                    <span class="keyword">while</span> (<span class="keyword">true</span>) &#123;</span><br><span class="line">                        buffer.clear();</span><br><span class="line">                        <span class="keyword">int</span> n = sc.read(buffer);</span><br><span class="line">                        <span class="keyword">if</span> (n &lt;= <span class="number">0</span>) &#123;</span><br><span class="line">                            <span class="keyword">break</span>;</span><br><span class="line">                        &#125;</span><br><span class="line">                        buffer.flip();</span><br><span class="line">                    &#125;</span><br><span class="line">                    it.remove();</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+<p>在上面这段程序中，将Server端的监听连接请求的事件和处理请求的事件放在一个线程中，但是在事件应用中，我们通常会把它们放在两个线程中：一个线程专门负责监听客户端的连接请求，而且是以阻塞方式运行的；另外一个线程专门负责处理请求，这个专门处理请求的线程才会真正采用NIO的方式，像Web服务器Tomcat和Jetty都是使用这个处理方式。</p>
+<p>Selector可以同时监听一组通信信道(Channel)上的IO状态，前提是这个Selector已经注册到这些通信信道中。选择器Selector可以调用select()方法检查已经注册的通信信道上IO是否已经准备好，如果没有至少一个信道IO状态有变化，那么select方法会阻塞等待或在超时时间后返回0。如果有多个信道有数据，那么将会把这些数据分配到对应的数据Buffer中。所以关键的地方是，有一个线程来处理所有连接的数据交互，每个连接的数据交互都不是阻塞方式，所以可以同时处理大量的连续请求。</p>
+<h2 id="Buffer的工作方式"><a href="#Buffer的工作方式" class="headerlink" title="Buffer的工作方式"></a>Buffer的工作方式</h2><p>把Buffer简单理解为一组基本数据类型的元素列表，它通过几个变量来保存这个数据的当前位置状态，也就是有4个索引，如下所示：   </p>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">索引</th>
+<th style="text-align:center">说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">capacity</td>
+<td style="text-align:center">缓冲区数组的总长度</td>
+</tr>
+<tr>
+<td style="text-align:center">position</td>
+<td style="text-align:center">下一个要操作的数据元素位置</td>
+</tr>
+<tr>
+<td style="text-align:center">limit</td>
+<td style="text-align:center">缓冲区数组中不可操作的下一个元素的位置，limit&lt;=capacity</td>
+</tr>
+<tr>
+<td style="text-align:center">mark</td>
+<td style="text-align:center">记录当前position的前一根位置或默认是0</td>
+</tr>
+</tbody>
+</table>
+<p>通过Channel获取的IO数据首先要经过OS的Socket缓冲区，再将数据复制到Buffer中，这个OS缓冲区就是底层的TCP所关联的RecvQ或者SendQ队列，从OS缓冲区到用户缓冲区复制数据比较耗性能，Buffer提供了另外一种直接操作OS缓冲区的方式，即ByteBuffer.allocateDirector(size)，这个方法返回的DirectByteBuffer就是与底层存储空间关联的缓冲区，它通过Native代码操作非JVM堆的内存空间。每次创建或者释放的时候都调用一次System.gc()。</p>
+<p>DirectByteBuffer和Non-DirectBuffer对比</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:center"></th>
+<th style="text-align:center">HeapByteBuffer</th>
+<th style="text-align:center">DirectByteBuffer</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">存储位置</td>
+<td style="text-align:center">Java Heap中</td>
+<td style="text-align:center">Native内存中</td>
+</tr>
+<tr>
+<td style="text-align:center">I/O</td>
+<td style="text-align:center">需要在用户地址空间和OS内核地址空间交换数据</td>
+<td style="text-align:center">不需复制</td>
+</tr>
+<tr>
+<td style="text-align:center">内存管理</td>
+<td style="text-align:center">Java GC回收，创建和回收开销少</td>
+<td style="text-align:center">通过调用System.gc()要释放掉Java对象引用的DirectByteBuffer内存空间，如果Java对象长时间持有引用会导致Native内存泄露，创建和回收内存开销较大</td>
+</tr>
+<tr>
+<td style="text-align:center">适用场景</td>
+<td style="text-align:center">并发连接数少于1000，I/O操作较少时比较合适</td>
+<td style="text-align:center">数据量比较大，生命周期比较长的情况下比较合适</td>
+</tr>
+</tbody>
+</table>
+<h2 id="NIO的数据访问方式"><a href="#NIO的数据访问方式" class="headerlink" title="NIO的数据访问方式"></a>NIO的数据访问方式</h2><p>NIO提供了比传统文件访问方式更好的方法，NIO有2个优化方法：一个是FileChannel.transferTo、FileChannel.transferFrom;另一个是FileChannel.map。</p>
 <ol>
-<li><p>空间预分配:  当SDS长度(len)小于1MB，程序会分配和len同样大小的未使用空间，这是len===free。例如修改后字符串长度为13字节，就会分配13字节的未使用空间，此时buf=len+free+1=13+13+1=27字节，其中1是’\0’。当SDS被修改后长度大于1MB，程序会分配1MB的未使用空间。即使len=50MB，也还是分配1MB的未使用空间。通过空间预分配策略，Redis可以有效减少连续修改字符串操作引起的内存分配次数。</p>
+<li><p>FileChannel.transferXXX<br>与传统的访问文件方式相比，可以减少数据从内核到用户空间的复制，数据直接在内核空间中移动，在Linux中使用sendfile系统调用。</p>
 </li>
-<li><p>惰性空间释放:    当SDS字符串进行缩短操作时，程序不会立即重新分配内存来回收多的字节，而是用free记录，等待将来使用。例如SDS：abcxyz，修改成abc，SDS并不会释放多余出来的3个字节，而是将free=free+3，以备将来字符串增长操作时使用。</p>
+<li><p>FileChannel.map<br>将文件按照一定大小块映射为内存区域，当程序访问这个内存区域时将直接操作这个文件数据，这种方式省去了数据从内核空间向用户空间复制的损耗。这种方式适合对大文件的只读性操作，如大文件的MD5校验。这种方式是和OS的底层I/O实现相关的，代码如下：</p>
 </li>
 </ol>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">map</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">int</span> bufferSize = <span class="number">1024</span>;</span><br><span class="line">    String fileName = <span class="string">"test.db"</span>;</span><br><span class="line">    <span class="keyword">long</span> fileLength = <span class="keyword">new</span> File(fileName).length();</span><br><span class="line">    <span class="keyword">int</span> bufferCount = <span class="number">1</span> + (<span class="keyword">int</span>) (fileLength / bufferSize);</span><br><span class="line">    MappedByteBuffer[] buffers = <span class="keyword">new</span> MappedByteBuffer[bufferCount];</span><br><span class="line">    <span class="keyword">long</span> remaining = fileLength;</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; bufferCount; i++) &#123;</span><br><span class="line">        RandomAccessFile file;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            file = <span class="keyword">new</span> RandomAccessFile(fileName, <span class="string">"r"</span>);</span><br><span class="line">            buffers[i] = file.getChannel().map(FileChannel.MapMode.READ_ONLY, i * bufferSize, (<span class="keyword">int</span>) Math.min(remaining, bufferSize));</span><br><span class="line">        &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line"></span><br><span class="line">        &#125;</span><br><span class="line">        remaining -= bufferSize;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+          
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
+                <a class="post-title-link" href="/2016/05/17/Java Web/深入分析IO工作机制/" itemprop="url">
+                  深入分析I/O工作机制
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2016-05-17T00:00:00+08:00" content="2016-05-17">
+              2016-05-17
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/Java-Web/" itemprop="url" rel="index">
+                    <span itemprop="name">Java Web</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+
+          
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h1 id="Java的I-O基本架构"><a href="#Java的I-O基本架构" class="headerlink" title="Java的I/O基本架构"></a>Java的I/O基本架构</h1><p>Java的I/O操作类在java.io下，大概有将近80个类，大概可以分为以下4类：  </p>
 <ul>
-<li>SDS是二进制安全的。</li>
+<li>基于字节操作的IO接口：InputStream和OutputStream  </li>
+<li>基于字符操作的IO接口：Writer和Reader  </li>
+<li>基于磁盘操作的IO接口：File  </li>
+<li>基于网络操作的IO接口：Socket</li>
 </ul>
+<p>前2组主要是传输数据的数据格式，后两组主要是传输数据的方式，虽然Socket不在java.io下，在此仍然放在一起，因为IO核心问题要么是数据格式影响IO操作，要么是传输方式影响IO操作，也就是将什么样的数据写到什么地方的问题。</p>
+<h2 id="字节与字符的转化接口"><a href="#字节与字符的转化接口" class="headerlink" title="字节与字符的转化接口"></a>字节与字符的转化接口</h2><p>数据持久化或网络传输都是以字节进行的，所以必须要有从字符到字节或者字节到字符的转化。<br>InputStreamReader类是从字节到字符的转化桥梁，从InputStream到Reader的过程要指定编码字符集，否则将采用操作系统默认的字符集，很可能会出现乱码问题。StreamDecoder正是完成从字节到字符的解码的实现类。  </p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">try</span> &#123;</span><br><span class="line">	StringBuffer str = <span class="keyword">new</span> StringBuffer();</span><br><span class="line">	<span class="keyword">char</span>[] buf = <span class="keyword">new</span> <span class="keyword">char</span>[<span class="number">1024</span>];</span><br><span class="line">	FileReader f = <span class="keyword">new</span> FileReader(<span class="string">"file"</span>);</span><br><span class="line">	<span class="keyword">while</span>(f.read(buf) &gt; <span class="number">0</span>)&#123;</span><br><span class="line">		str.append(buf);</span><br><span class="line">	&#125;</span><br><span class="line">	str.toString();</span><br><span class="line">&#125; <span class="keyword">catch</span> (IOException e)&#123;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>FileReader就是按照上述方式读取文件，FileReader继承了InputStreamReader，实际上是读取文件流，然后通过StreamDecoder解码成char。<br>写入也是类似过程，通过OutputStreamWriter类完成从字符到字节的过程，有StreamEncoder完成解码过程。</p>
+<hr>
+<h1 id="磁盘I-O工作机制"><a href="#磁盘I-O工作机制" class="headerlink" title="磁盘I/O工作机制"></a>磁盘I/O工作机制</h1><p>读取和写入文件I/O操作都调用操作系统提供的接口，因为磁盘设备是操作系统管理的，应用程序要访问物理设备只能通过系统调用的方式。只要是操作系统调用，就存在内核空间地址和用户空间地址切换的问题，这是操作系统本身安全机制，而将内核程序运行使用的内存空间和用户程序运行的内存空间进行隔离造成的。这样虽然保证了内核程旭运行安全，但必然存在数据可能需要从内核空间向用户空间复制的问题。</p>
+<p>如果遇到非常耗时的操作，如磁盘I/O，数据从磁盘复制到内存空间，然后又从内核空间复制到用户空间，将会非常缓慢。这时OS为了加速I/O访问，在内核空间使用缓存机制，也就是从磁盘读取的文件按照一定的组织方式进行缓存，如果用户访问的是同一段磁盘地址的空间数据，那么OS将从内核缓存中直接取出返回给用户程序，这样可以减少I/O响应时间。</p>
+<h2 id="标准访问文件方式"><a href="#标准访问文件方式" class="headerlink" title="标准访问文件方式"></a>标准访问文件方式</h2><p>当程序调用read()接口时，操作系统检查在内核告诉缓存中有没有需要的数据，如果已经缓存了，那么直接从缓存中返回，如果没有，从磁盘中读取，然后缓存在操作系统缓存中。</p>
+<p>写入方式是，程序调用write()接口将数据从用户地址空间复制到内核地址空间的缓存中。这时对用户程序来说写已经完成，至于什么时候再写到磁盘中由OS决定，除非显示调用了sync同步命令。</p>
+<h2 id="直接I-O方式"><a href="#直接I-O方式" class="headerlink" title="直接I/O方式"></a>直接I/O方式</h2><p>程序直接访问磁盘，不经过OS内核数据缓冲区，这样做的目的是减少一次从内核缓冲区到用户程序缓存的数据复制。这种方式通常是在对数据的缓存管理由应用程序实现的数据库管理系统中。如在数据库管理系统中，系统明确知道应该缓存哪些数据，应该失效哪些数据，还可以对一些热点数据做预加载，提前将热点数据加载到内存，可以加速数据的访问效率。</p>
+<p>但直接I/O也有负面影响，如果访问的数据不在应用程序缓存中，那么每次数据都会从磁盘直接加载，这种加载会非常缓慢。通过直接I/O与异步I/O结合使用，会得到比较好的性能。</p>
+<h2 id="同步访问文件的方式"><a href="#同步访问文件的方式" class="headerlink" title="同步访问文件的方式"></a>同步访问文件的方式</h2><p>数据的读取和写入都是同步操作的，它与标准访问文件不同的是，只有当数据被成功写到磁盘时才返回给应用程序成功的标志。</p>
+<p>这种访问文件的方式性能比较差，只有在一些对数据安全性要求比较高的场景中才会使用，而且通常这种操作方式的硬件都是定制的。</p>
+<h2 id="异步访问文件的方式"><a href="#异步访问文件的方式" class="headerlink" title="异步访问文件的方式"></a>异步访问文件的方式</h2><p>当访问数据的线程发出请求之后，线程会接着去处理其他事情，而不是阻塞等待，当请求的数据返回后继续处理下面的操作。这种访问文件的方式可明显提供应用程序效率，但不会改变访问文件的效率。</p>
+<h2 id="内存映射方式"><a href="#内存映射方式" class="headerlink" title="内存映射方式"></a>内存映射方式</h2><p>OS将内存中某一块区域与磁盘中的文件关联起来，当腰访问内存中一段数据时，转换为访问文件的某一段数据。这种方式目的同样是减少数据从内核空间缓存到用户空间缓存的数据复制操作，因为这2个数据是共享的。</p>
+<h2 id="Java访问磁盘文件"><a href="#Java访问磁盘文件" class="headerlink" title="Java访问磁盘文件"></a>Java访问磁盘文件</h2><p>在Java中通常的File并不代表一个真实存在的文件对象，当指定一个路径描述符时，它会返回一个代表这个路径的虚拟对象，这个可能是一个真实存在的文件或者是一个包含多个文件的目录。大多数情况下，我们并不关心这个文件是否真的存在，而是关心对这个文件到底如何操作。</p>
+<p>何时会真正检查一个文件存不存在？要是在真正要读取这个文件时。例如，FileInputStream类都是操作一个文件的接口，注意到在创建一个FileInputStream对象时会创建一个FileDescriptor对象，其实这个对象就是真正代表一个存在的文件对象的描述。当操作一个文件对象时可以通过getFD()方法获取真正操作的与底层OS相关联的文件描述。例如，可以调用FileDescriptor.sync()方法将操作系统缓存中的数据强制刷新到物理磁盘中。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="title">FileInputStream</span><span class="params">(File file)</span> <span class="keyword">throws</span> FileNotFoundException </span>&#123;</span><br><span class="line">        String name = (file != <span class="keyword">null</span> ? file.getPath() : <span class="keyword">null</span>);</span><br><span class="line">        SecurityManager security = System.getSecurityManager();</span><br><span class="line">        <span class="keyword">if</span> (security != <span class="keyword">null</span>) &#123;</span><br><span class="line">            security.checkRead(name);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> (name == <span class="keyword">null</span>) &#123;</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> NullPointerException();</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> (file.isInvalid()) &#123;</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> FileNotFoundException(<span class="string">"Invalid file path"</span>);</span><br><span class="line">        &#125;</span><br><span class="line">        fd = <span class="keyword">new</span> FileDescriptor();</span><br><span class="line">        fd.incrementAndGetUseCount();</span><br><span class="line">        <span class="keyword">this</span>.path = name;</span><br><span class="line">        open(name);</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+<p>当传入一个文件路径时，将会根据这个路径创建一个File对象来标识这个文件，然后根据这个File对象创建真正读取文件的操作对象，这时将会真正创建一个关联真实存在的磁盘文件的描述符FileDescriptor，通过这个对象可以直接控制这个磁盘文件。</p>
+<hr>
+<h1 id="Java-Socket工作机制"><a href="#Java-Socket工作机制" class="headerlink" title="Java Socket工作机制"></a>Java Socket工作机制</h1><h2 id="建立通信链路"><a href="#建立通信链路" class="headerlink" title="建立通信链路"></a>建立通信链路</h2><p>当客户端要与服务端通信时，客户端首先要创建一个Socket实例，OS将为这个Socket实例分配一个没有被使用的本地端口号，并创建一个包含本地地址、远程地址和端口号的套接字数据结构，这个数据结构将一直保存在系统中直到这个连接关闭。在创建Socket实例的构造函数正确返回之前，将要进行TCP的3次握手协议，TCP握手协议完成后，Socket实例对象将创建完成，否则抛出IOException错误。</p>
+<p>与之对应的服务端将创建一个ServerSocket实例，创建ServerSocket比较简单，只要指定的端口号未被占用，一般实例都会创建成功。同时OS也会为ServerSocket实例创建一个底层数据结构，这个数据结构包含指定监听的端口号和包含监听地址的通配符，通常情况下都是“*”，即监听所有地址。之后当调用accept()方法时，将进入阻塞状态，等待客户端的请求。</p>
+<p>当一个新的请求到来时，将为这个连接创建一个新的套接字数据结构，该套接字数据的信息包含的地址和端口信息正是请求源地址和端口。这个新创建的数据结构将会关联到ServerSocket实例的一个未完成的连接数据结构列表中。注意，这时服务端的与之对应的Socket实例并没有完成创建，而要等到与客户端的3次握手完成后，这个服务端的Socket实例才会返回，并将这个Socket实例对应的数据结构从未完成列表中移到已完成列表中。所以与ServerSocket所关联的列表中每个数据结构都代表与一个客户端建立的TCP连接。</p>
+<h2 id="数据传输"><a href="#数据传输" class="headerlink" title="数据传输"></a>数据传输</h2><p>当连接建立成功，服务端和客户端都会拥有一个Socket实例，每个Socket实例都有一个InputStream和一个OutputStream，并通过这两个对象交换数据。同时我们知道网络I/O都是以字节流传输的，当创建Socket对象时，OS将会为InputStream和OutputStream分别分配一定大小的缓存区，数据的写入和读取都是通过这个缓存区完成。</p>
+<p>写入端将数据写到OutputStream的SendQ队列中，当队列填满时，数据将被转移到另一端InputStream的RecvQ队列中，如果这时RecvQ已经满了，那么OutputStream的write方法将会阻塞，直到RecvQ队列有足够的空间容纳SendQ发送的数据。这个缓存区的大小及写入端的速度和读取端的速度非常影响这个连接的数据传输效率，由于可能会发生阻塞，所有网络I/O与磁盘I/O不同的是数据的写入和读取还要有一个协调的过程，如果两边同时传送数据可能会产生死锁。</p>
 
           
         
@@ -595,7 +554,7 @@
 
   
   <nav class="pagination">
-    <a class="extend prev" rel="prev" href="/page/6/"><i class="fa fa-angle-left"></i></a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/6/">6</a><span class="page-number current">7</span>
+    <a class="extend prev" rel="prev" href="/page/6/"><i class="fa fa-angle-left"></i></a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/6/">6</a><span class="page-number current">7</span><a class="page-number" href="/page/8/">8</a><span class="space">&hellip;</span><a class="page-number" href="/page/17/">17</a><a class="extend next" rel="next" href="/page/8/"><i class="fa fa-angle-right"></i></a>
   </nav>
 
 

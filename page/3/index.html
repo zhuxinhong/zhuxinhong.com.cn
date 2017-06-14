@@ -242,8 +242,8 @@
             
               
                 
-                <a class="post-title-link" href="/2016/05/28/Java Web/深入分析ClassLoader/" itemprop="url">
-                  深入分析ClassLoader
+                <a class="post-title-link" href="/2017/01/23/编写高质量代码/类、对象及方法/" itemprop="url">
+                  类、对象及方法
                 </a>
               
             
@@ -256,8 +256,8 @@
               <i class="fa fa-calendar-o"></i>
             </span>
             <span class="post-meta-item-text">发表于</span>
-            <time itemprop="dateCreated" datetime="2016-05-28T00:00:00+08:00" content="2016-05-28">
-              2016-05-28
+            <time itemprop="dateCreated" datetime="2017-01-23T00:00:00+08:00" content="2017-01-23">
+              2017-01-23
             </time>
           </span>
 
@@ -270,8 +270,8 @@
               <span class="post-meta-item-text">分类于</span>
               
                 <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
-                  <a href="/categories/Java-Web/" itemprop="url" rel="index">
-                    <span itemprop="name">Java Web</span>
+                  <a href="/categories/编写高质量代码/" itemprop="url" rel="index">
+                    <span itemprop="name">编写高质量代码</span>
                   </a>
                 </span>
 
@@ -305,519 +305,36 @@
       
         
           
-            <p>ClassLoader除了能将Class加载到JVM中之外，还能审查每个类该由谁加载。它是一种父优先的等级加载机制。</p>
-<h2 id="ClassLoader等级加载机制"><a href="#ClassLoader等级加载机制" class="headerlink" title="ClassLoader等级加载机制"></a>ClassLoader等级加载机制</h2><ol>
-<li>Bootstrap ClassLoader，主要加载JVM自身工作需要的类，完全由JVM自己控制，外部无法访问，这个ClassLoader不遵守等级加载规则。</li>
-<li>ExtClassLoader，不是JVM亲自实现。服务目标在System.getProperties(“java.ext.dirs”)目录下。</li>
-<li>AppClassLoader，父类是ExtClassLoader，所有在System.getProperties(“java.class.path”)目录下的类都可以被这个类加载器加载，这就是我们常用到的classpath。</li>
-</ol>
-<p>如果我们要实现自己的类加载器，不管是直接实现抽象类ClassLoader，还是继承URLClassLoader或其他子类，它的父加载器都是AppClassLoader，不管调用哪个父类构造器，创建对象都必须最终调用getSystemCLassLoader()作为父加载器，而getSystemClassLoader()方法获取到的正是AppClassLoader。</p>
-<p>Bootstrap ClassLoader并不属于JVM的类层次结构，因为BootstrapClassLoader并没有遵守ClassLoader的加载规则。Bootstrap ClassLoader并没有子类，ExtClassLoader父类也不是Bootstrap ClassLoader，ExtClassLoader并没有父类，应用中能提取到的顶层父类是ExtClassLoader。</p>
-<p>ExtClassLoader和AppClassLoader都位于sun.misc.Launcher类中，它们是Launcher类的内部类，都继承了URLClassLoader类，URLClassLoader实现了抽象类ClassLoader。</p>
-<h2 id="如何加载class文件"><a href="#如何加载class文件" class="headerlink" title="如何加载class文件"></a>如何加载class文件</h2><p>抽象类ClassLoader中并没有定义如何加载，需要子类实现findClass()方法。看一下URLClassLoader实现findClass()过程：    </p>
+            <ul>
+<li><a href="#构造函数尽量简化">构造函数尽量简化</a></li>
+<li><a href="#使用匿名类的构造函数">使用匿名类的构造函数</a></li>
+</ul>
+<h3 id="构造函数尽量简化"><a href="#构造函数尽量简化" class="headerlink" title="构造函数尽量简化"></a>构造函数尽量简化</h3><p>看一段代码</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Sample2</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        Server s = <span class="keyword">new</span> SimpleServer(<span class="number">1000</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">abstract</span> <span class="class"><span class="keyword">class</span> <span class="title">Server</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> DEFAULT_PORT = <span class="number">40000</span>;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">Server</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">int</span> port = getPort();</span><br><span class="line">        System.out.println(<span class="string">"端口号:"</span> + port);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">protected</span> <span class="keyword">abstract</span> <span class="keyword">int</span> <span class="title">getPort</span><span class="params">()</span></span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">SimpleServer</span> <span class="keyword">extends</span> <span class="title">Server</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">int</span> port = <span class="number">100</span>;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">SimpleServer</span><span class="params">(<span class="keyword">int</span> _port)</span> </span>&#123;</span><br><span class="line">        port = _port;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">protected</span> <span class="keyword">int</span> <span class="title">getPort</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> Math.random() &gt; <span class="number">0.5</span> ? port : DEFAULT_PORT;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>多次执行，结果只有2种，永远不会出现“端口号:100”或是”端口号:1000”</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">端口号:40000</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">端口号:0</span><br></pre></td></tr></table></figure>
+<p>子类实例化时，会先初始化父类（这里只是初始化不是生成父类对象），也就是初始化父类的变量，调用父类的构造函数，然后再初始化子类的变量，调用子类构造函数。</p>
+<p>接着分析上面的程序，执行过程如下：</p>
 <ol>
-<li>通过URLClassPath类取得加载的class文件字节流，找到后读取它的byte字节流。    </li>
-<li>调用defineClass()创建类对象。</li>
+<li>子类SimpleServer的构造函数接收int类型参数：1000。</li>
+<li>父类初始化常变量，DEFAULT_PORT初始化为40000。</li>
+<li>执行父类午餐构造函数，即子类的有参构造默认包含了super()方法。</li>
+<li>父类构造函数执行到getPort，调用子类实现。</li>
+<li>子类的getPort返回port值（注意，此时port变量还未赋值，是0）或DEFAULT_PORT（此时是40000）了。</li>
+<li>父类初始化完毕，开始初始化子类实例变量，port赋值100。</li>
+<li>执行子类构造函数，port被重新赋值为1000.</li>
+<li>子类SimpleServer实例化结束，对象创建完毕。</li>
 </ol>
-<p>创建URLClassLoader对象会根据传过来的URL数组中路径来判断是文件还是jar包，根据路径的不同分别创建FileLoader和JarLoader，或者使用默认的加载器。</p>
-<h3 id="验证与解析"><a href="#验证与解析" class="headerlink" title="验证与解析"></a>验证与解析</h3><ol>
-<li>字节码验证，确保格式正确，行为正确。</li>
-<li>类准备，准备字段、方法和实现接口所必须的数据结构。</li>
-<li>解析，类装入器装入类引用的其他所有类。    </li>
-<li>初始化对象，该阶段末尾静态字段被初始化默认值。</li>
-</ol>
-<h2 id="实现自己的ClassLoader"><a href="#实现自己的ClassLoader" class="headerlink" title="实现自己的ClassLoader"></a>实现自己的ClassLoader</h2><p>应用场景：    </p>
-<ul>
-<li>在自定义路径下查找自定义的class类文件，也许我们需要的class文件并不总是在classPath下面。    </li>
-<li>对我们自己要加载的类做特殊处理，如保证通过网络传输的安全性，可以将类经过加密后传输，在加载到JVM之前需要对类的字节码再解密。        </li>
-<li>可以定义类的实现机制，例如实现热部署：检查已经加载的class文件是否被修改，如修改可重新加载。    </li>
-</ul>
-<p>JVM表示一个类是否是同一个类有两个条件：    </p>
-<ol>
-<li>检查完整类名是否一致。        </li>
-<li>检查加载这个类的ClassLoader是否是同一个，这里指的是ClassLoader实例是否是同一个。</li>
-</ol>
-
-          
-        
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
-      
-
-  
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-            
-            
-              
-                
-                <a class="post-title-link" href="/2016/05/22/Java Web/Tomcat的系统架构/" itemprop="url">
-                  Tomcat系统架构
-                </a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            <span class="post-meta-item-icon">
-              <i class="fa fa-calendar-o"></i>
-            </span>
-            <span class="post-meta-item-text">发表于</span>
-            <time itemprop="dateCreated" datetime="2016-05-22T00:00:00+08:00" content="2016-05-22">
-              2016-05-22
-            </time>
-          </span>
-
-          
-            <span class="post-category" >
-              &nbsp; | &nbsp;
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-              
-                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
-                  <a href="/categories/Java-Web/" itemprop="url" rel="index">
-                    <span itemprop="name">Java Web</span>
-                  </a>
-                </span>
-
-                
-                
-
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-
-          
-          
-
-          
-        </div>
-      </header>
-    
-
-
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h1 id="Tomcat总体结构"><a href="#Tomcat总体结构" class="headerlink" title="Tomcat总体结构"></a>Tomcat总体结构</h1><p>Tomcat有2个核心组件：  </p>
-<ul>
-<li>Connector  </li>
-<li>Container  </li>
-</ul>
-<p>其中Connector组件可以被替换，一个Container可以选择对用多个Connector。多个Connector和一个Container形成一个Service。有了Service就可以对外提供服务了。但Service需要一个生存环境，这时就非Server莫属了。所以整个Tomcat的生命周期由Server控制。</p>
-<p>Connector主要负责对外交流，Container主要处理Connector接受的请求，主要处理内部事务。其实，Service只是在Connector和Container外面多包一层，把它们组装在一起，对外提供服务。一个Service可以设置多个Connector，但只能有一个Container容器。</p>
-<h2 id="Service"><a href="#Service" class="headerlink" title="Service"></a>Service</h2><p><img src="http://o7s628cn2.bkt.clouddn.com/image/javaweb/Service.png" alt="Service"></p>
-<p>从org.apache.catalina.Service接口中定义方法可以看出，它主要是为了关联Connector和Container，同时会初始化其他组件。所有组件的生命周期在一个Lifecycle的接口中控制。</p>
-<p><img src="http://o7s628cn2.bkt.clouddn.com/image/javaweb/StandardService.png" alt="StandardService"></p>
-<p>从StandardService类结构方法可以看出，除了Service接口方法的实现以及控制组件生命周期的Lifecycle接口的实现，还有几个方法用于实现时间监听方法。不仅是这个Service组件，在Tomcat中其他组件也同样有这个几个方法，这也是一个典型设计模式。</p>
-<p>下面看一下StandardService中几个主要方法，setContainer方法如下：</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setContainer</span><span class="params">(Container container)</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">        Container oldContainer = <span class="keyword">this</span>.container;</span><br><span class="line">        <span class="keyword">if</span> ((oldContainer != <span class="keyword">null</span>) &amp;&amp; (oldContainer <span class="keyword">instanceof</span> Engine))</span><br><span class="line">            ((Engine) oldContainer).setService(<span class="keyword">null</span>);</span><br><span class="line">        <span class="keyword">this</span>.container = container;</span><br><span class="line">        <span class="keyword">if</span> ((<span class="keyword">this</span>.container != <span class="keyword">null</span>) &amp;&amp; (<span class="keyword">this</span>.container <span class="keyword">instanceof</span> Engine))</span><br><span class="line">            ((Engine) <span class="keyword">this</span>.container).setService(<span class="keyword">this</span>);</span><br><span class="line">        <span class="keyword">if</span> (getState().isAvailable() &amp;&amp; (<span class="keyword">this</span>.container != <span class="keyword">null</span>)) &#123;</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                <span class="keyword">this</span>.container.start();</span><br><span class="line">            &#125; <span class="keyword">catch</span> (LifecycleException e) &#123;</span><br><span class="line">                <span class="comment">// Ignore</span></span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> (getState().isAvailable() &amp;&amp; (oldContainer != <span class="keyword">null</span>)) &#123;</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                oldContainer.stop();</span><br><span class="line">            &#125; <span class="keyword">catch</span> (LifecycleException e) &#123;</span><br><span class="line">                <span class="comment">// Ignore</span></span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// Report this property change to interested listeners</span></span><br><span class="line">        support.firePropertyChange(<span class="string">"container"</span>, oldContainer, <span class="keyword">this</span>.container);</span><br><span class="line"></span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
-<p>这段代码很简单，首先判断当前Service有没有已经关联的Container，如果已经关联，去除这个关联关系—-((Engine) oldContainer).setService(null)。如果这个oldContainer已经启动了，结束它的生命周期，然后再替换新的。</p>
-<p>AddConnector方法如下：</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">addConnector</span><span class="params">(Connector connector)</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">synchronized</span> (connectors) &#123;</span><br><span class="line">            connector.setService(<span class="keyword">this</span>);</span><br><span class="line">            Connector results[] = <span class="keyword">new</span> Connector[connectors.length + <span class="number">1</span>];</span><br><span class="line">            System.arraycopy(connectors, <span class="number">0</span>, results, <span class="number">0</span>, connectors.length);</span><br><span class="line">            results[connectors.length] = connector;</span><br><span class="line">            connectors = results;</span><br><span class="line"></span><br><span class="line">            <span class="keyword">if</span> (getState().isAvailable()) &#123;</span><br><span class="line">                <span class="keyword">try</span> &#123;</span><br><span class="line">                    connector.start();</span><br><span class="line">                &#125; <span class="keyword">catch</span> (LifecycleException e) &#123;</span><br><span class="line">                    log.error(sm.getString(</span><br><span class="line">                            <span class="string">"standardService.connector.startFailed"</span>,</span><br><span class="line">                            connector), e);</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            <span class="comment">// Report this property change to interested listeners</span></span><br><span class="line">            support.firePropertyChange(<span class="string">"connector"</span>, <span class="keyword">null</span>, connector);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
-<p>首先设置关联关系，然后初始化，开始新的生命周期。Connector用的是数组，而不是List集合，从性能角度考虑可以理解。有趣的是这里用了数组但并没有一开始就分配一个固定大小的数组。</p>
-<h2 id="Server"><a href="#Server" class="headerlink" title="Server"></a>Server</h2><p>Server要完成的任务很简单，提供一个接口让其他程序能够访问到这个Service集合，同时要维护它所包含的所有Service生命周期，包括如何初始化、如何结束服务、如何找到别人要访问的Service。</p>
-<p>Server的类结构图如下：<br><img src="http://o7s628cn2.bkt.clouddn.com/image/javaweb/Server.png" alt="Server"></p>
-<p>它的标准实现类StandardServer实现了上面这些方法，同时也实现了Lifecycle、MbeanRegistration两个接口的所有方法。下面看一下StandardServer一个重要方法addService的实现：</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">addService</span><span class="params">(Service service)</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    service.setServer(<span class="keyword">this</span>);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">synchronized</span> (services) &#123;</span><br><span class="line">        Service results[] = <span class="keyword">new</span> Service[services.length + <span class="number">1</span>];</span><br><span class="line">        System.arraycopy(services, <span class="number">0</span>, results, <span class="number">0</span>, services.length);</span><br><span class="line">        results[services.length] = service;</span><br><span class="line">        services = results;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> (getState().isAvailable()) &#123;</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                service.start();</span><br><span class="line">            &#125; <span class="keyword">catch</span> (LifecycleException e) &#123;</span><br><span class="line">                <span class="comment">// Ignore</span></span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// Report this property change to interested listeners</span></span><br><span class="line">        support.firePropertyChange(<span class="string">"service"</span>, <span class="keyword">null</span>, service);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>从第一行就知道了Service和Server是相互关联的，Server也是和Service管理Connector一样管理它，也是将Service放在一个数组中。</p>
-<h2 id="Lifecycle"><a href="#Lifecycle" class="headerlink" title="Lifecycle"></a>Lifecycle</h2><p>在Tomcat中组件的生命周期通过Lifecycle接口来控制，组件只要集成这个接口并实现其中方法就可以统一被拥有它的组件控制了。最高级的组件就是Server，而控制Server的是Startup，也就是启动和关闭Tomcat。Lifecycle接口方法的实现都在其他组件中，组件的生命周期由包含它的父组件控制，所以它的Start方法自然就是调用它下面组件的Start方法，Stop方法也是一样。</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">startInternal</span><span class="params">()</span> <span class="keyword">throws</span> LifecycleException </span>&#123;</span><br><span class="line"></span><br><span class="line">    fireLifecycleEvent(CONFIGURE_START_EVENT, <span class="keyword">null</span>);</span><br><span class="line">    setState(LifecycleState.STARTING);</span><br><span class="line"></span><br><span class="line">    globalNamingResources.start();</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// Start our defined Services</span></span><br><span class="line">    <span class="keyword">synchronized</span> (services) &#123;</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; services.length; i++) &#123;</span><br><span class="line">            services[i].start();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">stopInternal</span><span class="params">()</span> <span class="keyword">throws</span> LifecycleException </span>&#123;</span><br><span class="line"></span><br><span class="line">    setState(LifecycleState.STOPPING);</span><br><span class="line">    fireLifecycleEvent(CONFIGURE_STOP_EVENT, <span class="keyword">null</span>);</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// Stop our defined Services</span></span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; services.length; i++) &#123;</span><br><span class="line">        services[i].stop();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    globalNamingResources.stop();</span><br><span class="line">    </span><br><span class="line">    stopAwait();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>监听的代码会包围Service组件的启动过程，但所有Service必须要实现Lifecycle接口，这样做会更加灵活。</p>
-<h2 id="Connector组件"><a href="#Connector组件" class="headerlink" title="Connector组件"></a>Connector组件</h2><p>它的主要任务数负责接收浏览器发过来的TCP连接请求，创建一个Request和Response对象分别用于和请求端交换数据。然后会产生一个线程来处理这个请求并把产生的Request和Response对象传给处理这个请求的线程，处理这个请求的线程就是Container要做的事了。</p>
-<p>在Tomcat7中，Connector有3种选择：    </p>
-<ul>
-<li>BIO–Http11Protocol</li>
-<li>NIO–Http11NioProtocol</li>
-<li>apr–Http11AprProtocol</li>
-</ul>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="title">Connector</span><span class="params">(String protocol)</span> </span>&#123;</span><br><span class="line">    setProtocol(protocol);</span><br><span class="line">    <span class="comment">// Instantiate protocol handler</span></span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        Class&lt;?&gt; clazz = Class.forName(protocolHandlerClassName);</span><br><span class="line">        <span class="keyword">this</span>.protocolHandler = (ProtocolHandler) clazz.newInstance();</span><br><span class="line">    &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">        log.error(sm.getString(</span><br><span class="line">                <span class="string">"coyoteConnector.protocolHandlerInstantiationFailed"</span>), e);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>通过上述代码可以看出，Connector会根据我们在server.xml中配置的Connector类型来初始化。</p>
-<p>这里以常用的NIO来说明，找到Http11NioProtocol基类的start方法：</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">start</span><span class="params">()</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (getLog().isInfoEnabled())</span><br><span class="line">        getLog().info(sm.getString(<span class="string">"abstractProtocolHandler.start"</span>,</span><br><span class="line">                getNameInternal()));</span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        endpoint.start();</span><br><span class="line">    &#125; <span class="keyword">catch</span> (Exception ex) &#123;</span><br><span class="line">        getLog().error(sm.getString(<span class="string">"abstractProtocolHandler.startError"</span>,</span><br><span class="line">                getNameInternal()), ex);</span><br><span class="line">        <span class="keyword">throw</span> ex;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Start async timeout thread</span></span><br><span class="line">    asyncTimeout = <span class="keyword">new</span> AsyncTimeout();</span><br><span class="line">    Thread timeoutThread = <span class="keyword">new</span> Thread(asyncTimeout, getNameInternal() + <span class="string">"-AsyncTimeout"</span>);</span><br><span class="line">    timeoutThread.setPriority(endpoint.getThreadPriority());</span><br><span class="line">    timeoutThread.setDaemon(<span class="keyword">true</span>);</span><br><span class="line">    timeoutThread.start();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>start方法中调用endpoint.start()，找到对应方法，在NioEndpoint类中：</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">startInternal</span><span class="params">()</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> (!running) &#123;</span><br><span class="line">            running = <span class="keyword">true</span>;</span><br><span class="line">            paused = <span class="keyword">false</span>;</span><br><span class="line"></span><br><span class="line">            processorCache = <span class="keyword">new</span> SynchronizedStack&lt;&gt;(SynchronizedStack.DEFAULT_SIZE,</span><br><span class="line">                    socketProperties.getProcessorCache());</span><br><span class="line">            eventCache = <span class="keyword">new</span> SynchronizedStack&lt;&gt;(SynchronizedStack.DEFAULT_SIZE,</span><br><span class="line">                            socketProperties.getEventCache());</span><br><span class="line">            nioChannels = <span class="keyword">new</span> SynchronizedStack&lt;&gt;(SynchronizedStack.DEFAULT_SIZE,</span><br><span class="line">                    socketProperties.getBufferPool());</span><br><span class="line"></span><br><span class="line">            <span class="comment">// Create worker collection</span></span><br><span class="line">            <span class="keyword">if</span> ( getExecutor() == <span class="keyword">null</span> ) &#123;</span><br><span class="line">                createExecutor();</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            initializeConnectionLatch();</span><br><span class="line"></span><br><span class="line">            <span class="comment">// Start poller threads</span></span><br><span class="line">            pollers = <span class="keyword">new</span> Poller[getPollerThreadCount()];</span><br><span class="line">            <span class="keyword">for</span> (<span class="keyword">int</span> i=<span class="number">0</span>; i&lt;pollers.length; i++) &#123;</span><br><span class="line">                pollers[i] = <span class="keyword">new</span> Poller();</span><br><span class="line">                Thread pollerThread = <span class="keyword">new</span> Thread(pollers[i], getName() + <span class="string">"-ClientPoller-"</span>+i);</span><br><span class="line">                pollerThread.setPriority(threadPriority);</span><br><span class="line">                pollerThread.setDaemon(<span class="keyword">true</span>);</span><br><span class="line">                pollerThread.start();</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            startAcceptorThreads();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
-<p>当执行到startAcceptorThreads()时，就会进入等待请求的状态，知道一个新的请求到来才会激活它继续执行。</p>
-
-          
-        
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
-      
-
-  
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-            
-            
-              
-                
-                <a class="post-title-link" href="/2016/05/18/Java Web/NIO的工作机制/" itemprop="url">
-                  NIO工作机制
-                </a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            <span class="post-meta-item-icon">
-              <i class="fa fa-calendar-o"></i>
-            </span>
-            <span class="post-meta-item-text">发表于</span>
-            <time itemprop="dateCreated" datetime="2016-05-18T00:00:00+08:00" content="2016-05-18">
-              2016-05-18
-            </time>
-          </span>
-
-          
-            <span class="post-category" >
-              &nbsp; | &nbsp;
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-              
-                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
-                  <a href="/categories/Java-Web/" itemprop="url" rel="index">
-                    <span itemprop="name">Java Web</span>
-                  </a>
-                </span>
-
-                
-                
-
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-
-          
-          
-
-          
-        </div>
-      </header>
-    
-
-
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h1 id="NIO的工作方式"><a href="#NIO的工作方式" class="headerlink" title="NIO的工作方式"></a>NIO的工作方式</h1><h2 id="NIO工作机制"><a href="#NIO工作机制" class="headerlink" title="NIO工作机制"></a>NIO工作机制</h2><p>NIO引入了Channel、Buffer和Selector，Channel是高速通道，Buffer是高速通道上的具体单位，Selector是调度器。当我们调用write()往SendQ写数据时，当一次写的数据超过SendQ长度时需要按照SendQ的长度进行分割，在这个过程中需要将用户空间数据和内核地址空间进行切换，而这个切换不是你可以控制的，但在Buffer中我们可以控制Buffer的容量、是否扩容以及如何扩容。</p>
-<p>调用Selector的静态工厂创建一个选择器，创建一个服务端的Channel，绑定到一个Socket对象，并把这个通信信道注册到选择器上，把这个通信信道设置为非阻塞模式。然后就可以调用Selector的selectedKeys方法来检查已经注册在这个选择器上的所有通信信道是否有需要的事件发生，如果与某个事件发生，将会返回所有的SelectionKey，通过这个对象的Channel方法就可以就可以取得这个通信信道对象，从而读取通信的数据，而这里读取的数据是Buffer，这个Buffer是我们可以控制的缓冲器。</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">selector</span><span class="params">()</span> <span class="keyword">throws</span> IOException </span>&#123;</span><br><span class="line">        ByteBuffer buffer = ByteBuffer.allocate(<span class="number">1024</span>);</span><br><span class="line">        Selector selector = Selector.open();</span><br><span class="line">        ServerSocketChannel ssc = ServerSocketChannel.open();</span><br><span class="line">        ssc.configureBlocking(<span class="keyword">false</span>); <span class="comment">//设置为非阻塞方式</span></span><br><span class="line">        ssc.register(selector, SelectionKey.OP_ACCEPT);</span><br><span class="line">        <span class="keyword">while</span> (<span class="keyword">true</span>) &#123;</span><br><span class="line">            Set selectedKeys = selector.selectedKeys();</span><br><span class="line">            Iterator it = selectedKeys.iterator();</span><br><span class="line">            <span class="keyword">while</span> (it.hasNext()) &#123;</span><br><span class="line">                SelectionKey key = (SelectionKey) it.next();</span><br><span class="line">                <span class="keyword">if</span> ((key.readyOps() &amp; SelectionKey.OP_ACCEPT) == SelectionKey.OP_ACCEPT) &#123;</span><br><span class="line">                    ServerSocketChannel ssChannel = (ServerSocketChannel) key.channel();</span><br><span class="line">                    SocketChannel sc = ssChannel.accept(); <span class="comment">//接受到服务端请求</span></span><br><span class="line">                    sc.configureBlocking(<span class="keyword">false</span>);</span><br><span class="line">                    sc.register(selector, SelectionKey.OP_READ);</span><br><span class="line">                    it.remove();</span><br><span class="line">                &#125; <span class="keyword">else</span> <span class="keyword">if</span> ((key.readyOps() &amp; SelectionKey.OP_READ) == SelectionKey.OP_READ) &#123;</span><br><span class="line">                    SocketChannel sc = (SocketChannel) key.channel();</span><br><span class="line">                    <span class="keyword">while</span> (<span class="keyword">true</span>) &#123;</span><br><span class="line">                        buffer.clear();</span><br><span class="line">                        <span class="keyword">int</span> n = sc.read(buffer);</span><br><span class="line">                        <span class="keyword">if</span> (n &lt;= <span class="number">0</span>) &#123;</span><br><span class="line">                            <span class="keyword">break</span>;</span><br><span class="line">                        &#125;</span><br><span class="line">                        buffer.flip();</span><br><span class="line">                    &#125;</span><br><span class="line">                    it.remove();</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
-<p>在上面这段程序中，将Server端的监听连接请求的事件和处理请求的事件放在一个线程中，但是在事件应用中，我们通常会把它们放在两个线程中：一个线程专门负责监听客户端的连接请求，而且是以阻塞方式运行的；另外一个线程专门负责处理请求，这个专门处理请求的线程才会真正采用NIO的方式，像Web服务器Tomcat和Jetty都是使用这个处理方式。</p>
-<p>Selector可以同时监听一组通信信道(Channel)上的IO状态，前提是这个Selector已经注册到这些通信信道中。选择器Selector可以调用select()方法检查已经注册的通信信道上IO是否已经准备好，如果没有至少一个信道IO状态有变化，那么select方法会阻塞等待或在超时时间后返回0。如果有多个信道有数据，那么将会把这些数据分配到对应的数据Buffer中。所以关键的地方是，有一个线程来处理所有连接的数据交互，每个连接的数据交互都不是阻塞方式，所以可以同时处理大量的连续请求。</p>
-<h2 id="Buffer的工作方式"><a href="#Buffer的工作方式" class="headerlink" title="Buffer的工作方式"></a>Buffer的工作方式</h2><p>把Buffer简单理解为一组基本数据类型的元素列表，它通过几个变量来保存这个数据的当前位置状态，也就是有4个索引，如下所示：   </p>
-<table>
-<thead>
-<tr>
-<th style="text-align:center">索引</th>
-<th style="text-align:center">说明</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align:center">capacity</td>
-<td style="text-align:center">缓冲区数组的总长度</td>
-</tr>
-<tr>
-<td style="text-align:center">position</td>
-<td style="text-align:center">下一个要操作的数据元素位置</td>
-</tr>
-<tr>
-<td style="text-align:center">limit</td>
-<td style="text-align:center">缓冲区数组中不可操作的下一个元素的位置，limit&lt;=capacity</td>
-</tr>
-<tr>
-<td style="text-align:center">mark</td>
-<td style="text-align:center">记录当前position的前一根位置或默认是0</td>
-</tr>
-</tbody>
-</table>
-<p>通过Channel获取的IO数据首先要经过OS的Socket缓冲区，再将数据复制到Buffer中，这个OS缓冲区就是底层的TCP所关联的RecvQ或者SendQ队列，从OS缓冲区到用户缓冲区复制数据比较耗性能，Buffer提供了另外一种直接操作OS缓冲区的方式，即ByteBuffer.allocateDirector(size)，这个方法返回的DirectByteBuffer就是与底层存储空间关联的缓冲区，它通过Native代码操作非JVM堆的内存空间。每次创建或者释放的时候都调用一次System.gc()。</p>
-<p>DirectByteBuffer和Non-DirectBuffer对比</p>
-<table>
-<thead>
-<tr>
-<th style="text-align:center"></th>
-<th style="text-align:center">HeapByteBuffer</th>
-<th style="text-align:center">DirectByteBuffer</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align:center">存储位置</td>
-<td style="text-align:center">Java Heap中</td>
-<td style="text-align:center">Native内存中</td>
-</tr>
-<tr>
-<td style="text-align:center">I/O</td>
-<td style="text-align:center">需要在用户地址空间和OS内核地址空间交换数据</td>
-<td style="text-align:center">不需复制</td>
-</tr>
-<tr>
-<td style="text-align:center">内存管理</td>
-<td style="text-align:center">Java GC回收，创建和回收开销少</td>
-<td style="text-align:center">通过调用System.gc()要释放掉Java对象引用的DirectByteBuffer内存空间，如果Java对象长时间持有引用会导致Native内存泄露，创建和回收内存开销较大</td>
-</tr>
-<tr>
-<td style="text-align:center">适用场景</td>
-<td style="text-align:center">并发连接数少于1000，I/O操作较少时比较合适</td>
-<td style="text-align:center">数据量比较大，生命周期比较长的情况下比较合适</td>
-</tr>
-</tbody>
-</table>
-<h2 id="NIO的数据访问方式"><a href="#NIO的数据访问方式" class="headerlink" title="NIO的数据访问方式"></a>NIO的数据访问方式</h2><p>NIO提供了比传统文件访问方式更好的方法，NIO有2个优化方法：一个是FileChannel.transferTo、FileChannel.transferFrom;另一个是FileChannel.map。</p>
-<ol>
-<li><p>FileChannel.transferXXX<br>与传统的访问文件方式相比，可以减少数据从内核到用户空间的复制，数据直接在内核空间中移动，在Linux中使用sendfile系统调用。</p>
-</li>
-<li><p>FileChannel.map<br>将文件按照一定大小块映射为内存区域，当程序访问这个内存区域时将直接操作这个文件数据，这种方式省去了数据从内核空间向用户空间复制的损耗。这种方式适合对大文件的只读性操作，如大文件的MD5校验。这种方式是和OS的底层I/O实现相关的，代码如下：</p>
-</li>
-</ol>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">map</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">int</span> bufferSize = <span class="number">1024</span>;</span><br><span class="line">    String fileName = <span class="string">"test.db"</span>;</span><br><span class="line">    <span class="keyword">long</span> fileLength = <span class="keyword">new</span> File(fileName).length();</span><br><span class="line">    <span class="keyword">int</span> bufferCount = <span class="number">1</span> + (<span class="keyword">int</span>) (fileLength / bufferSize);</span><br><span class="line">    MappedByteBuffer[] buffers = <span class="keyword">new</span> MappedByteBuffer[bufferCount];</span><br><span class="line">    <span class="keyword">long</span> remaining = fileLength;</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; bufferCount; i++) &#123;</span><br><span class="line">        RandomAccessFile file;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            file = <span class="keyword">new</span> RandomAccessFile(fileName, <span class="string">"r"</span>);</span><br><span class="line">            buffers[i] = file.getChannel().map(FileChannel.MapMode.READ_ONLY, i * bufferSize, (<span class="keyword">int</span>) Math.min(remaining, bufferSize));</span><br><span class="line">        &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line"></span><br><span class="line">        &#125;</span><br><span class="line">        remaining -= bufferSize;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-          
-        
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
-      
-
-  
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-            
-            
-              
-                
-                <a class="post-title-link" href="/2016/05/17/Java Web/深入分析IO工作机制/" itemprop="url">
-                  深入分析I/O工作机制
-                </a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            <span class="post-meta-item-icon">
-              <i class="fa fa-calendar-o"></i>
-            </span>
-            <span class="post-meta-item-text">发表于</span>
-            <time itemprop="dateCreated" datetime="2016-05-17T00:00:00+08:00" content="2016-05-17">
-              2016-05-17
-            </time>
-          </span>
-
-          
-            <span class="post-category" >
-              &nbsp; | &nbsp;
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-              
-                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
-                  <a href="/categories/Java-Web/" itemprop="url" rel="index">
-                    <span itemprop="name">Java Web</span>
-                  </a>
-                </span>
-
-                
-                
-
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-
-          
-          
-
-          
-        </div>
-      </header>
-    
-
-
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h1 id="Java的I-O基本架构"><a href="#Java的I-O基本架构" class="headerlink" title="Java的I/O基本架构"></a>Java的I/O基本架构</h1><p>Java的I/O操作类在java.io下，大概有将近80个类，大概可以分为以下4类：  </p>
-<ul>
-<li>基于字节操作的IO接口：InputStream和OutputStream  </li>
-<li>基于字符操作的IO接口：Writer和Reader  </li>
-<li>基于磁盘操作的IO接口：File  </li>
-<li>基于网络操作的IO接口：Socket</li>
-</ul>
-<p>前2组主要是传输数据的数据格式，后两组主要是传输数据的方式，虽然Socket不在java.io下，在此仍然放在一起，因为IO核心问题要么是数据格式影响IO操作，要么是传输方式影响IO操作，也就是将什么样的数据写到什么地方的问题。</p>
-<h2 id="字节与字符的转化接口"><a href="#字节与字符的转化接口" class="headerlink" title="字节与字符的转化接口"></a>字节与字符的转化接口</h2><p>数据持久化或网络传输都是以字节进行的，所以必须要有从字符到字节或者字节到字符的转化。<br>InputStreamReader类是从字节到字符的转化桥梁，从InputStream到Reader的过程要指定编码字符集，否则将采用操作系统默认的字符集，很可能会出现乱码问题。StreamDecoder正是完成从字节到字符的解码的实现类。  </p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">try</span> &#123;</span><br><span class="line">	StringBuffer str = <span class="keyword">new</span> StringBuffer();</span><br><span class="line">	<span class="keyword">char</span>[] buf = <span class="keyword">new</span> <span class="keyword">char</span>[<span class="number">1024</span>];</span><br><span class="line">	FileReader f = <span class="keyword">new</span> FileReader(<span class="string">"file"</span>);</span><br><span class="line">	<span class="keyword">while</span>(f.read(buf) &gt; <span class="number">0</span>)&#123;</span><br><span class="line">		str.append(buf);</span><br><span class="line">	&#125;</span><br><span class="line">	str.toString();</span><br><span class="line">&#125; <span class="keyword">catch</span> (IOException e)&#123;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>FileReader就是按照上述方式读取文件，FileReader继承了InputStreamReader，实际上是读取文件流，然后通过StreamDecoder解码成char。<br>写入也是类似过程，通过OutputStreamWriter类完成从字符到字节的过程，有StreamEncoder完成解码过程。</p>
 <hr>
-<h1 id="磁盘I-O工作机制"><a href="#磁盘I-O工作机制" class="headerlink" title="磁盘I/O工作机制"></a>磁盘I/O工作机制</h1><p>读取和写入文件I/O操作都调用操作系统提供的接口，因为磁盘设备是操作系统管理的，应用程序要访问物理设备只能通过系统调用的方式。只要是操作系统调用，就存在内核空间地址和用户空间地址切换的问题，这是操作系统本身安全机制，而将内核程序运行使用的内存空间和用户程序运行的内存空间进行隔离造成的。这样虽然保证了内核程旭运行安全，但必然存在数据可能需要从内核空间向用户空间复制的问题。</p>
-<p>如果遇到非常耗时的操作，如磁盘I/O，数据从磁盘复制到内存空间，然后又从内核空间复制到用户空间，将会非常缓慢。这时OS为了加速I/O访问，在内核空间使用缓存机制，也就是从磁盘读取的文件按照一定的组织方式进行缓存，如果用户访问的是同一段磁盘地址的空间数据，那么OS将从内核缓存中直接取出返回给用户程序，这样可以减少I/O响应时间。</p>
-<h2 id="标准访问文件方式"><a href="#标准访问文件方式" class="headerlink" title="标准访问文件方式"></a>标准访问文件方式</h2><p>当程序调用read()接口时，操作系统检查在内核告诉缓存中有没有需要的数据，如果已经缓存了，那么直接从缓存中返回，如果没有，从磁盘中读取，然后缓存在操作系统缓存中。</p>
-<p>写入方式是，程序调用write()接口将数据从用户地址空间复制到内核地址空间的缓存中。这时对用户程序来说写已经完成，至于什么时候再写到磁盘中由OS决定，除非显示调用了sync同步命令。</p>
-<h2 id="直接I-O方式"><a href="#直接I-O方式" class="headerlink" title="直接I/O方式"></a>直接I/O方式</h2><p>程序直接访问磁盘，不经过OS内核数据缓冲区，这样做的目的是减少一次从内核缓冲区到用户程序缓存的数据复制。这种方式通常是在对数据的缓存管理由应用程序实现的数据库管理系统中。如在数据库管理系统中，系统明确知道应该缓存哪些数据，应该失效哪些数据，还可以对一些热点数据做预加载，提前将热点数据加载到内存，可以加速数据的访问效率。</p>
-<p>但直接I/O也有负面影响，如果访问的数据不在应用程序缓存中，那么每次数据都会从磁盘直接加载，这种加载会非常缓慢。通过直接I/O与异步I/O结合使用，会得到比较好的性能。</p>
-<h2 id="同步访问文件的方式"><a href="#同步访问文件的方式" class="headerlink" title="同步访问文件的方式"></a>同步访问文件的方式</h2><p>数据的读取和写入都是同步操作的，它与标准访问文件不同的是，只有当数据被成功写到磁盘时才返回给应用程序成功的标志。</p>
-<p>这种访问文件的方式性能比较差，只有在一些对数据安全性要求比较高的场景中才会使用，而且通常这种操作方式的硬件都是定制的。</p>
-<h2 id="异步访问文件的方式"><a href="#异步访问文件的方式" class="headerlink" title="异步访问文件的方式"></a>异步访问文件的方式</h2><p>当访问数据的线程发出请求之后，线程会接着去处理其他事情，而不是阻塞等待，当请求的数据返回后继续处理下面的操作。这种访问文件的方式可明显提供应用程序效率，但不会改变访问文件的效率。</p>
-<h2 id="内存映射方式"><a href="#内存映射方式" class="headerlink" title="内存映射方式"></a>内存映射方式</h2><p>OS将内存中某一块区域与磁盘中的文件关联起来，当腰访问内存中一段数据时，转换为访问文件的某一段数据。这种方式目的同样是减少数据从内核空间缓存到用户空间缓存的数据复制操作，因为这2个数据是共享的。</p>
-<h2 id="Java访问磁盘文件"><a href="#Java访问磁盘文件" class="headerlink" title="Java访问磁盘文件"></a>Java访问磁盘文件</h2><p>在Java中通常的File并不代表一个真实存在的文件对象，当指定一个路径描述符时，它会返回一个代表这个路径的虚拟对象，这个可能是一个真实存在的文件或者是一个包含多个文件的目录。大多数情况下，我们并不关心这个文件是否真的存在，而是关心对这个文件到底如何操作。</p>
-<p>何时会真正检查一个文件存不存在？要是在真正要读取这个文件时。例如，FileInputStream类都是操作一个文件的接口，注意到在创建一个FileInputStream对象时会创建一个FileDescriptor对象，其实这个对象就是真正代表一个存在的文件对象的描述。当操作一个文件对象时可以通过getFD()方法获取真正操作的与底层OS相关联的文件描述。例如，可以调用FileDescriptor.sync()方法将操作系统缓存中的数据强制刷新到物理磁盘中。</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="title">FileInputStream</span><span class="params">(File file)</span> <span class="keyword">throws</span> FileNotFoundException </span>&#123;</span><br><span class="line">        String name = (file != <span class="keyword">null</span> ? file.getPath() : <span class="keyword">null</span>);</span><br><span class="line">        SecurityManager security = System.getSecurityManager();</span><br><span class="line">        <span class="keyword">if</span> (security != <span class="keyword">null</span>) &#123;</span><br><span class="line">            security.checkRead(name);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> (name == <span class="keyword">null</span>) &#123;</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> NullPointerException();</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> (file.isInvalid()) &#123;</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> FileNotFoundException(<span class="string">"Invalid file path"</span>);</span><br><span class="line">        &#125;</span><br><span class="line">        fd = <span class="keyword">new</span> FileDescriptor();</span><br><span class="line">        fd.incrementAndGetUseCount();</span><br><span class="line">        <span class="keyword">this</span>.path = name;</span><br><span class="line">        open(name);</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
-<p>当传入一个文件路径时，将会根据这个路径创建一个File对象来标识这个文件，然后根据这个File对象创建真正读取文件的操作对象，这时将会真正创建一个关联真实存在的磁盘文件的描述符FileDescriptor，通过这个对象可以直接控制这个磁盘文件。</p>
-<hr>
-<h1 id="Java-Socket工作机制"><a href="#Java-Socket工作机制" class="headerlink" title="Java Socket工作机制"></a>Java Socket工作机制</h1><h2 id="建立通信链路"><a href="#建立通信链路" class="headerlink" title="建立通信链路"></a>建立通信链路</h2><p>当客户端要与服务端通信时，客户端首先要创建一个Socket实例，OS将为这个Socket实例分配一个没有被使用的本地端口号，并创建一个包含本地地址、远程地址和端口号的套接字数据结构，这个数据结构将一直保存在系统中直到这个连接关闭。在创建Socket实例的构造函数正确返回之前，将要进行TCP的3次握手协议，TCP握手协议完成后，Socket实例对象将创建完成，否则抛出IOException错误。</p>
-<p>与之对应的服务端将创建一个ServerSocket实例，创建ServerSocket比较简单，只要指定的端口号未被占用，一般实例都会创建成功。同时OS也会为ServerSocket实例创建一个底层数据结构，这个数据结构包含指定监听的端口号和包含监听地址的通配符，通常情况下都是“*”，即监听所有地址。之后当调用accept()方法时，将进入阻塞状态，等待客户端的请求。</p>
-<p>当一个新的请求到来时，将为这个连接创建一个新的套接字数据结构，该套接字数据的信息包含的地址和端口信息正是请求源地址和端口。这个新创建的数据结构将会关联到ServerSocket实例的一个未完成的连接数据结构列表中。注意，这时服务端的与之对应的Socket实例并没有完成创建，而要等到与客户端的3次握手完成后，这个服务端的Socket实例才会返回，并将这个Socket实例对应的数据结构从未完成列表中移到已完成列表中。所以与ServerSocket所关联的列表中每个数据结构都代表与一个客户端建立的TCP连接。</p>
-<h2 id="数据传输"><a href="#数据传输" class="headerlink" title="数据传输"></a>数据传输</h2><p>当连接建立成功，服务端和客户端都会拥有一个Socket实例，每个Socket实例都有一个InputStream和一个OutputStream，并通过这两个对象交换数据。同时我们知道网络I/O都是以字节流传输的，当创建Socket对象时，OS将会为InputStream和OutputStream分别分配一定大小的缓存区，数据的写入和读取都是通过这个缓存区完成。</p>
-<p>写入端将数据写到OutputStream的SendQ队列中，当队列填满时，数据将被转移到另一端InputStream的RecvQ队列中，如果这时RecvQ已经满了，那么OutputStream的write方法将会阻塞，直到RecvQ队列有足够的空间容纳SendQ发送的数据。这个缓存区的大小及写入端的速度和读取端的速度非常影响这个连接的数据传输效率，由于可能会发生阻塞，所有网络I/O与磁盘I/O不同的是数据的写入和读取还要有一个协调的过程，如果两边同时传送数据可能会产生死锁。</p>
+<h3 id="使用匿名类的构造函数"><a href="#使用匿名类的构造函数" class="headerlink" title="使用匿名类的构造函数"></a>使用匿名类的构造函数</h3><p>看一段代码</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">    List l1 = <span class="keyword">new</span> ArrayList();</span><br><span class="line">    List l2 = <span class="keyword">new</span> ArrayList() &#123;&#125;;</span><br><span class="line">    List l3 = <span class="keyword">new</span> ArrayList() &#123;&#123;&#125;&#125;;</span><br><span class="line"></span><br><span class="line">    System.out.println(l1.getClass() == l2.getClass());</span><br><span class="line">    System.out.println(l2.getClass() == l3.getClass());</span><br><span class="line">    System.out.println(l1.getClass() == l3.getClass());</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>执行结果</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">false</span><br><span class="line">false</span><br><span class="line">false</span><br></pre></td></tr></table></figure>
+<p>l1 很容易理解，只是声明了 ArrayList 实例对象，l2 代表的是一个匿名类的生命和赋值，它定义了一个继承于 ArrayList 的匿名类，只是没有覆写任何方法。</p>
+<p>l3 也是一个匿名类的定义，它的代码类似于：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Sub</span> <span class="keyword">extends</span> <span class="title">ArrayList</span> </span>&#123;</span><br><span class="line">	(</span><br><span class="line">		<span class="comment">//初始化块</span></span><br><span class="line">	)</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">//声明赋值</span></span><br><span class="line">List l3 = <span class="keyword">new</span> Sub();</span><br></pre></td></tr></table></figure>
+<p>匿名类虽然没有名字，但也是可以有构造函数的，它用构造函数块来代替。</p>
 
           
         
@@ -867,8 +384,8 @@
             
               
                 
-                <a class="post-title-link" href="/2016/05/15/深入理解Java虚拟机/垃圾收集器算法/" itemprop="url">
-                  垃圾收集器算法
+                <a class="post-title-link" href="/2016/12/19/Java Web/Java8新特性 -- StreamAPI/" itemprop="url">
+                  Java8 -- StreamAPI
                 </a>
               
             
@@ -881,8 +398,8 @@
               <i class="fa fa-calendar-o"></i>
             </span>
             <span class="post-meta-item-text">发表于</span>
-            <time itemprop="dateCreated" datetime="2016-05-15T00:00:00+08:00" content="2016-05-15">
-              2016-05-15
+            <time itemprop="dateCreated" datetime="2016-12-19T00:00:00+08:00" content="2016-12-19">
+              2016-12-19
             </time>
           </span>
 
@@ -895,8 +412,8 @@
               <span class="post-meta-item-text">分类于</span>
               
                 <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
-                  <a href="/categories/深入理解Java虚拟机/" itemprop="url" rel="index">
-                    <span itemprop="name">深入理解Java虚拟机</span>
+                  <a href="/categories/Java-Web/" itemprop="url" rel="index">
+                    <span itemprop="name">Java Web</span>
                   </a>
                 </span>
 
@@ -930,36 +447,89 @@
       
         
           
-            <h1 id="引用计数算法"><a href="#引用计数算法" class="headerlink" title="引用计数算法"></a>引用计数算法</h1><p>给对象添加引用计数器，每增加一个地方引用时，计数器加1，引用失效时，计数器减1。</p>
-<p>主流的JVM里面并没有选用引用计数法来管理内存，原因是它很难解决对象之间相互循环引用的问题。<br>微软的COM技术、使用ActionScript的FlashPlayer、Python语言和游戏脚本领域被广泛应用的Squirrel中都使用了引用计数法管理内存。</p>
-<h1 id="可达性分析算法"><a href="#可达性分析算法" class="headerlink" title="可达性分析算法"></a>可达性分析算法</h1><p>通过一系列称为”GC Roots”的对象作为起始点，从这些节点向下搜索，搜索走过的路径称为引用链，当一个对象到GC Roots没有任何引用链相连时，则证明对象不可用。<br>在Java语言中，可作为GC Roots对象包括下面几种：  </p>
+            <h1 id="Java8新特性-–-StreamAPI"><a href="#Java8新特性-–-StreamAPI" class="headerlink" title="Java8新特性 – StreamAPI"></a>Java8新特性 – StreamAPI</h1><p>Stream 是 Java 8 中处理集合的关键抽象概念，它可以指定你希望对集合进行的操作，但是将执行操作的时间交给具体实现来决定。</p>
 <ul>
-<li>虚拟机栈（栈帧中的本地变量表）中引用的对象。  </li>
-<li>方法区中类静态属性引用的对象。  </li>
-<li>方法区中常量引用的对象。  </li>
-<li>本地方法栈中JNI（Native方法）引用的对象。</li>
+<li>迭代器遍历策略特定，不能并发执行。</li>
+<li>集合、数组、生成器、迭代器均和创建 Stream。</li>
+<li>过滤器 filter 选择元素，map 改变元素。</li>
+<li>改变 Stream 的操作包括 limit、distinct 和 sorted。</li>
+<li>从Stream中获得结果，使用 reduction 操作符，例如 count、max、min、findFirst 或 findAny。其中一些方法返回 Optional 值。</li>
+<li>Optional 类型为了安全地替代使用 null 值，需要借助 ifPresent 和 orElse 方法。</li>
+<li>Collectors 类的 groupingBy 和 partitioningBy 方法允许你对 Stream 中内容分组。</li>
+<li>Java 8 对原始类型 int、long 和 double 提供专门的 Stream。</li>
+<li>并行 Stream，放弃排序约束。</li>
 </ul>
-<h1 id="引用"><a href="#引用" class="headerlink" title="引用"></a>引用</h1><p>JDK1.2后，Java对引用概念进行扩充，将引用分为强引用、软引用、弱引用、虚引用4种。  </p>
-<ul>
-<li>强引用是指在程序代码中普遍存在的，类似“Object object = new Object()”这类的引用，只要强引用存在，垃圾收集器永远不会回收被引用的对象。  </li>
-<li>软引用用来描述一些还有用但并非必须的对象。对于软引用关联着的对象，在系统将要发生内存溢出异常前，将会把这些对象列进回收范围之中进行第二次回收。如果这次回收还没有足够内存，才会抛出内存溢出异常。JDK1.2后，提供SoftReference类实现软引用。  </li>
-<li>弱引用也是描述非必须对象，它的强度较软引用更弱一些，被弱引用关联的对象只能生存到下一次垃圾收集发生之前。当垃圾收集器工作时，无论当前内存是否足够，都会回收掉被弱引用关联的对象。JDK1.2后，提供WeakReference类实现弱引用。  </li>
-<li>虚引用也称为幽灵引用或幻影引用，是最弱的一种引用关系。一个对象是否有虚引用的存在，完全不会对其生存时间构成影响，也无法通过虚引用来取得一个对象实例。为一个对象设置虚引用关联的唯一目的就是能在这个对象被收集器回收时收到一个系统通知。JDK1.2后，提供PhantomReference类实现虚引用。</li>
-</ul>
-<h1 id="回收方法区"><a href="#回收方法区" class="headerlink" title="回收方法区"></a>回收方法区</h1><p>JVM规范中说过可以不要求虚拟机在方法区实现垃圾收集，而且在方法区中进行垃圾收集的“性价比”一般比较低：在堆中，尤其在新生代中，常规应用进行一次垃圾收集一般可以回收70%-95%的空间，而永久代的垃圾搜集效率远低于此。<br>永久代的垃圾收集主要回收两部分内容：废弃常量和无用的类。<br>判定一个常量是否是“废弃常量”比较简单，而要判定一个类是否是“无用的类”的条件则相对苛刻许多。类要同时满足下面3个条件才能算是“无用的类”：  </p>
+<h2 id="从迭代器到-Stream-操作"><a href="#从迭代器到-Stream-操作" class="headerlink" title="从迭代器到 Stream 操作"></a>从迭代器到 Stream 操作</h2><p>处理集合时，通常会迭代所有元素并对其中的每一个进行处理。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Sample1</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        List&lt;String&gt; list = letters();</span><br><span class="line">        list.forEach(System.out::println);</span><br><span class="line"></span><br><span class="line">        countWord(list);</span><br><span class="line">        filterCountWord(list);</span><br><span class="line">        parallelFilterCountWord(list);</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">static</span> List&lt;String&gt; <span class="title">letters</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        List&lt;String&gt; list = <span class="keyword">new</span> ArrayList&lt;&gt;();</span><br><span class="line">        list.add(<span class="string">"Tommy"</span>);</span><br><span class="line">        list.add(<span class="string">"Focus"</span>);</span><br><span class="line">        list.add(<span class="string">"Tim"</span>);</span><br><span class="line">        list.add(<span class="string">"Jack"</span>);</span><br><span class="line">        <span class="keyword">return</span> list;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">countWord</span><span class="params">(List&lt;String&gt; list)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">int</span> count = <span class="number">0</span>;</span><br><span class="line">        <span class="keyword">for</span> (String str : list) &#123;</span><br><span class="line">            <span class="keyword">if</span> (str.length() &gt; <span class="number">4</span>)</span><br><span class="line">                count++;</span><br><span class="line">        &#125;</span><br><span class="line">        System.out.println(<span class="string">"countWord: "</span> + count);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">filterCountWord</span><span class="params">(List&lt;String&gt; list)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">long</span> count = list.stream().filter(w -&gt; w.length() &gt; <span class="number">4</span>).count();</span><br><span class="line">        System.out.println(<span class="string">"filterCountWord: "</span> + count);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">parallelFilterCountWord</span><span class="params">(List&lt;String&gt; list)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">long</span> count = list.parallelStream().filter(w -&gt; w.length() &gt; <span class="number">4</span>).count();</span><br><span class="line">        System.out.println(<span class="string">"parallelFilterCountWord: "</span> + count);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <ol>
-<li>该类所有的实例都已经被回收，也就是说Java堆中不存在该类的任何实例。</li>
-<li>加载该类的ClassLoader已经被回收。  </li>
-<li>该类对应的java.lang.Class对象没有在任何地方被引用，无法在任何地方通过反射访问该类的方法。  </li>
+<li>Stream 不存储元素。元素可能被存储在底层的集合中，或根据需要产生出来。</li>
+<li>Stream 操作符不改变源对象。它们返回一个持有结果的新 Stream。</li>
+<li>Stream 操作符可能延迟执行。</li>
 </ol>
-<p>JVM可以对满足上述3各条件的无用类进行回收，这里说的是“可以”，并不是和对象一样，不使用了必然回收。是否对类进行回收，HotSpot虚拟机提供了 -Xnoclassgc 参数进行控制，还可以使用 -verbose:class 以及 -XX:+TraceClassLoading、 -XX:+TraceClassUnLaoding查看类加载和卸载信息，其中 -verboss:class 和 -XX:+TraceClassLoading 可以在Product版的虚拟机中使用。 -XX:+TraceClassUnLoading参数需要FastDebug版的虚拟机支持。<br>在大量使用反射、动态代理、CGLib等ByteCode框架、动态生成JSP以及OSGi这类频繁自定义ClassLoader的场景都需要虚拟机具备类卸载的功能，以保证永久代不会溢出。</p>
-<h1 id="垃圾收集算法"><a href="#垃圾收集算法" class="headerlink" title="垃圾收集算法"></a>垃圾收集算法</h1><h2 id="标记-清除算法"><a href="#标记-清除算法" class="headerlink" title="标记-清除算法"></a>标记-清除算法</h2><p>算法分为“标记”和“清除”两个阶段：首先标记处所有需要回收的对象，在标记完成后统一回收所有被标记的对象。主要不足有2处：一个是效率问题，标记和清除两个过程效率都不高；另一个是空间问题，标记清除之后会产生大量不连续的内存碎片，空间碎片太多可能导致以后程序运行过程中需要分配较大对象时，无法找到足够的连续内存而不得不提前出发另一次垃圾收集动作。</p>
-<h2 id="复制算法"><a href="#复制算法" class="headerlink" title="复制算法"></a>复制算法</h2><p>为了解决效率问题，复制收集算法出现了。它将可用内存按容量分为大小相等的两块，每次只使用其中一块。当这一块内存用完了，就将还存活着的对象复制到另一块上面，然后再把已经使用过的内存空间一次清理掉。</p>
-<p>现在的商业虚拟机都采用这种收集算法来回收新生代，IBM公司专门研究表明，新生代的对象95%是“朝生夕死”的，所以并不需要1:1的比例来划分内存空间，而是将内存分为一块较大的Eden空间和两块较小的Survior空间，每次使用Eden和其中一块Survior。当回收时，将Eden和Survior中还存活着的对象一次性地复制到另一块Survior空间上，最后清理掉Eden和刚才用过的Survior空间。HotSpot默认Eden和Survior的大小比例是8:1，也就是每次新生代中可用内存空间为整个新生代容量的90%（80%+10%）。我们没有办法保证每次回收都只有不多于10%的对象存活，当Survior空间不够用时，需要依赖其他内存（这里指老年代）进行分配担保。</p>
-<p>如果另外一块Survior空间没有足够空间存放上一次新生代收集下来的存活对象时，这些对象将直接通过分配担保机制进入老年代。</p>
-<h2 id="标记-整理算法"><a href="#标记-整理算法" class="headerlink" title="标记-整理算法"></a>标记-整理算法</h2><p>复制收集算法在对象存活率较高时就要进行较多的复制操作，效率将会变低。根据老年代的特点，有人提出了“标记-整理”算法，标记过程仍然与“标记-清除”算法一样，但后续步骤不是直接对可回收对象进行清理，而是让所有存活的对象都向一端移动，然后直接清理掉端边界以外的内存。</p>
-<h2 id="分代收集算法"><a href="#分代收集算法" class="headerlink" title="分代收集算法"></a>分代收集算法</h2><p>当前商业虚拟机的垃圾手机都采用“分代收集”算法，一般把Java堆分为新生代和老年代。新生代中，每次垃圾收集时都发现有大批对象死去，只有少量存活，那就选用复制算法，只需要付出少量存活对象的复制成本就可以完成收集。而老年代中因为对象存活率高、没有额外空间对它进行分配担保，就必须使用“标记-清理”或者“标记-整理”算法来进行回收。</p>
-
+<h2 id="创建-Stream"><a href="#创建-Stream" class="headerlink" title="创建 Stream"></a>创建 Stream</h2><h3 id="API"><a href="#API" class="headerlink" title="API"></a>API</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span><br><span class="line"> * Returns a sequential &#123;<span class="doctag">@code</span> Stream&#125; containing a single element.</span><br><span class="line"> *</span><br><span class="line"> * <span class="doctag">@param</span> t the single element</span><br><span class="line"> * <span class="doctag">@param</span> &lt;T&gt; the type of stream elements</span><br><span class="line"> * <span class="doctag">@return</span> a singleton sequential stream</span><br><span class="line"> */</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span>&lt;T&gt; Stream&lt;T&gt; <span class="title">of</span><span class="params">(T t)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> StreamSupport.stream(<span class="keyword">new</span> Streams.StreamBuilderImpl&lt;&gt;(t), <span class="keyword">false</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span><br><span class="line"> * Returns a sequential ordered stream whose elements are the specified values.</span><br><span class="line"> *</span><br><span class="line"> * <span class="doctag">@param</span> &lt;T&gt; the type of stream elements</span><br><span class="line"> * <span class="doctag">@param</span> values the elements of the new stream</span><br><span class="line"> * <span class="doctag">@return</span> the new stream</span><br><span class="line"> */</span></span><br><span class="line"><span class="meta">@SafeVarargs</span></span><br><span class="line"><span class="meta">@SuppressWarnings</span>(<span class="string">"varargs"</span>) <span class="comment">// Creating a stream from an array is safe</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span>&lt;T&gt; Stream&lt;T&gt; <span class="title">of</span><span class="params">(T... values)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> Arrays.stream(values);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>generate 和 iterate 是两个用来创建无限 Stream 的静态方法。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Sample2</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        Stream&lt;String&gt; echos = Stream.generate(() -&gt; <span class="string">"Echo"</span>);</span><br><span class="line">        Stream&lt;Double&gt; randoms = Stream.generate(Math::random);</span><br><span class="line">        Stream&lt;BigInteger&gt; integers = Stream.iterate(BigInteger.ZERO, n -&gt; n.add(BigInteger.ONE));</span><br><span class="line"></span><br><span class="line">        Object[] powers = Stream.iterate(<span class="number">1.0</span>, p -&gt; p * <span class="number">2</span>).peek(e -&gt; System.out.println(<span class="string">"Fetching "</span> + e)).limit(<span class="number">20</span>).toArray();</span><br><span class="line"></span><br><span class="line">        System.out.println(<span class="string">"well done ..."</span>);</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="filter、map-和-flatMap"><a href="#filter、map-和-flatMap" class="headerlink" title="filter、map 和 flatMap"></a>filter、map 和 flatMap</h3><p>流转换指从一个流中读取数据，并将转换后的数据写入另一个流。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Sample3</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        List&lt;String&gt; list = letters();</span><br><span class="line">        Stream&lt;String&gt; lowerString = list.stream().map(String::toLowerCase);</span><br><span class="line">        lowerString.forEach(System.out::println);</span><br><span class="line"></span><br><span class="line">        Stream&lt;Character&gt; characterStream = list.stream().flatMap(Sample3::characterStream);</span><br><span class="line">        characterStream.forEach(System.out::println);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">static</span> List&lt;String&gt; <span class="title">letters</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        List&lt;String&gt; list = <span class="keyword">new</span> ArrayList&lt;&gt;();</span><br><span class="line">        list.add(<span class="string">"Tommy"</span>);</span><br><span class="line">        list.add(<span class="string">"Focus"</span>);</span><br><span class="line">        list.add(<span class="string">"Tim"</span>);</span><br><span class="line">        list.add(<span class="string">"Jack"</span>);</span><br><span class="line">        <span class="keyword">return</span> list;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Stream&lt;Character&gt; <span class="title">characterStream</span><span class="params">(String s)</span> </span>&#123;</span><br><span class="line">        List&lt;Character&gt; result = <span class="keyword">new</span> ArrayList&lt;&gt;();</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">char</span> c : s.toCharArray()) &#123;</span><br><span class="line">            result.add(c);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> result.stream();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<ol>
+<li>map 方法，会对每个元素应用一个函数，将返回值收集到一个新的流中。</li>
+<li>flatMap 方法，完成从 T 到 G\<u> 的 f 函数和从 U 到 G\<u> 的 g 方法，这是 monads 理论的一个关键概念。</u></u></li>
+</ol>
+<h3 id="提取子流和组合流"><a href="#提取子流和组合流" class="headerlink" title="提取子流和组合流"></a>提取子流和组合流</h3><p>Stream.limit(n) 返回一个 n 个元素的新流（如果原始流的长度小于n，则返回原始的流）。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Sample5</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        unique();</span><br><span class="line"></span><br><span class="line">        sort();</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">unique</span><span class="params">()</span></span>&#123;</span><br><span class="line">        Stream&lt;String&gt; uniqueWords = Stream.of(<span class="string">"zhuxh"</span>, <span class="string">"zhuxh"</span>, <span class="string">"zhuxh"</span>, <span class="string">"focus"</span>).distinct();</span><br><span class="line">        uniqueWords.forEach(System.out::println);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">sort</span><span class="params">()</span></span>&#123;</span><br><span class="line">        List&lt;String&gt; list = letters();</span><br><span class="line">        Stream&lt;String&gt; stringStream = list.stream();</span><br><span class="line"></span><br><span class="line">        Stream&lt;String&gt; longestFirst = stringStream.sorted(Comparator.comparing(String::length).reversed());</span><br><span class="line">        longestFirst.forEach(System.out::println);</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">static</span> List&lt;String&gt; <span class="title">letters</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        List&lt;String&gt; list = <span class="keyword">new</span> ArrayList&lt;&gt;();</span><br><span class="line">        list.add(<span class="string">"Tommy"</span>);</span><br><span class="line">        list.add(<span class="string">"Focus"</span>);</span><br><span class="line">        list.add(<span class="string">"Tim"</span>);</span><br><span class="line">        list.add(<span class="string">"Jack"</span>);</span><br><span class="line">        <span class="keyword">return</span> list;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="简单的聚合方法"><a href="#简单的聚合方法" class="headerlink" title="简单的聚合方法"></a>简单的聚合方法</h3><p>聚合方法都是<em>终止操作</em>，当一个流应用了终止操作后，不能再应用其他操作。</p>
+<p>聚合方法，count、max、min，返回一个 Optional<t> 值，可能封装返回值，也可能没有返回值。</t></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Sample6</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        Stream&lt;String&gt; stringStream = letters().stream();</span><br><span class="line"></span><br><span class="line">        Optional&lt;String&gt; largestString = stringStream.max(String::compareToIgnoreCase);</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span>(largestString.isPresent())&#123;</span><br><span class="line">            System.out.println(largestString.get());</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">static</span> List&lt;String&gt; <span class="title">letters</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        List&lt;String&gt; list = <span class="keyword">new</span> ArrayList&lt;&gt;();</span><br><span class="line">        list.add(<span class="string">"Tommy"</span>);</span><br><span class="line">        list.add(<span class="string">"Focus"</span>);</span><br><span class="line">        list.add(<span class="string">"Tim"</span>);</span><br><span class="line">        list.add(<span class="string">"Jack"</span>);</span><br><span class="line">        <span class="keyword">return</span> list;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>类似的API还有 findFirst(), findAny()。</p>
+<p>还提供了 anyMatch(), allMatch 和 noneMatch()，这些方法总是会检查整个流，但仍可以通过并行执行来提高速度。</p>
+<h3 id="Optional-类型"><a href="#Optional-类型" class="headerlink" title="Optional 类型"></a>Optional 类型</h3><p>java.util.Optional\<t\></t\></p>
+<p>Optional\<t\> 对象是对一个 T 类型对象的封装，或者表示不是任何对象。它比一般指向 T 类型引用更安全，不会反悔null–前提是你正确使用。</t\></p>
+<p>创建 Optional 对象</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> &lt;T&gt; <span class="function">Optional&lt;T&gt; <span class="title">of</span><span class="params">(T value)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">new</span> Optional&lt;&gt;(value);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> &lt;T&gt; <span class="function">Optional&lt;T&gt; <span class="title">ofNullable</span><span class="params">(T value)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> value == <span class="keyword">null</span> ? empty() : of(value);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span>&lt;T&gt; Optional&lt;T&gt; <span class="title">empty</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="meta">@SuppressWarnings</span>(<span class="string">"unchecked"</span>)</span><br><span class="line">    Optional&lt;T&gt; t = (Optional&lt;T&gt;) EMPTY;</span><br><span class="line">    <span class="keyword">return</span> t;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>获取值</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> T <span class="title">get</span><span class="params">()</span> </span>&#123;</span><br><span class="line">     <span class="keyword">if</span> (value == <span class="keyword">null</span>) &#123;</span><br><span class="line">         <span class="keyword">throw</span> <span class="keyword">new</span> NoSuchElementException(<span class="string">"No value present"</span>);</span><br><span class="line">     &#125;</span><br><span class="line">     <span class="keyword">return</span> value;</span><br><span class="line"> &#125;</span><br></pre></td></tr></table></figure>
+<p>ifPresent 方法另一种形式可以接受一个函数，如存在可选值，它会将该值传递给函数，否则不进行任何操作。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">isPresent</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> value != <span class="keyword">null</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">ifPresent</span><span class="params">(Consumer&lt;? <span class="keyword">super</span> T&gt; consumer)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (value != <span class="keyword">null</span>)</span><br><span class="line">        consumer.accept(value);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="flatMap"><a href="#flatMap" class="headerlink" title="flatMap"></a>flatMap</h4><p>组合可选值函数</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">MyMath</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Optional&lt;Double&gt; <span class="title">inverse</span><span class="params">(Double x)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> x == <span class="number">0</span> ? Optional.empty() : Optional.of(<span class="number">1</span> / x);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Optional&lt;Double&gt; <span class="title">squareRoot</span><span class="params">(Double x)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> x &lt; <span class="number">0</span> ? Optional.empty() : Optional.of(Math.sqrt(x));</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        Double x = <span class="number">1</span>d;</span><br><span class="line"></span><br><span class="line">        Optional&lt;Double&gt; result = MyMath.inverse(x).flatMap(MyMath::squareRoot);</span><br><span class="line"></span><br><span class="line">        Optional&lt;Double&gt; res2 = Optional.of(-<span class="number">4</span>d).flatMap(MyMath::inverse).flatMap(MyMath::squareRoot);</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+<h3 id="聚合"><a href="#聚合" class="headerlink" title="聚合"></a>聚合</h3><p>元素求和</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Sample2</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        List&lt;Integer&gt; intList = <span class="keyword">new</span> ArrayList&lt;&gt;();</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; <span class="number">100</span>; i++) &#123;</span><br><span class="line">            intList.add(i);</span><br><span class="line">        &#125;</span><br><span class="line">        Stream&lt;Integer&gt; stream = intList.stream();</span><br><span class="line"></span><br><span class="line">        Optional&lt;Integer&gt; sum = stream.reduce(Integer::sum);</span><br><span class="line"></span><br><span class="line">        System.out.println(sum.get());</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>字符串长度求和</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Sample7</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        List&lt;String&gt; list = letters();</span><br><span class="line">        </span><br><span class="line">        Stream&lt;String&gt; stream = list.stream();</span><br><span class="line">        <span class="keyword">int</span> res = stream.reduce(<span class="number">0</span>, (total, word) -&gt; total + word.length(), (t1, t2) -&gt; t1 + t2);</span><br><span class="line">        System.out.println(res);</span><br><span class="line"></span><br><span class="line">        <span class="keyword">int</span> res2 = stream.mapToInt(String::length).sum();</span><br><span class="line">        System.out.println(res2);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">static</span> List&lt;String&gt; <span class="title">letters</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        List&lt;String&gt; list = <span class="keyword">new</span> ArrayList&lt;&gt;();</span><br><span class="line">        list.add(<span class="string">"Tommy"</span>);</span><br><span class="line">        list.add(<span class="string">"Focus"</span>);</span><br><span class="line">        list.add(<span class="string">"Tim"</span>);</span><br><span class="line">        list.add(<span class="string">"Jack"</span>);</span><br><span class="line">        <span class="keyword">return</span> list;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="收集结果"><a href="#收集结果" class="headerlink" title="收集结果"></a>收集结果</h3><p>处理完流之后，收集结果</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Sample8</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        String[] words = <span class="keyword">new</span> String[]&#123;<span class="string">"Tommy"</span>, <span class="string">"Focus"</span>, <span class="string">"Tim"</span>, <span class="string">"Jack"</span>&#125;;</span><br><span class="line">        Stream&lt;String&gt; stream = Arrays.stream(words);</span><br><span class="line">        HashSet&lt;String&gt; hashSet = stream.collect(HashSet::<span class="keyword">new</span>, HashSet::add, HashSet::addAll);</span><br><span class="line"></span><br><span class="line">        List&lt;String&gt; list = Arrays.stream(words).collect(Collectors.toList());</span><br><span class="line">        Set&lt;String&gt; set = Arrays.stream(words).collect(Collectors.toSet());</span><br><span class="line"></span><br><span class="line">        TreeSet&lt;String&gt; treeSet = Arrays.stream(words).collect(Collectors.toCollection(TreeSet::<span class="keyword">new</span>));</span><br><span class="line"></span><br><span class="line">        String strJoin = Arrays.stream(words).collect(Collectors.joining());</span><br><span class="line"></span><br><span class="line">        String result = Arrays.stream(words).collect(Collectors.joining(<span class="string">","</span>));</span><br><span class="line"></span><br><span class="line">        String result2 = Arrays.stream(words).map(Object::toString).collect(Collectors.joining(<span class="string">","</span>));</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">        IntSummaryStatistics summary = Arrays.stream(words).collect(Collectors.summarizingInt(String::length));</span><br><span class="line">        <span class="keyword">double</span> averagwLength = summary.getAverage();</span><br><span class="line">        <span class="keyword">double</span> maxLength = summary.getMax();</span><br><span class="line">        <span class="keyword">double</span> min = summary.getMin();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="收集结果到-Map"><a href="#收集结果到-Map" class="headerlink" title="收集结果到 Map"></a>收集结果到 Map</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Sample9</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        User user1 = <span class="keyword">new</span> User(<span class="number">1</span>, <span class="string">"Focus"</span>);</span><br><span class="line">        User user2 = <span class="keyword">new</span> User(<span class="number">2</span>, <span class="string">"Tommy"</span>);</span><br><span class="line">        User user3 = <span class="keyword">new</span> User(<span class="number">3</span>, <span class="string">"Jack"</span>);</span><br><span class="line"></span><br><span class="line">        List&lt;User&gt; list = Arrays.asList(user1, user2, user3);</span><br><span class="line"></span><br><span class="line">        s1(list);</span><br><span class="line">        s2(list);</span><br><span class="line">        s3(list);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span><br><span class="line">     * key重复会抛异常</span><br><span class="line">     **/</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">s1</span><span class="params">(List&lt;User&gt; list)</span> </span>&#123;</span><br><span class="line">        Map&lt;Integer, String&gt; idToName = list.stream().collect(Collectors.toMap(User::getId, User::getName));</span><br><span class="line">        Map&lt;Integer, User&gt; idToUser = list.stream().collect(Collectors.toMap(User::getId, Function.identity()));</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">s2</span><span class="params">(List&lt;User&gt; list)</span> </span>&#123;</span><br><span class="line">        User user = <span class="keyword">new</span> User(<span class="number">1</span>, <span class="string">"Billy"</span>);</span><br><span class="line"></span><br><span class="line">        List&lt;User&gt; userList = <span class="keyword">new</span> ArrayList&lt;&gt;(list);</span><br><span class="line">        userList.add(user);</span><br><span class="line"></span><br><span class="line">        Map&lt;Integer, Set&lt;String&gt;&gt; idToName = userList.stream().collect(Collectors.toMap(</span><br><span class="line">                u -&gt; u.getId(),</span><br><span class="line">                u -&gt; Collections.singleton(u.getName()),</span><br><span class="line">                (a, b) -&gt; &#123;</span><br><span class="line">                    Set&lt;String&gt; r = <span class="keyword">new</span> HashSet&lt;String&gt;(a);</span><br><span class="line">                    r.addAll(b);</span><br><span class="line">                    <span class="keyword">return</span> r;</span><br><span class="line">                &#125;));</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">s3</span><span class="params">(List&lt;User&gt; list)</span> </span>&#123;</span><br><span class="line">        Map&lt;Integer, User&gt; idToUser = list.stream().collect(</span><br><span class="line">                Collectors.toMap(</span><br><span class="line">                        User::getId,</span><br><span class="line">                        Function.identity(),</span><br><span class="line">                        (existingVal, newVal) -&gt; &#123;</span><br><span class="line">                            <span class="keyword">throw</span> <span class="keyword">new</span> IllegalStateException();</span><br><span class="line">                        &#125;,</span><br><span class="line">                        TreeMap::<span class="keyword">new</span></span><br><span class="line">                )</span><br><span class="line">        );</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="分组、分片"><a href="#分组、分片" class="headerlink" title="分组、分片"></a>分组、分片</h3><p>对流处理结果分组、分片。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">User</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">User</span><span class="params">(Integer id, String name)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.id = id;</span><br><span class="line">        <span class="keyword">this</span>.name = name;</span><br><span class="line">        <span class="keyword">this</span>.email = name + <span class="string">"@qiyi.com"</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">User</span><span class="params">(Integer id, String name, Integer sex)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>(id, name);</span><br><span class="line">        <span class="keyword">this</span>.sex = sex;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> Integer id;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> String name;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> String email;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> Integer sex;</span><br><span class="line">    </span><br><span class="line">    ....</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Sample10</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        User user1 = <span class="keyword">new</span> User(<span class="number">1</span>, <span class="string">"Focus"</span>, <span class="number">1</span>);</span><br><span class="line">        User user2 = <span class="keyword">new</span> User(<span class="number">2</span>, <span class="string">"Tommy"</span>, <span class="number">1</span>);</span><br><span class="line">        User user3 = <span class="keyword">new</span> User(<span class="number">3</span>, <span class="string">"Jack"</span>, <span class="number">1</span>);</span><br><span class="line"></span><br><span class="line">        User user4 = <span class="keyword">new</span> User(<span class="number">4</span>, <span class="string">"Rose"</span>, <span class="number">2</span>);</span><br><span class="line">        User user5 = <span class="keyword">new</span> User(<span class="number">5</span>, <span class="string">"Jane"</span>, <span class="number">2</span>);</span><br><span class="line"></span><br><span class="line">        List&lt;User&gt; list = Arrays.asList(user1, user2, user3, user4, user5);</span><br><span class="line"></span><br><span class="line">        <span class="comment">/** 按性别分组**/</span></span><br><span class="line">        Map&lt;Integer, List&lt;User&gt;&gt; map = list.stream().collect(Collectors.groupingBy(User::getSex));</span><br><span class="line"></span><br><span class="line">        <span class="comment">/** 按ID小于等于3分组**/</span></span><br><span class="line">        Map&lt;Boolean, List&lt;User&gt;&gt; map1 = list.stream().collect(Collectors.partitioningBy(e -&gt; e.getId() &lt;= <span class="number">3</span>));</span><br><span class="line"></span><br><span class="line">        <span class="comment">/** 按性别分组 收集为set**/</span></span><br><span class="line">        Map&lt;Integer, Set&lt;User&gt;&gt; map2 = list.stream().collect(Collectors.groupingBy(User::getSex, Collectors.toSet()));</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>Java8 还提供了其他收集器，用来对分组后元素进行 downstream 处理：</p>
+<ul>
+<li>counting 返回收集元素总个数</li>
+<li>summing (Int|Long|Double) 接受一个函数作为参数，将该函数应用到downstream元素中，求和</li>
+<li>maxBy、minBy 接受一个比较器，生成 downstream 元素中最大值和最小值</li>
+<li>mapping 方法将一个函数应用到 downstream 结果上，并且需要另一个收集器来处理结果</li>
+<li>….</li>
+</ul>
+<h3 id="原始类型流"><a href="#原始类型流" class="headerlink" title="原始类型流"></a>原始类型流</h3><p>将每个整数包装成响应对象很低效，Stream API 提供了 IntStream、LongStream 和 DoubleStream 等类型，专门用来直接存储原始类型值。如果要存 short、char、byte 和 boolean 类型，使用 IntStream；如果要存储 float 类型，使用 DoubleStream。设计者认为，不需要为其他5种原始类型都添加对应的专门类型。</p>
+<p>将原始类型流转换为一个对象流，可以使用 boxed 方法:</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Stream&lt;Integer&gt; integers = IntStream.range(<span class="number">0</span>, <span class="number">100</span>).boxed();</span><br></pre></td></tr></table></figure>
+<p>原始类型流方法与对象流上调用类似，但有以下几点显著区别：</p>
+<ul>
+<li>toArray 返回原始类型数组。</li>
+<li>产生 Optional 结果的方法返回一个 OptionalInt、OptionalLong 或者 OptionalDouble 类型，这些与 Optional 类似，但没有 get 方法，而是对应的 getAsInt、getAsLong 和 getAsDouble。</li>
+<li>方法 sum、average、max 和 min 会返回总和、平均值、最大值和最小值。对象流中没有定义这些方法。</li>
+<li>summaryStatistics 方法产生一个 IntSummaryStatistics、LongSummaryStatistics 或者 DoubleSummaryStatistics 对象。  </li>
+</ul>
+<h3 id="并行流"><a href="#并行流" class="headerlink" title="并行流"></a>并行流</h3><p>流使得并行计算变得容易。处理过程几乎全自动。但必须遵守一些约定。</p>
+<ul>
+<li>创建并行流， Collection.parellelStream, parallel 方法。</li>
+<li>确保传递给并行流操作的函数都是线程安全的。</li>
+</ul>
+<p>有序并不妨碍并行。例如，计算 stream.map(fun) 时，流可以被分片为 n 段，每一段都被并发处理，然后按顺序组合结果。</p>
+<p>执行一个流操作时，不会修改流底层的集合（即使修改是线程安全）。流不会收集它自己的数据—-这些数据总是存在于另一个集合中。如果你想修改原有集合，那么就无法定义流操作的输出。JDK 文档称这种需求为“不干扰”。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//正确</span></span><br><span class="line">List&lt;String&gt; wordList = ...;</span><br><span class="line">Stream&lt;String&gt; words = wordList.stream();</span><br><span class="line">wordList.add(<span class="string">"END"</span>);</span><br><span class="line"><span class="keyword">long</span> n = words.distinct().count();</span><br></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//错误</span></span><br><span class="line">Stream&lt;String&gt; words = wordList.stream();</span><br><span class="line">words.forEach(s -&gt; <span class="keyword">if</span> (s.length() &lt; <span class="number">12</span>) wordList.remove(s));</span><br></pre></td></tr></table></figure>
           
         
       
@@ -991,7 +561,7 @@
 
   
   <nav class="pagination">
-    <a class="extend prev" rel="prev" href="/page/2/"><i class="fa fa-angle-left"></i></a><a class="page-number" href="/">1</a><a class="page-number" href="/page/2/">2</a><span class="page-number current">3</span><a class="page-number" href="/page/4/">4</a><span class="space">&hellip;</span><a class="page-number" href="/page/7/">7</a><a class="extend next" rel="next" href="/page/4/"><i class="fa fa-angle-right"></i></a>
+    <a class="extend prev" rel="prev" href="/page/2/"><i class="fa fa-angle-left"></i></a><a class="page-number" href="/">1</a><a class="page-number" href="/page/2/">2</a><span class="page-number current">3</span><a class="page-number" href="/page/4/">4</a><span class="space">&hellip;</span><a class="page-number" href="/page/17/">17</a><a class="extend next" rel="next" href="/page/4/"><i class="fa fa-angle-right"></i></a>
   </nav>
 
 

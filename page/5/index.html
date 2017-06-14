@@ -242,8 +242,8 @@
             
               
                 
-                <a class="post-title-link" href="/2015/07/11/redis设计与实现/Redis持久化-AOF/" itemprop="url">
-                  Redis持久化-AOF
+                <a class="post-title-link" href="/2016/07/05/HBase/初识HBase/" itemprop="url">
+                  初识HBase
                 </a>
               
             
@@ -256,8 +256,8 @@
               <i class="fa fa-calendar-o"></i>
             </span>
             <span class="post-meta-item-text">发表于</span>
-            <time itemprop="dateCreated" datetime="2015-07-11T00:00:00+08:00" content="2015-07-11">
-              2015-07-11
+            <time itemprop="dateCreated" datetime="2016-07-05T00:00:00+08:00" content="2016-07-05">
+              2016-07-05
             </time>
           </span>
 
@@ -270,8 +270,8 @@
               <span class="post-meta-item-text">分类于</span>
               
                 <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
-                  <a href="/categories/Redis设计与实现/" itemprop="url" rel="index">
-                    <span itemprop="name">Redis设计与实现</span>
+                  <a href="/categories/HBase/" itemprop="url" rel="index">
+                    <span itemprop="name">HBase</span>
                   </a>
                 </span>
 
@@ -305,14 +305,62 @@
       
         
           
-            <p>Redis提供了AOF(Append Only File)持久化功能，AOF通过保存服务器所执行命令来记录数据库状态的，和MySQL记录增删改的log有点像哈。</p>
-<p>AOF持久化功能实现分为命令追加(append)、文件写入(write)和文件同步(sync)三个步骤。</p>
-<p>1.AOF命令追加<br>当开启AOF持久化功能时，服务器会在执行完一个写命令后，会以协议格式将执行的写命令追加到服务器状态的aof_buf缓冲区末尾。</p>
-<p>2.AOF文件写入和同步<br>Redis服务进程就是一个事件循环，循环中的文件事件负责接受客户端的命令请求，以及向客户端发送命令回复，而时间事件则负责执行像serverCron函数这样需要定时运行的函数。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">def eventLoop():</span><br><span class="line"><span class="keyword">while</span> True:</span><br><span class="line">	//处理文件事件，接收命令以及发送命令</span><br><span class="line">	//处理命令时可能会有新内容被追加到aof_buf中</span><br><span class="line">	processFileEvents()</span><br><span class="line">	//处理时间事件</span><br><span class="line">	processTimeEvents()</span><br><span class="line">	//考虑是否将aof_buf中内容写入和保存到aof文件</span><br><span class="line">	flushAppendOnlyFile()</span><br></pre></td></tr></table></figure></p>
-<p>flushAppendOnlyFile函数的行为由服务器配置的appendfsync选项值来决定。<br>appendfsync配置：<br>always : 服务器在每个事件循环都要将aof_buf缓冲区的所有内容写到AOF文件，并同步，效率最慢，但最安全。<br>everysec : 服务器在每个事件循环都将aof_bug缓冲区的所有文件写到AOF文件，并且每隔1s就在子线程中对AOF文件做同步，效率快。<br>no : 服务器在每个事件循环都将aof_bug缓冲区的所有文件写到AOF文件，此模式下的flushAppendOnlyFile无须执行同步操作，同步AOF文件由操作系统决定，写入速度最快。</p>
-<p>3.AOF重写<br>随着服务器运行时间的流逝，AOF文件中的内容会越来越多，可能会对Redis服务器和宿主计算机造成影响。<br>虽然Redis将生成新AOF文件替换旧AOF文件功能命名为AOF文件重写，但实际上，AOF文件重写并不需要对现有AOF文件进行任何读取、分析和写入操作，这个功能是通过读取服务器当前数据库状态来实现的。<br>实际操作中，Redis依次遍历数据库中所有key，并根据key类型的不同，取出相应值并生成对应类型的写入语句。同时，为了避免在执行命令时造成客户端输入缓冲区溢出，重写程序在处理列表、哈希表、集合、有序集合这4种可能会带有多个元素的键时，会先检查键所包含元素的数量，如果数量超过了redis.h/REDIS_AOF_REWRITE_ITEMS_PER_CMD常量的值，那重写程序会使用多条命令来记录键的值。当前版本中，REDIS_AOF_REWRITE_ITEMS_PER_CMD常量值为64，所以每条语句最多会写入64个元素。</p>
-<p>4.AOF后台重写<br>上面介绍的AOF重写可以很好的完成创建一个新AOF文件的任务，但是，这个操作会进行大量的写入操作，所以调用这个函数的线程将被长时间阻塞，因为Redis服务器使用单个线程来处理命令请求，所以如果由服务器调用AOF重写，那么在重写期间，服务器将无法处理客户端发来的请求。<br>Redis并不希望AOF的重写操作造成服务器无法处理请求，所以需要将重写放到子进程里执行，这样做可以达到两个目的：<br>1)子进程执行AOF重写期间，服务器可以继续处理客户端的命令请求。<br>2)子进程带有服务器进程的数据副本，使用子进程而不是线程，可以在避免使用锁的情况下，保证数据安全性。</p>
-<p>不过这里仍然存在一个问题：在子进程执行AOF重写期间，服务器处理客户端的命令请求时，对现有数据库状态进行修改操作，会使得服务器当前数据库状态和重写后的AOF文件所保存的数据库状态不一致。<br>为了解决这个问题，Redis服务器设置了一个AOF重写缓冲区，这个缓冲区在服务器创建子进程之后开始使用，当Redis执行完一个写命令后，它会同时将这个写命令发送给AOF缓冲区和AOF重写缓冲区。<br>以上就是AOF后台重写，即BGREWRITEAOF命令的实现原理。</p>
+            <h2 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h2><p>HBase是一个构建在HDFS之上、分布式、面向列的开源数据库，由Google BigTable的开源实现，它主要用于存储海量数据，是Hadoop生态系统中的重要一员。</p>
+<h2 id="HBase优势"><a href="#HBase优势" class="headerlink" title="HBase优势"></a>HBase优势</h2><h3 id="1-成熟"><a href="#1-成熟" class="headerlink" title="1.成熟"></a>1.成熟</h3><ul>
+<li>社区成熟    </li>
+<li>理论充分经过实践</li>
+<li>丰富的工具支持, hbck、phoenix、solr</li>
+</ul>
+<h3 id="2-高效"><a href="#2-高效" class="headerlink" title="2.高效"></a>2.高效</h3><ul>
+<li>将随机嘟列转化为顺序读写，适应高并发写入</li>
+<li>均衡效果好读写性能和机器数保持线性关系</li>
+<li>行中没有保存数据的列不占存储空间</li>
+</ul>
+<h3 id="3-分布式特性"><a href="#3-分布式特性" class="headerlink" title="3.分布式特性"></a>3.分布式特性</h3><ul>
+<li>基于HDFS、Zookeeper</li>
+<li>一致性、可用性、分区容忍性</li>
+<li>大数据存储</li>
+<li>易扩展</li>
+</ul>
+<h2 id="HBase表特点"><a href="#HBase表特点" class="headerlink" title="HBase表特点"></a>HBase表特点</h2><ul>
+<li>大：一个表可以有数十亿行，上百万列</li>
+<li>面向列：面向列（族）的存储和权限访问，列（族）独立索引</li>
+<li>稀疏：对于为空（null）的列，并不占用存储空间，因此，表可以设计的非常稀疏</li>
+<li>数据类型单一：HBase中的数据类型都是字符串(string)</li>
+<li>无模式：每行都有一个可排序的主键和任意多的列，列可以根据需要动态增加，同一张表中不同的行可以有截然不同的列</li>
+</ul>
+<h2 id="HBase-VS-RDBMS"><a href="#HBase-VS-RDBMS" class="headerlink" title="HBase VS RDBMS"></a>HBase VS RDBMS</h2><ul>
+<li>数据类型<br>HBase中的数据都是字符串类型</li>
+<li>数据操作<br>HBase只有普通的增删改查等操作，没有表之间的关联查询</li>
+<li>存储模式<br>HBase是基于列式存储的，而RDBMS是基于行式存储的</li>
+<li>应用场景<br>HBase适合存储大量数据，查询效率极高</li>
+</ul>
+<hr>
+<h2 id="HBase概念"><a href="#HBase概念" class="headerlink" title="HBase概念"></a>HBase概念</h2><h3 id="1-主键"><a href="#1-主键" class="headerlink" title="1.主键"></a>1.主键</h3><ul>
+<li>用来检索记录的主键</li>
+<li>访问HBase表中的行，只有三种方式：<ol>
+<li>通过单个Row Key访问</li>
+<li>通过Row Key的range</li>
+<li>全表扫描</li>
+</ol>
+</li>
+<li>主键为任意字符串，最大长度为64kb，按字典顺序存储，在HBase内部保存为字节数组</li>
+</ul>
+<h3 id="2-列族"><a href="#2-列族" class="headerlink" title="2.列族"></a>2.列族</h3><ul>
+<li>列族在创建表的时候声明，一个列族可以包含多个列，列中的数据都是以二进制形式存在，没有数据类型</li>
+<li>列族是一些列的集合</li>
+<li>一个列族所有列成员是有着相同的前缀。比如，列courses:histor和courses:math都是列族courses的成员，冒号是列族的分隔符，用来区分前缀和列名</li>
+</ul>
+<h3 id="3-时间戳与存储单元"><a href="#3-时间戳与存储单元" class="headerlink" title="3.时间戳与存储单元"></a>3.时间戳与存储单元</h3><ul>
+<li>HBase中通过row和columns确定的为一个存贮单元称为cell。每个cell都保存着同一份数据的多个版本。</li>
+<li>在写入数据时，时间戳可以由HBase自动赋值（当前系统时间精确到毫秒），也可以显示赋值。</li>
+<li>每个cell中，不用版本的数据按照时间的倒序排序。</li>
+</ul>
+<h2 id="HBase数据模型"><a href="#HBase数据模型" class="headerlink" title="HBase数据模型"></a>HBase数据模型</h2><h3 id="HBase存储细节"><a href="#HBase存储细节" class="headerlink" title="HBase存储细节"></a>HBase存储细节</h3><ul>
+<li>每个列族存储在HDFS上的一个单独文件夹中</li>
+<li>Key和Version number会在每个列族中存储一份</li>
+<li>空值不会被保存</li>
+</ul>
 
           
         
@@ -362,8 +410,8 @@
             
               
                 
-                <a class="post-title-link" href="/2015/07/11/redis设计与实现/Redis文件事件/" itemprop="url">
-                  Redis文件事件
+                <a class="post-title-link" href="/2016/06/07/Scala/Scala基础/" itemprop="url">
+                  Scala基础
                 </a>
               
             
@@ -376,8 +424,8 @@
               <i class="fa fa-calendar-o"></i>
             </span>
             <span class="post-meta-item-text">发表于</span>
-            <time itemprop="dateCreated" datetime="2015-07-11T00:00:00+08:00" content="2015-07-11">
-              2015-07-11
+            <time itemprop="dateCreated" datetime="2016-06-07T00:00:00+08:00" content="2016-06-07">
+              2016-06-07
             </time>
           </span>
 
@@ -390,8 +438,8 @@
               <span class="post-meta-item-text">分类于</span>
               
                 <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
-                  <a href="/categories/Redis设计与实现/" itemprop="url" rel="index">
-                    <span itemprop="name">Redis设计与实现</span>
+                  <a href="/categories/Scala/" itemprop="url" rel="index">
+                    <span itemprop="name">Scala</span>
                   </a>
                 </span>
 
@@ -425,370 +473,59 @@
       
         
           
-            <p>Redis 服务器是一个事件驱动程序，服务器需要处理以下两类事件：<br>1）文件事件<br>Redis服务器通过套接字与客户端（或其他Redis服务器）进行连接，而文件事件就是服务器对套接字操作的抽象。服务器与客户端（或其他服务器）的通信会产生相应的文件事件，而服务器则通过监听并处理这些时间来完成一系列网络通信操作。<br>2）时间事件<br>Redis服务器中的一些操作（比如serverCron函数）需要在给定的时间点执行，而时间事件就是服务器对这类定时操作的抽象。<br>1.文件事件<br>Redis基于Reactor模式开发了自己的网络事件处理器：这个处理器被称为文件事件处理器：<br>a,文件事件处理器使用I/O多路复用程序来同时监听多个套接字，并根据套接字目前执行的任务来为套接字关联不同的事件处理器。<br>b.当被监听的套接字准备好执行连接应答、读取、写入、关闭等操作时，与操作相对应的文件事件就会产生，调用套接字之前关联好的事件处理器来处理这些事件。<br>虽然文件事件处理器以单线程方式运行，但通过I/O多路复用程序来监听多个套接字，文件事件处理器既实现了高性能的网络通信模型，又可以很好地与Redis服务器中其他同样以单线程方式运行的模块进行对接。  </p>
-<p>2.文件事件处理器<br>4部分：套接字、 I/O多路复用程序 、 文件事件分派器 和 事件处理器。<br>文件事件是对套接字操作的抽象，每当一个套接字准备好执行连接应答、写入、读取、关闭等操作时，就会产生一个文件事件。服务器通常会连接多个套接字，所以多个文件事件可能并发出现。<br>I/O多路复用程序负责监听多个套接字，并向文件事件分派器传送那些产生了事件的套接字。<br>尽管多个文件事件会有并发，但IO复用程序会将所有产生事件的套接字都放到一个队列里面，然后通过这个队列，以有序、同步、每次一个套接字的方式向文件事件分派器传送套接字。当上一个套接字产生的事件被处理完之后（该套接字为事件所关联的事件处理器执行完毕）。IO多路复用程序才会继续向文件事件分派器传送下一个套接字。<br>文件事件分派器接受IO多路复用程序传来的套接字，并根据套接字所产生的事件类型条用相应的事件处理器。<br>服务器会为执行不同任务的套接字关联不同的事件处理器，这些处理器是一个个函数，它们定义了某个事件发生时，服务器应执行的动作。  </p>
-<p>3.IO多路复用程序的实现<br>Redis的IO多路复用程序的所有功能都是通过包装常见的select、epoll、evport和kqueue这些IO多路复用函数库来实现的，每个IO多路复用函数库在Redis源码中都对应一个单独的文件。  </p>
-<p>4.事件的类型<br>IO多路复用程序会监听多个套接字的ae,h/AE_READABLE事件和ae.h/AE_WRITEABLE事件，对应关系如下：<br>a.当套接字变得可读时（客户端对套接字执行write操作，或执行close操作），或者有新的可应答套接字出现时，套接字产生AE_READABLE事件。<br>b.当套接字变得可写时（客户端对套接字执行read操作），套接字产生AE_WRITEABLE事件。<br>如果同时产生2种事件，文件事件分派器会优先处理AE_READABLE事件，完成之后再处理AE_WRITEABLE事件。  </p>
-<p>5.文件事件处理器<br>a.连接应答处理器<br>b.命令请求处理器<br>c.命令回复处理器  </p>
-<p>下面通过一个例子来说明各个处理器的作用：<br>假设一个Redis服务器正在运作，那么这个服务器的监听套接字的AE_READABLE事件应该正处于监听状态之下，而该事件所对应的处理器为连接应答处理器。<br>如果这是有一个Redis客户端向服务器发起连接，那么监听套接字将产生AE_READABLE事件，触发连接应答处理器执行。处理器会对客户端的连接请求进行应答，然后创建客户端套接字，以及客户端状态，并将客户端套接字的AE_READABLE事件与命令请求处理器进行关联，使得客户端可以向主服务器发送命令请求。<br>之后，假设客户端向主服务器发送一个命令请求，客户端套接字将产生AE_READABLE事件，引发命令请求处理器执行，处理器读取客户端的命令内容，然后传给相关程序去执行。<br>执行命令产生的命令回复，需要传送回客户端，服务器会将客户端套接字的AE_WRITEABLE事件与命令回复处理器进行关联。当客户端尝试读取命令回复的时候，客户端套接字将产生AE_WRITEABLE事件，触发命令回复处理器执行，当命令回复处理器将命令回复全部写入到套接字之后，服务器就会接触客户端套接字的AE_WRITEABLE事件与命令回复处理器之间的关联。</p>
-
-          
-        
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
-      
-
-  
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-            
-            
-              
-                
-                <a class="post-title-link" href="/2015/07/04/redis设计与实现/RedisRDB文件结构/" itemprop="url">
-                  RedisRDB文件结构
-                </a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            <span class="post-meta-item-icon">
-              <i class="fa fa-calendar-o"></i>
-            </span>
-            <span class="post-meta-item-text">发表于</span>
-            <time itemprop="dateCreated" datetime="2015-07-04T00:00:00+08:00" content="2015-07-04">
-              2015-07-04
-            </time>
-          </span>
-
-          
-            <span class="post-category" >
-              &nbsp; | &nbsp;
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-              
-                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
-                  <a href="/categories/Redis设计与实现/" itemprop="url" rel="index">
-                    <span itemprop="name">Redis设计与实现</span>
-                  </a>
-                </span>
-
-                
-                
-
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-
-          
-          
-
-          
-        </div>
-      </header>
-    
-
-
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>Redis RDB文件保存的是二进制数据，结构包括5部分:<br>REDIS | db_version | databases | EOF | check_sum</p>
-<p>db_version长度为4个字节，它的值是一个字符串表示的整数，记录RDB文件的版本号。</p>
-<p>databases记录数据库实例，和各个数据库实例的键值对数据，如果redis-server中所有db都为空，那这个值也为空，长度为0字节。</p>
-<p>EOF常量长度为1字节，标志着RDB文件正文内容结束。</p>
-<p>check_sum是一个8字节长的无符号整数，保存着一个校验和，这个校验和是程序通过对REDIS、db_version、databases、EOF四个部分内容计算而来。Redis在载入RDB文件时，会将载入数据的检验和与该值对比，以此来检查RDB文件是否出错或损坏。</p>
-<p>1.databases<br>每个非空数据库在RDB文件中的都保存为SELECTDB、db_number、key_value_pairs三个部分。<br>SELECTDB | db_number | key_value_pairs<br>SELECTDB常量长度为1字节，标识后面的数据库号码。<br>db_number保存数据库号码，根据号码大小不同，长度为1字节、2字节或5字节。当程序读入db_number部分后，服务器啊会调用SELECT命令，根据读入的数据库号码进行数据库切换。<br>key_value_pairs保存了数据库中所有键值对数据，如果键值对带有过期时间，那么过期时间也会和键值对保存在一起。</p>
-<p>2.key_value_pairs<br>不带过期时间的键值对结构<br>TYPE | key | value<br>带过期时间的键值对结构<br>EXPIRETIME_MS | ms | TYPE | key | value<br>其中，TYPE记录value的类型，是以下常量中任意一个：<br>REDIS_RDB_TYPE_STRING<br>REDIS_RDB_TYPE_LIST<br>REDIS_RDB_TYPE_SET<br>REDIS_RDB_TYPE_ZSET<br>REDIS_RDB_TYPE_HASH<br>REDIS_RDB_TYPE_LIST_ZIPLIST<br>REDIS_RDB_TYPE_SET_INSERT<br>REDIS_RDB_TYPE_ZSET_ZIPLIST<br>REDIS_RDB_TYPE_HASH_ZIPLIST<br>key总是一个字符串对象，编码和REDIS_RDB_TYPE_STRING类型的value一样。<br>value根据TYPE类型不同，结构和长度也会不同。<br>EXPIRETIME_MS常量长度为1字节，当程序读入该常量时，会表示下一个读入的将是一个以毫秒为单位的过期时间。<br>ms是一个8字节长的带符号整数，记录了一个以毫秒为单位的unix时间戳，即过期时间。</p>
-<p>3.value编码<br>a.字符串对象<br>TYPE是REDIS_RDB_TYPE_STRING，字符串对象编码可以是REDIS_ENCODING_INT或者REDIS_ENCODING_RAW，对应保存的值类型是整数和字符串。<br>如果字符串对象编码为REDIS_ENCODING_RAW，字符串长度若大于20字节，那么这个字符串会被压缩保存，否则原样保存。<br>无压缩字符串结构<br>len | string<br>压缩后结构<br>REDIS_RDB_ENC_LZF | compressed_len | origin_len | compressed_string<br>其中REDIS_RDB_ENC_LZF常量标志字符串已被LZF算法压缩，程序在读入过程中，碰到这个常量时，会根据之后的compressed_len和orgin_len和compressed_string 三部分对字符串进行解压。</p>
-<p>b.列表对象<br>TYPE为REDIS_RDB_TYPE_LIST，value保存的是一个REDIS_ENCODING_LINKEDLIST编码的列表对象，结构如下<br>list_length | item1| item2 | item3 | … | itemN<br>list_length记录了列表的长度，item部分代表列表的项，每项都是字符串对象。</p>
-<p>c.集合对象<br>TYPE为REDIS_RDB_TYPE_SET，value保存的是一个REDIS_ENCODING_HT编码的对象集合，结构如下<br>set_size | elem1 | elem2 | elem3 | … | elemN<br>set_size记录集合大小，elem开头部分代表元素集合，每个元素都是一个字符串对象。</p>
-<p>d.哈希表对象<br>TYPE为REDIS_RDB_TYPE_HASH，value保存的是一个REDIS_ENCODING_HT编码的集合对象，结构如下<br>hash_size | key_value_pair 1 | key_value_pair 2 | key_value_pair 3 | … | key_value_pair N<br>hash_size记录了哈希表的大小。key_value_pair部分代表键值对，结构中的每个键值对都以键紧挨着值的方式排列。结构如下<br>key1 | value1 | key2 | value2 | key3 | value3 | ….</p>
-<p>e.有序集合对象<br>TYPE为REDIS_RDB_TYPE_ZSET，value保存的是一个REDIS_ENCODING_SKIPLIST编码的有序集合对象。结构如下<br>sorted_set_size | elem1 | elem2 | elem3 | … | elemN<br>sorted_set_size记录有序集合大小，elem开头部分代表有序集合中的元素，每个元素又分为成员 (member)和分值(score)两部分，成员是一个字符串对象，分值则是一个double类型的浮点数，程序在保存RDB文件时会先将分支转换成字符串对象，再用保存字符串的方法将分值保存起来。<br>有序集合中每个元素都是以成员紧挨着分值方式排列，结构如下<br>sorted_set_size | member1 | score 1 | member2 | score2 | … | memberN | scoreN</p>
-<p>f.INTSET编码集合<br>TYPE为REDIS_RDB_TYPE_SET_INTSET，value保存的是一个整数集合对象，RDB保存这种对象方法是先将整数集合转换为字符串对象，再保存到RDB文件中。读取是相反。</p>
-<p>g.ZIPLIST编码的列表、哈希表或有序集合<br>TYPE为REDIS_RDB_TYPE_LIST_ZIPLIST、REDIS_RDB_TYPE_HASH_ZIPLIST或者REDIS_RDB_TYPE_ZSET_ZIPLIST，那么value保存的是一个压缩列表对象，RDB文件保存方法是:<br>1)将压缩列表转换成一个字符串对象；<br>2)将转换所得的字符串对象保存到RDB文件。<br>读取时做对应类型转换即可。</p>
-
-          
-        
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
-      
-
-  
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-            
-            
-              
-                
-                <a class="post-title-link" href="/2015/07/01/redis设计与实现/Redis类型检查和命令多态/" itemprop="url">
-                  Redis类型检查和命令多态
-                </a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            <span class="post-meta-item-icon">
-              <i class="fa fa-calendar-o"></i>
-            </span>
-            <span class="post-meta-item-text">发表于</span>
-            <time itemprop="dateCreated" datetime="2015-07-01T00:00:00+08:00" content="2015-07-01">
-              2015-07-01
-            </time>
-          </span>
-
-          
-            <span class="post-category" >
-              &nbsp; | &nbsp;
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-              
-                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
-                  <a href="/categories/Redis设计与实现/" itemprop="url" rel="index">
-                    <span itemprop="name">Redis设计与实现</span>
-                  </a>
-                </span>
-
-                
-                
-
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-
-          
-          
-
-          
-        </div>
-      </header>
-    
-
-
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>Redis中用于操作键的命令基本可以分为2类。</p>
-<p>其中一种是可以对任何类型的键执行，比如DEL,EXPIRE,RENAME,TYPE,OBJECT,TTL等命令。</p>
-<p>另一种只能对特定的键执行，比如：<br>SET,GET,APPEND,STRLEN 等仅限用于字符串的键类型；<br>HDEL,HSET,HGET,HLEN 等仅限用于哈希键类型；<br>RPUSH,LPOP,LINSERT,LLEN 等仅限用于列表键类型；<br>SADD,SPOP,SINTER,SCARD 等仅限用于集合键类型；<br>ZADD,ZCARD,ZRANK,ZSCORE 等仅限用于有序集合键类型；</p>
-<p>在执行一个类型特定命令之前，Redis会先检查输入键类型是否正确，然后再决定是否执行命令。<br>如果键名称正确，再检查键对象是否是执行命令所需的类型，不是的话就返回一个类型错误。</p>
-<p>多态命令的实现除了检查键类型和命令是否匹配外，还会检查键的至对象所使用的编码。例如，LLEN命令。<br>如果列表对象编码为ziplist,，说明对象为压缩列表，程序使用ziplistlen作为底层实现返回列表长度。<br>如果列表对象编码为linkedlist，说明对象为双端链表，程序使用listLength作为底层实现返回链表长度。</p>
-
-          
-        
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
-      
-
-  
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-            
-            
-              
-                
-                <a class="post-title-link" href="/2015/07/01/redis设计与实现/Redis持久化-RDB/" itemprop="url">
-                  Redis持久化-RDB
-                </a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            <span class="post-meta-item-icon">
-              <i class="fa fa-calendar-o"></i>
-            </span>
-            <span class="post-meta-item-text">发表于</span>
-            <time itemprop="dateCreated" datetime="2015-07-01T00:00:00+08:00" content="2015-07-01">
-              2015-07-01
-            </time>
-          </span>
-
-          
-            <span class="post-category" >
-              &nbsp; | &nbsp;
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-              
-                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
-                  <a href="/categories/Redis设计与实现/" itemprop="url" rel="index">
-                    <span itemprop="name">Redis设计与实现</span>
-                  </a>
-                </span>
-
-                
-                
-
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-
-          
-          
-
-          
-        </div>
-      </header>
-    
-
-
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>RDB持久化可以自动，也可以手动，这个功能将某个时间点上的数据库状态保存到一个经过压缩的二进制文件中。</p>
-<p>SAVE命令会阻塞服务，执行完成前客户端的所有请求都会拒绝。<br>BGSAVE命令会新建一个子进程执行持久化操作，不阻塞服务。</p>
-<p>服务器状态维护了一个dirty计数器以及一个lastsave属性，供RDB持久化策略使用。<br>dirty计数器记录距离上一次成功执行SAVE或BGSAVE操作后，服务器中所有数据库进行了多少次修改操作（增删改）；<br>lastsave属性是一个unix时间戳，记录上一次RDB持久化的时间。</p>
+            <h2 id="变量"><a href="#变量" class="headerlink" title="变量"></a>变量</h2><ul>
+<li>val，定义immutable variable，不可变        </li>
+<li>var，定义mutable variable，可变</li>
+<li>lazy val，惰性常量    </li>
+</ul>
+<h2 id="数据类型"><a href="#数据类型" class="headerlink" title="数据类型"></a>数据类型</h2><p>超级父类 Any</p>
+<p>Byte, Short, Int, Long, Char, String, Float, Double, Boolean</p>
+<p>null表示对象引用类型为空，nothing表示程序异常终止。</p>
+<figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">scala&gt; <span class="function"><span class="keyword">def</span> <span class="title">foo</span></span>()=<span class="keyword">throw</span> <span class="keyword">new</span> <span class="type">Exception</span>(<span class="string">"error"</span>)</span><br><span class="line">foo: ()<span class="type">Nothing</span></span><br></pre></td></tr></table></figure>
+<p>String构建与Java的String之上，新增字符串插值特性。</p>
+<figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> name = <span class="string">"Hello"</span>	</span><br><span class="line"><span class="string">s"new name is <span class="subst">$&#123;name&#125;</span>"</span></span><br></pre></td></tr></table></figure>
+<p>可以不显示指定变量类型，Scala会自动进行类型推导。</p>
+<h2 id="代码块"><a href="#代码块" class="headerlink" title="代码块"></a>代码块</h2><figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">&#123;exp1 ;exp2&#125;</span><br><span class="line"></span><br><span class="line">&#123;</span><br><span class="line">exp1</span><br><span class="line">exp2</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>表达式可以写在一行，分号分隔。也可以写多行。</p>
+<h2 id="函数"><a href="#函数" class="headerlink" title="函数"></a>函数</h2><figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">functionName</span></span>( param: <span class="type">ParamType</span>): <span class="type">ReturnType</span> = &#123;</span><br><span class="line">	<span class="comment">//function body: expressions</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">scala&gt; <span class="function"><span class="keyword">def</span> <span class="title">add</span></span>(x:<span class="type">Int</span>, y:<span class="type">Int</span>)= &#123;x+y&#125;</span><br><span class="line">add: (x: <span class="type">Int</span>, y: <span class="type">Int</span>)<span class="type">Int</span></span><br><span class="line"></span><br><span class="line">scala&gt; add(<span class="number">1</span>,<span class="number">1</span>)</span><br><span class="line">res4: <span class="type">Int</span> = <span class="number">2</span></span><br><span class="line"></span><br><span class="line">scala&gt; <span class="function"><span class="keyword">def</span> <span class="title">add</span></span>(x:<span class="type">Int</span>, y:<span class="type">Int</span>):<span class="type">Int</span>= &#123;x+y&#125;</span><br><span class="line">add: (x: <span class="type">Int</span>, y: <span class="type">Int</span>)<span class="type">Int</span></span><br><span class="line"></span><br><span class="line">scala&gt; add(<span class="number">1</span>,<span class="number">1</span>)</span><br><span class="line">res5: <span class="type">Int</span> = <span class="number">2</span></span><br></pre></td></tr></table></figure>
+<p>多个参数用逗号分隔。</p>
+<h2 id="if表达式"><a href="#if表达式" class="headerlink" title="if表达式"></a>if表达式</h2><figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (logical_exp) valA <span class="keyword">else</span> valB</span><br></pre></td></tr></table></figure>
+<p>和Java类似。</p>
+<h2 id="for表达式"><a href="#for表达式" class="headerlink" title="for表达式"></a>for表达式</h2><figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">scala&gt; <span class="keyword">val</span> l = <span class="type">List</span>(<span class="string">"a"</span>, <span class="string">"b"</span>, <span class="string">"c"</span>)</span><br><span class="line">l: <span class="type">List</span>[<span class="type">String</span>] = <span class="type">List</span>(a, b, c)</span><br><span class="line"></span><br><span class="line">scala&gt; <span class="keyword">for</span> (</span><br><span class="line">s &lt;- l</span><br><span class="line">) println(s)</span><br><span class="line">a</span><br><span class="line">b</span><br><span class="line">c</span><br></pre></td></tr></table></figure>
+<h2 id="try表达式"><a href="#try表达式" class="headerlink" title="try表达式"></a>try表达式</h2><figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">try</span>&#123; &#125;</span><br><span class="line"><span class="keyword">catch</span>&#123; &#125;</span><br><span class="line"><span class="keyword">finally</span>&#123; &#125;</span><br></pre></td></tr></table></figure>
+<p>与Java不同，try是表达式，不是关键字。</p>
+<figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">try</span>&#123;</span><br><span class="line">	<span class="type">Integer</span>.parseInt(<span class="string">"abc"</span>)</span><br><span class="line">&#125; <span class="keyword">catch</span> &#123;</span><br><span class="line">	<span class="keyword">case</span> _ =&gt; <span class="number">0</span></span><br><span class="line">&#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">	println(<span class="string">"always be printed"</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="match表达式"><a href="#match表达式" class="headerlink" title="match表达式"></a>match表达式</h2><figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">exp <span class="keyword">match</span> &#123;</span><br><span class="line">	<span class="keyword">case</span> p1 =&gt; val1</span><br><span class="line">	<span class="keyword">case</span> p2 =&gt; val2</span><br><span class="line">	...</span><br><span class="line">	<span class="keyword">case</span> _ =&gt; valn</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> code = <span class="number">1</span></span><br><span class="line"><span class="keyword">val</span> result_match = code <span class="keyword">match</span> &#123;</span><br><span class="line">	<span class="keyword">case</span> <span class="number">1</span> =&gt; <span class="string">"ONE"</span></span><br><span class="line">	<span class="keyword">case</span> <span class="number">2</span> =&gt; <span class="string">"TWO"</span></span><br><span class="line">	<span class="keyword">case</span> _ =&gt; <span class="string">"OTHERS"</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>_ 表示通配，相当于Java中switch语句的default关键字。</p>
+<h2 id="求值策略"><a href="#求值策略" class="headerlink" title="求值策略"></a>求值策略</h2><ul>
+<li>Call By Value 对函数实参求值，且仅求值一次</li>
+<li>Call By Name    函数实参每次在函数体内被用到时都会求值</li>
+</ul>
+<p>Scala默认使用Call By Value<br>如果函数形参类型以 =&gt; 开头，那么会使用Call By Name        </p>
+<p>def foo(x: Int) = x //call by value<br>def foo(x: =&gt; Int) = x //call by name    </p>
+<p>call by name在调用时不会解析入参中的表达式，call by value则相反。</p>
+<h2 id="函数-1"><a href="#函数-1" class="headerlink" title="函数"></a>函数</h2><p>Scala函数特性：    </p>
+<ol>
+<li>把函数作为实参传递给另一个函数。    </li>
+<li>把函数作为返回值。    </li>
+<li>把函数赋值给变量。    </li>
+<li>把函数存储在数据结构里。    </li>
+<li>函数和普通变量一样，具有函数的类型。</li>
+</ol>
+<h2 id="函数类型"><a href="#函数类型" class="headerlink" title="函数类型"></a>函数类型</h2><p>函数类型格式为 A =&gt; B ，表示一个接受类型A的参数，并返回类型B的函数。</p>
+<p>例子： Int =&gt; String 是把整型映射为字符串的函数类型。</p>
+<h2 id="高阶函数"><a href="#高阶函数" class="headerlink" title="高阶函数"></a>高阶函数</h2><p>用函数作为形参或返回值的函数，称为高阶函数。</p>
+<figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">operate</span></span>(f: (<span class="type">Int</span>, <span class="type">Int</span>) =&gt; <span class="type">Int</span>) = &#123;</span><br><span class="line">	f(<span class="number">4</span>, <span class="number">4</span>)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">greeting</span></span>() = (name: <span class="type">String</span>) =&gt; &#123;<span class="string">"hello"</span> + <span class="string">" "</span> + name&#125;	<span class="comment">//匿名函数</span></span><br></pre></td></tr></table></figure>
+<h2 id="柯里化"><a href="#柯里化" class="headerlink" title="柯里化"></a>柯里化</h2><p>柯里化函数，把具有多个参数的函数转换为一条函数链，每个节点上是单一参数。</p>
+<p>例子：以下2个add函数定义是等价的</p>
+<figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">add</span></span>(x: <span class="type">Int</span>, y: <span class="type">Int</span>) = x + y	</span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">add</span></span>(x: <span class="type">Int</span>)(y: <span class="type">Int</span>) = x + y <span class="comment">//Scala柯里化语法</span></span><br></pre></td></tr></table></figure>
+<h2 id="尾递归函数"><a href="#尾递归函数" class="headerlink" title="尾递归函数"></a>尾递归函数</h2><p>尾递归函数中所有递归形式的调用都出现在函数的末尾。</p>
+<p>当编译器检测到一个函数调用是尾递归的时候，它就覆盖当前的活动记录而不是在栈中去创建一个新的。（避免堆栈内存溢出）</p>
+<p>例子：</p>
+<figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@annotation</span>.tailrec</span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">factorial</span></span>(n: <span class="type">Int</span>, m: <span class="type">Int</span>): <span class="type">Int</span> =</span><br><span class="line">	<span class="keyword">if</span> (n &lt;= <span class="number">0</span>) m</span><br><span class="line">	<span class="keyword">else</span> factoria(n<span class="number">-1</span>, m*n)</span><br><span class="line">factorial(<span class="number">5</span>, <span class="number">1</span>)</span><br></pre></td></tr></table></figure>
+<figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">sum</span></span>(f: <span class="type">Int</span> =&gt; <span class="type">Int</span>)(a: <span class="type">Int</span>)(b: <span class="type">Int</span>): <span class="type">Int</span> = &#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@annotation</span>.tailrec</span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">loop</span></span>(n: <span class="type">Int</span>, acc: <span class="type">Int</span>): <span class="type">Int</span> = &#123;</span><br><span class="line">      <span class="keyword">if</span> (n &gt; b) &#123;</span><br><span class="line">        println(<span class="string">s"n=<span class="subst">$&#123;n&#125;</span>, acc=<span class="subst">$&#123;acc&#125;</span>"</span>)</span><br><span class="line">        acc</span><br><span class="line">      &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        println(<span class="string">s"n=<span class="subst">$&#123;n&#125;</span>, acc=<span class="subst">$&#123;acc&#125;</span>"</span>)</span><br><span class="line">        loop(n + <span class="number">1</span>, acc + f(n))</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    loop(a, <span class="number">0</span>)</span><br><span class="line">&#125;</span><br><span class="line">  </span><br><span class="line">  sum(x =&gt; x)(<span class="number">1</span>)(<span class="number">5</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment">//输出</span></span><br><span class="line">n=<span class="number">1</span>, acc=<span class="number">0</span></span><br><span class="line">n=<span class="number">2</span>, acc=<span class="number">1</span></span><br><span class="line">n=<span class="number">3</span>, acc=<span class="number">3</span></span><br><span class="line">n=<span class="number">4</span>, acc=<span class="number">6</span></span><br><span class="line">n=<span class="number">5</span>, acc=<span class="number">10</span></span><br><span class="line">n=<span class="number">6</span>, acc=<span class="number">15</span></span><br></pre></td></tr></table></figure>
 
           
         
@@ -821,7 +558,7 @@
 
   
   <nav class="pagination">
-    <a class="extend prev" rel="prev" href="/page/4/"><i class="fa fa-angle-left"></i></a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/4/">4</a><span class="page-number current">5</span><a class="page-number" href="/page/6/">6</a><a class="page-number" href="/page/7/">7</a><a class="extend next" rel="next" href="/page/6/"><i class="fa fa-angle-right"></i></a>
+    <a class="extend prev" rel="prev" href="/page/4/"><i class="fa fa-angle-left"></i></a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/4/">4</a><span class="page-number current">5</span><a class="page-number" href="/page/6/">6</a><span class="space">&hellip;</span><a class="page-number" href="/page/17/">17</a><a class="extend next" rel="next" href="/page/6/"><i class="fa fa-angle-right"></i></a>
   </nav>
 
 
