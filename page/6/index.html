@@ -242,174 +242,6 @@
             
               
                 
-                <a class="post-title-link" href="/2016/07/05/HBase/初识HBase/" itemprop="url">
-                  初识HBase
-                </a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            <span class="post-meta-item-icon">
-              <i class="fa fa-calendar-o"></i>
-            </span>
-            <span class="post-meta-item-text">发表于</span>
-            <time itemprop="dateCreated" datetime="2016-07-05T00:00:00+08:00" content="2016-07-05">
-              2016-07-05
-            </time>
-          </span>
-
-          
-            <span class="post-category" >
-              &nbsp; | &nbsp;
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-              
-                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
-                  <a href="/categories/HBase/" itemprop="url" rel="index">
-                    <span itemprop="name">HBase</span>
-                  </a>
-                </span>
-
-                
-                
-
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-
-          
-          
-
-          
-        </div>
-      </header>
-    
-
-
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h2 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h2><p>HBase是一个构建在HDFS之上、分布式、面向列的开源数据库，由Google BigTable的开源实现，它主要用于存储海量数据，是Hadoop生态系统中的重要一员。</p>
-<h2 id="HBase优势"><a href="#HBase优势" class="headerlink" title="HBase优势"></a>HBase优势</h2><h3 id="1-成熟"><a href="#1-成熟" class="headerlink" title="1.成熟"></a>1.成熟</h3><ul>
-<li>社区成熟    </li>
-<li>理论充分经过实践</li>
-<li>丰富的工具支持, hbck、phoenix、solr</li>
-</ul>
-<h3 id="2-高效"><a href="#2-高效" class="headerlink" title="2.高效"></a>2.高效</h3><ul>
-<li>将随机嘟列转化为顺序读写，适应高并发写入</li>
-<li>均衡效果好读写性能和机器数保持线性关系</li>
-<li>行中没有保存数据的列不占存储空间</li>
-</ul>
-<h3 id="3-分布式特性"><a href="#3-分布式特性" class="headerlink" title="3.分布式特性"></a>3.分布式特性</h3><ul>
-<li>基于HDFS、Zookeeper</li>
-<li>一致性、可用性、分区容忍性</li>
-<li>大数据存储</li>
-<li>易扩展</li>
-</ul>
-<h2 id="HBase表特点"><a href="#HBase表特点" class="headerlink" title="HBase表特点"></a>HBase表特点</h2><ul>
-<li>大：一个表可以有数十亿行，上百万列</li>
-<li>面向列：面向列（族）的存储和权限访问，列（族）独立索引</li>
-<li>稀疏：对于为空（null）的列，并不占用存储空间，因此，表可以设计的非常稀疏</li>
-<li>数据类型单一：HBase中的数据类型都是字符串(string)</li>
-<li>无模式：每行都有一个可排序的主键和任意多的列，列可以根据需要动态增加，同一张表中不同的行可以有截然不同的列</li>
-</ul>
-<h2 id="HBase-VS-RDBMS"><a href="#HBase-VS-RDBMS" class="headerlink" title="HBase VS RDBMS"></a>HBase VS RDBMS</h2><ul>
-<li>数据类型<br>HBase中的数据都是字符串类型</li>
-<li>数据操作<br>HBase只有普通的增删改查等操作，没有表之间的关联查询</li>
-<li>存储模式<br>HBase是基于列式存储的，而RDBMS是基于行式存储的</li>
-<li>应用场景<br>HBase适合存储大量数据，查询效率极高</li>
-</ul>
-<hr>
-<h2 id="HBase概念"><a href="#HBase概念" class="headerlink" title="HBase概念"></a>HBase概念</h2><h3 id="1-主键"><a href="#1-主键" class="headerlink" title="1.主键"></a>1.主键</h3><ul>
-<li>用来检索记录的主键</li>
-<li>访问HBase表中的行，只有三种方式：<ol>
-<li>通过单个Row Key访问</li>
-<li>通过Row Key的range</li>
-<li>全表扫描</li>
-</ol>
-</li>
-<li>主键为任意字符串，最大长度为64kb，按字典顺序存储，在HBase内部保存为字节数组</li>
-</ul>
-<h3 id="2-列族"><a href="#2-列族" class="headerlink" title="2.列族"></a>2.列族</h3><ul>
-<li>列族在创建表的时候声明，一个列族可以包含多个列，列中的数据都是以二进制形式存在，没有数据类型</li>
-<li>列族是一些列的集合</li>
-<li>一个列族所有列成员是有着相同的前缀。比如，列courses:histor和courses:math都是列族courses的成员，冒号是列族的分隔符，用来区分前缀和列名</li>
-</ul>
-<h3 id="3-时间戳与存储单元"><a href="#3-时间戳与存储单元" class="headerlink" title="3.时间戳与存储单元"></a>3.时间戳与存储单元</h3><ul>
-<li>HBase中通过row和columns确定的为一个存贮单元称为cell。每个cell都保存着同一份数据的多个版本。</li>
-<li>在写入数据时，时间戳可以由HBase自动赋值（当前系统时间精确到毫秒），也可以显示赋值。</li>
-<li>每个cell中，不用版本的数据按照时间的倒序排序。</li>
-</ul>
-<h2 id="HBase数据模型"><a href="#HBase数据模型" class="headerlink" title="HBase数据模型"></a>HBase数据模型</h2><h3 id="HBase存储细节"><a href="#HBase存储细节" class="headerlink" title="HBase存储细节"></a>HBase存储细节</h3><ul>
-<li>每个列族存储在HDFS上的一个单独文件夹中</li>
-<li>Key和Version number会在每个列族中存储一份</li>
-<li>空值不会被保存</li>
-</ul>
-
-          
-        
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
-      
-
-  
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-            
-            
-              
-                
                 <a class="post-title-link" href="/2016/06/07/Scala/Scala基础/" itemprop="url">
                   Scala基础
                 </a>
@@ -554,11 +386,155 @@
 
 
     
+      
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
+                <a class="post-title-link" href="/2016/05/28/JavaWeb/深入分析ClassLoader/" itemprop="url">
+                  深入分析ClassLoader
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2016-05-28T00:00:00+08:00" content="2016-05-28">
+              2016-05-28
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/Java-Web/" itemprop="url" rel="index">
+                    <span itemprop="name">Java Web</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+
+          
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>ClassLoader除了能将Class加载到JVM中之外，还能审查每个类该由谁加载。它是一种父优先的等级加载机制。</p>
+<h2 id="ClassLoader等级加载机制"><a href="#ClassLoader等级加载机制" class="headerlink" title="ClassLoader等级加载机制"></a>ClassLoader等级加载机制</h2><ol>
+<li>Bootstrap ClassLoader，主要加载JVM自身工作需要的类，完全由JVM自己控制，外部无法访问，这个ClassLoader不遵守等级加载规则。</li>
+<li>ExtClassLoader，不是JVM亲自实现。服务目标在System.getProperties(“java.ext.dirs”)目录下。</li>
+<li>AppClassLoader，父类是ExtClassLoader，所有在System.getProperties(“java.class.path”)目录下的类都可以被这个类加载器加载，这就是我们常用到的classpath。</li>
+</ol>
+<p>如果我们要实现自己的类加载器，不管是直接实现抽象类ClassLoader，还是继承URLClassLoader或其他子类，它的父加载器都是AppClassLoader，不管调用哪个父类构造器，创建对象都必须最终调用getSystemCLassLoader()作为父加载器，而getSystemClassLoader()方法获取到的正是AppClassLoader。</p>
+<p>Bootstrap ClassLoader并不属于JVM的类层次结构，因为BootstrapClassLoader并没有遵守ClassLoader的加载规则。Bootstrap ClassLoader并没有子类，ExtClassLoader父类也不是Bootstrap ClassLoader，ExtClassLoader并没有父类，应用中能提取到的顶层父类是ExtClassLoader。</p>
+<p>ExtClassLoader和AppClassLoader都位于sun.misc.Launcher类中，它们是Launcher类的内部类，都继承了URLClassLoader类，URLClassLoader实现了抽象类ClassLoader。</p>
+<h2 id="如何加载class文件"><a href="#如何加载class文件" class="headerlink" title="如何加载class文件"></a>如何加载class文件</h2><p>抽象类ClassLoader中并没有定义如何加载，需要子类实现findClass()方法。看一下URLClassLoader实现findClass()过程：    </p>
+<ol>
+<li>通过URLClassPath类取得加载的class文件字节流，找到后读取它的byte字节流。    </li>
+<li>调用defineClass()创建类对象。</li>
+</ol>
+<p>创建URLClassLoader对象会根据传过来的URL数组中路径来判断是文件还是jar包，根据路径的不同分别创建FileLoader和JarLoader，或者使用默认的加载器。</p>
+<h3 id="验证与解析"><a href="#验证与解析" class="headerlink" title="验证与解析"></a>验证与解析</h3><ol>
+<li>字节码验证，确保格式正确，行为正确。</li>
+<li>类准备，准备字段、方法和实现接口所必须的数据结构。</li>
+<li>解析，类装入器装入类引用的其他所有类。    </li>
+<li>初始化对象，该阶段末尾静态字段被初始化默认值。</li>
+</ol>
+<h2 id="实现自己的ClassLoader"><a href="#实现自己的ClassLoader" class="headerlink" title="实现自己的ClassLoader"></a>实现自己的ClassLoader</h2><p>应用场景：    </p>
+<ul>
+<li>在自定义路径下查找自定义的class类文件，也许我们需要的class文件并不总是在classPath下面。    </li>
+<li>对我们自己要加载的类做特殊处理，如保证通过网络传输的安全性，可以将类经过加密后传输，在加载到JVM之前需要对类的字节码再解密。        </li>
+<li>可以定义类的实现机制，例如实现热部署：检查已经加载的class文件是否被修改，如修改可重新加载。    </li>
+</ul>
+<p>JVM表示一个类是否是同一个类有两个条件：    </p>
+<ol>
+<li>检查完整类名是否一致。        </li>
+<li>检查加载这个类的ClassLoader是否是同一个，这里指的是ClassLoader实例是否是同一个。</li>
+</ol>
+
+          
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
   </section>
 
   
   <nav class="pagination">
-    <a class="extend prev" rel="prev" href="/page/5/"><i class="fa fa-angle-left"></i></a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/5/">5</a><span class="page-number current">6</span><a class="page-number" href="/page/7/">7</a><span class="space">&hellip;</span><a class="page-number" href="/page/18/">18</a><a class="extend next" rel="next" href="/page/7/"><i class="fa fa-angle-right"></i></a>
+    <a class="extend prev" rel="prev" href="/page/5/"><i class="fa fa-angle-left"></i></a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/5/">5</a><span class="page-number current">6</span><a class="page-number" href="/page/7/">7</a><span class="space">&hellip;</span><a class="page-number" href="/page/17/">17</a><a class="extend next" rel="next" href="/page/7/"><i class="fa fa-angle-right"></i></a>
   </nav>
 
 
@@ -599,7 +575,7 @@
         <nav class="site-state motion-element">
           <div class="site-state-item site-state-posts">
             <a href="/archives">
-              <span class="site-state-item-count">35</span>
+              <span class="site-state-item-count">34</span>
               <span class="site-state-item-name">日志</span>
             </a>
           </div>

@@ -242,191 +242,6 @@
             
               
                 
-                <a class="post-title-link" href="/2016/05/18/JavaWeb/NIO的工作机制/" itemprop="url">
-                  NIO工作机制
-                </a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            <span class="post-meta-item-icon">
-              <i class="fa fa-calendar-o"></i>
-            </span>
-            <span class="post-meta-item-text">发表于</span>
-            <time itemprop="dateCreated" datetime="2016-05-18T00:00:00+08:00" content="2016-05-18">
-              2016-05-18
-            </time>
-          </span>
-
-          
-            <span class="post-category" >
-              &nbsp; | &nbsp;
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-              
-                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
-                  <a href="/categories/Java-Web/" itemprop="url" rel="index">
-                    <span itemprop="name">Java Web</span>
-                  </a>
-                </span>
-
-                
-                
-
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-
-          
-          
-
-          
-        </div>
-      </header>
-    
-
-
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h1 id="NIO的工作方式"><a href="#NIO的工作方式" class="headerlink" title="NIO的工作方式"></a>NIO的工作方式</h1><h2 id="NIO工作机制"><a href="#NIO工作机制" class="headerlink" title="NIO工作机制"></a>NIO工作机制</h2><p>NIO引入了Channel、Buffer和Selector，Channel是高速通道，Buffer是高速通道上的具体单位，Selector是调度器。当我们调用write()往SendQ写数据时，当一次写的数据超过SendQ长度时需要按照SendQ的长度进行分割，在这个过程中需要将用户空间数据和内核地址空间进行切换，而这个切换不是你可以控制的，但在Buffer中我们可以控制Buffer的容量、是否扩容以及如何扩容。</p>
-<p>调用Selector的静态工厂创建一个选择器，创建一个服务端的Channel，绑定到一个Socket对象，并把这个通信信道注册到选择器上，把这个通信信道设置为非阻塞模式。然后就可以调用Selector的selectedKeys方法来检查已经注册在这个选择器上的所有通信信道是否有需要的事件发生，如果与某个事件发生，将会返回所有的SelectionKey，通过这个对象的Channel方法就可以就可以取得这个通信信道对象，从而读取通信的数据，而这里读取的数据是Buffer，这个Buffer是我们可以控制的缓冲器。</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">selector</span><span class="params">()</span> <span class="keyword">throws</span> IOException </span>&#123;</span><br><span class="line">        ByteBuffer buffer = ByteBuffer.allocate(<span class="number">1024</span>);</span><br><span class="line">        Selector selector = Selector.open();</span><br><span class="line">        ServerSocketChannel ssc = ServerSocketChannel.open();</span><br><span class="line">        ssc.configureBlocking(<span class="keyword">false</span>); <span class="comment">//设置为非阻塞方式</span></span><br><span class="line">        ssc.register(selector, SelectionKey.OP_ACCEPT);</span><br><span class="line">        <span class="keyword">while</span> (<span class="keyword">true</span>) &#123;</span><br><span class="line">            Set selectedKeys = selector.selectedKeys();</span><br><span class="line">            Iterator it = selectedKeys.iterator();</span><br><span class="line">            <span class="keyword">while</span> (it.hasNext()) &#123;</span><br><span class="line">                SelectionKey key = (SelectionKey) it.next();</span><br><span class="line">                <span class="keyword">if</span> ((key.readyOps() &amp; SelectionKey.OP_ACCEPT) == SelectionKey.OP_ACCEPT) &#123;</span><br><span class="line">                    ServerSocketChannel ssChannel = (ServerSocketChannel) key.channel();</span><br><span class="line">                    SocketChannel sc = ssChannel.accept(); <span class="comment">//接受到服务端请求</span></span><br><span class="line">                    sc.configureBlocking(<span class="keyword">false</span>);</span><br><span class="line">                    sc.register(selector, SelectionKey.OP_READ);</span><br><span class="line">                    it.remove();</span><br><span class="line">                &#125; <span class="keyword">else</span> <span class="keyword">if</span> ((key.readyOps() &amp; SelectionKey.OP_READ) == SelectionKey.OP_READ) &#123;</span><br><span class="line">                    SocketChannel sc = (SocketChannel) key.channel();</span><br><span class="line">                    <span class="keyword">while</span> (<span class="keyword">true</span>) &#123;</span><br><span class="line">                        buffer.clear();</span><br><span class="line">                        <span class="keyword">int</span> n = sc.read(buffer);</span><br><span class="line">                        <span class="keyword">if</span> (n &lt;= <span class="number">0</span>) &#123;</span><br><span class="line">                            <span class="keyword">break</span>;</span><br><span class="line">                        &#125;</span><br><span class="line">                        buffer.flip();</span><br><span class="line">                    &#125;</span><br><span class="line">                    it.remove();</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
-<p>在上面这段程序中，将Server端的监听连接请求的事件和处理请求的事件放在一个线程中，但是在事件应用中，我们通常会把它们放在两个线程中：一个线程专门负责监听客户端的连接请求，而且是以阻塞方式运行的；另外一个线程专门负责处理请求，这个专门处理请求的线程才会真正采用NIO的方式，像Web服务器Tomcat和Jetty都是使用这个处理方式。</p>
-<p>Selector可以同时监听一组通信信道(Channel)上的IO状态，前提是这个Selector已经注册到这些通信信道中。选择器Selector可以调用select()方法检查已经注册的通信信道上IO是否已经准备好，如果没有至少一个信道IO状态有变化，那么select方法会阻塞等待或在超时时间后返回0。如果有多个信道有数据，那么将会把这些数据分配到对应的数据Buffer中。所以关键的地方是，有一个线程来处理所有连接的数据交互，每个连接的数据交互都不是阻塞方式，所以可以同时处理大量的连续请求。</p>
-<h2 id="Buffer的工作方式"><a href="#Buffer的工作方式" class="headerlink" title="Buffer的工作方式"></a>Buffer的工作方式</h2><p>把Buffer简单理解为一组基本数据类型的元素列表，它通过几个变量来保存这个数据的当前位置状态，也就是有4个索引，如下所示：   </p>
-<table>
-<thead>
-<tr>
-<th style="text-align:center">索引</th>
-<th style="text-align:center">说明</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align:center">capacity</td>
-<td style="text-align:center">缓冲区数组的总长度</td>
-</tr>
-<tr>
-<td style="text-align:center">position</td>
-<td style="text-align:center">下一个要操作的数据元素位置</td>
-</tr>
-<tr>
-<td style="text-align:center">limit</td>
-<td style="text-align:center">缓冲区数组中不可操作的下一个元素的位置，limit&lt;=capacity</td>
-</tr>
-<tr>
-<td style="text-align:center">mark</td>
-<td style="text-align:center">记录当前position的前一根位置或默认是0</td>
-</tr>
-</tbody>
-</table>
-<p>通过Channel获取的IO数据首先要经过OS的Socket缓冲区，再将数据复制到Buffer中，这个OS缓冲区就是底层的TCP所关联的RecvQ或者SendQ队列，从OS缓冲区到用户缓冲区复制数据比较耗性能，Buffer提供了另外一种直接操作OS缓冲区的方式，即ByteBuffer.allocateDirector(size)，这个方法返回的DirectByteBuffer就是与底层存储空间关联的缓冲区，它通过Native代码操作非JVM堆的内存空间。每次创建或者释放的时候都调用一次System.gc()。</p>
-<p>DirectByteBuffer和Non-DirectBuffer对比</p>
-<table>
-<thead>
-<tr>
-<th style="text-align:center"></th>
-<th style="text-align:center">HeapByteBuffer</th>
-<th style="text-align:center">DirectByteBuffer</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align:center">存储位置</td>
-<td style="text-align:center">Java Heap中</td>
-<td style="text-align:center">Native内存中</td>
-</tr>
-<tr>
-<td style="text-align:center">I/O</td>
-<td style="text-align:center">需要在用户地址空间和OS内核地址空间交换数据</td>
-<td style="text-align:center">不需复制</td>
-</tr>
-<tr>
-<td style="text-align:center">内存管理</td>
-<td style="text-align:center">Java GC回收，创建和回收开销少</td>
-<td style="text-align:center">通过调用System.gc()要释放掉Java对象引用的DirectByteBuffer内存空间，如果Java对象长时间持有引用会导致Native内存泄露，创建和回收内存开销较大</td>
-</tr>
-<tr>
-<td style="text-align:center">适用场景</td>
-<td style="text-align:center">并发连接数少于1000，I/O操作较少时比较合适</td>
-<td style="text-align:center">数据量比较大，生命周期比较长的情况下比较合适</td>
-</tr>
-</tbody>
-</table>
-<h2 id="NIO的数据访问方式"><a href="#NIO的数据访问方式" class="headerlink" title="NIO的数据访问方式"></a>NIO的数据访问方式</h2><p>NIO提供了比传统文件访问方式更好的方法，NIO有2个优化方法：一个是FileChannel.transferTo、FileChannel.transferFrom;另一个是FileChannel.map。</p>
-<ol>
-<li><p>FileChannel.transferXXX<br>与传统的访问文件方式相比，可以减少数据从内核到用户空间的复制，数据直接在内核空间中移动，在Linux中使用sendfile系统调用。</p>
-</li>
-<li><p>FileChannel.map<br>将文件按照一定大小块映射为内存区域，当程序访问这个内存区域时将直接操作这个文件数据，这种方式省去了数据从内核空间向用户空间复制的损耗。这种方式适合对大文件的只读性操作，如大文件的MD5校验。这种方式是和OS的底层I/O实现相关的，代码如下：</p>
-</li>
-</ol>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">map</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">int</span> bufferSize = <span class="number">1024</span>;</span><br><span class="line">    String fileName = <span class="string">"test.db"</span>;</span><br><span class="line">    <span class="keyword">long</span> fileLength = <span class="keyword">new</span> File(fileName).length();</span><br><span class="line">    <span class="keyword">int</span> bufferCount = <span class="number">1</span> + (<span class="keyword">int</span>) (fileLength / bufferSize);</span><br><span class="line">    MappedByteBuffer[] buffers = <span class="keyword">new</span> MappedByteBuffer[bufferCount];</span><br><span class="line">    <span class="keyword">long</span> remaining = fileLength;</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; bufferCount; i++) &#123;</span><br><span class="line">        RandomAccessFile file;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            file = <span class="keyword">new</span> RandomAccessFile(fileName, <span class="string">"r"</span>);</span><br><span class="line">            buffers[i] = file.getChannel().map(FileChannel.MapMode.READ_ONLY, i * bufferSize, (<span class="keyword">int</span>) Math.min(remaining, bufferSize));</span><br><span class="line">        &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line"></span><br><span class="line">        &#125;</span><br><span class="line">        remaining -= bufferSize;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-          
-        
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
-      
-
-  
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-            
-            
-              
-                
                 <a class="post-title-link" href="/2016/05/17/JavaWeb/深入分析IO工作机制/" itemprop="url">
                   深入分析I/O工作机制
                 </a>
@@ -550,11 +365,152 @@
 
 
     
+      
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
+                <a class="post-title-link" href="/2016/05/15/深入理解Java虚拟机/垃圾收集器算法/" itemprop="url">
+                  垃圾收集器算法
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2016-05-15T00:00:00+08:00" content="2016-05-15">
+              2016-05-15
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/深入理解Java虚拟机/" itemprop="url" rel="index">
+                    <span itemprop="name">深入理解Java虚拟机</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+
+          
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h1 id="引用计数算法"><a href="#引用计数算法" class="headerlink" title="引用计数算法"></a>引用计数算法</h1><p>给对象添加引用计数器，每增加一个地方引用时，计数器加1，引用失效时，计数器减1。</p>
+<p>主流的JVM里面并没有选用引用计数法来管理内存，原因是它很难解决对象之间相互循环引用的问题。<br>微软的COM技术、使用ActionScript的FlashPlayer、Python语言和游戏脚本领域被广泛应用的Squirrel中都使用了引用计数法管理内存。</p>
+<h1 id="可达性分析算法"><a href="#可达性分析算法" class="headerlink" title="可达性分析算法"></a>可达性分析算法</h1><p>通过一系列称为”GC Roots”的对象作为起始点，从这些节点向下搜索，搜索走过的路径称为引用链，当一个对象到GC Roots没有任何引用链相连时，则证明对象不可用。<br>在Java语言中，可作为GC Roots对象包括下面几种：  </p>
+<ul>
+<li>虚拟机栈（栈帧中的本地变量表）中引用的对象。  </li>
+<li>方法区中类静态属性引用的对象。  </li>
+<li>方法区中常量引用的对象。  </li>
+<li>本地方法栈中JNI（Native方法）引用的对象。</li>
+</ul>
+<h1 id="引用"><a href="#引用" class="headerlink" title="引用"></a>引用</h1><p>JDK1.2后，Java对引用概念进行扩充，将引用分为强引用、软引用、弱引用、虚引用4种。  </p>
+<ul>
+<li>强引用是指在程序代码中普遍存在的，类似“Object object = new Object()”这类的引用，只要强引用存在，垃圾收集器永远不会回收被引用的对象。  </li>
+<li>软引用用来描述一些还有用但并非必须的对象。对于软引用关联着的对象，在系统将要发生内存溢出异常前，将会把这些对象列进回收范围之中进行第二次回收。如果这次回收还没有足够内存，才会抛出内存溢出异常。JDK1.2后，提供SoftReference类实现软引用。  </li>
+<li>弱引用也是描述非必须对象，它的强度较软引用更弱一些，被弱引用关联的对象只能生存到下一次垃圾收集发生之前。当垃圾收集器工作时，无论当前内存是否足够，都会回收掉被弱引用关联的对象。JDK1.2后，提供WeakReference类实现弱引用。  </li>
+<li>虚引用也称为幽灵引用或幻影引用，是最弱的一种引用关系。一个对象是否有虚引用的存在，完全不会对其生存时间构成影响，也无法通过虚引用来取得一个对象实例。为一个对象设置虚引用关联的唯一目的就是能在这个对象被收集器回收时收到一个系统通知。JDK1.2后，提供PhantomReference类实现虚引用。</li>
+</ul>
+<h1 id="回收方法区"><a href="#回收方法区" class="headerlink" title="回收方法区"></a>回收方法区</h1><p>JVM规范中说过可以不要求虚拟机在方法区实现垃圾收集，而且在方法区中进行垃圾收集的“性价比”一般比较低：在堆中，尤其在新生代中，常规应用进行一次垃圾收集一般可以回收70%-95%的空间，而永久代的垃圾搜集效率远低于此。<br>永久代的垃圾收集主要回收两部分内容：废弃常量和无用的类。<br>判定一个常量是否是“废弃常量”比较简单，而要判定一个类是否是“无用的类”的条件则相对苛刻许多。类要同时满足下面3个条件才能算是“无用的类”：  </p>
+<ol>
+<li>该类所有的实例都已经被回收，也就是说Java堆中不存在该类的任何实例。</li>
+<li>加载该类的ClassLoader已经被回收。  </li>
+<li>该类对应的java.lang.Class对象没有在任何地方被引用，无法在任何地方通过反射访问该类的方法。  </li>
+</ol>
+<p>JVM可以对满足上述3各条件的无用类进行回收，这里说的是“可以”，并不是和对象一样，不使用了必然回收。是否对类进行回收，HotSpot虚拟机提供了 -Xnoclassgc 参数进行控制，还可以使用 -verbose:class 以及 -XX:+TraceClassLoading、 -XX:+TraceClassUnLaoding查看类加载和卸载信息，其中 -verboss:class 和 -XX:+TraceClassLoading 可以在Product版的虚拟机中使用。 -XX:+TraceClassUnLoading参数需要FastDebug版的虚拟机支持。<br>在大量使用反射、动态代理、CGLib等ByteCode框架、动态生成JSP以及OSGi这类频繁自定义ClassLoader的场景都需要虚拟机具备类卸载的功能，以保证永久代不会溢出。</p>
+<h1 id="垃圾收集算法"><a href="#垃圾收集算法" class="headerlink" title="垃圾收集算法"></a>垃圾收集算法</h1><h2 id="标记-清除算法"><a href="#标记-清除算法" class="headerlink" title="标记-清除算法"></a>标记-清除算法</h2><p>算法分为“标记”和“清除”两个阶段：首先标记处所有需要回收的对象，在标记完成后统一回收所有被标记的对象。主要不足有2处：一个是效率问题，标记和清除两个过程效率都不高；另一个是空间问题，标记清除之后会产生大量不连续的内存碎片，空间碎片太多可能导致以后程序运行过程中需要分配较大对象时，无法找到足够的连续内存而不得不提前出发另一次垃圾收集动作。</p>
+<h2 id="复制算法"><a href="#复制算法" class="headerlink" title="复制算法"></a>复制算法</h2><p>为了解决效率问题，复制收集算法出现了。它将可用内存按容量分为大小相等的两块，每次只使用其中一块。当这一块内存用完了，就将还存活着的对象复制到另一块上面，然后再把已经使用过的内存空间一次清理掉。</p>
+<p>现在的商业虚拟机都采用这种收集算法来回收新生代，IBM公司专门研究表明，新生代的对象95%是“朝生夕死”的，所以并不需要1:1的比例来划分内存空间，而是将内存分为一块较大的Eden空间和两块较小的Survior空间，每次使用Eden和其中一块Survior。当回收时，将Eden和Survior中还存活着的对象一次性地复制到另一块Survior空间上，最后清理掉Eden和刚才用过的Survior空间。HotSpot默认Eden和Survior的大小比例是8:1，也就是每次新生代中可用内存空间为整个新生代容量的90%（80%+10%）。我们没有办法保证每次回收都只有不多于10%的对象存活，当Survior空间不够用时，需要依赖其他内存（这里指老年代）进行分配担保。</p>
+<p>如果另外一块Survior空间没有足够空间存放上一次新生代收集下来的存活对象时，这些对象将直接通过分配担保机制进入老年代。</p>
+<h2 id="标记-整理算法"><a href="#标记-整理算法" class="headerlink" title="标记-整理算法"></a>标记-整理算法</h2><p>复制收集算法在对象存活率较高时就要进行较多的复制操作，效率将会变低。根据老年代的特点，有人提出了“标记-整理”算法，标记过程仍然与“标记-清除”算法一样，但后续步骤不是直接对可回收对象进行清理，而是让所有存活的对象都向一端移动，然后直接清理掉端边界以外的内存。</p>
+<h2 id="分代收集算法"><a href="#分代收集算法" class="headerlink" title="分代收集算法"></a>分代收集算法</h2><p>当前商业虚拟机的垃圾手机都采用“分代收集”算法，一般把Java堆分为新生代和老年代。新生代中，每次垃圾收集时都发现有大批对象死去，只有少量存活，那就选用复制算法，只需要付出少量存活对象的复制成本就可以完成收集。而老年代中因为对象存活率高、没有额外空间对它进行分配担保，就必须使用“标记-清理”或者“标记-整理”算法来进行回收。</p>
+
+          
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
   </section>
 
   
   <nav class="pagination">
-    <a class="extend prev" rel="prev" href="/page/7/"><i class="fa fa-angle-left"></i></a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/7/">7</a><span class="page-number current">8</span><a class="page-number" href="/page/9/">9</a><span class="space">&hellip;</span><a class="page-number" href="/page/18/">18</a><a class="extend next" rel="next" href="/page/9/"><i class="fa fa-angle-right"></i></a>
+    <a class="extend prev" rel="prev" href="/page/7/"><i class="fa fa-angle-left"></i></a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/7/">7</a><span class="page-number current">8</span><a class="page-number" href="/page/9/">9</a><span class="space">&hellip;</span><a class="page-number" href="/page/17/">17</a><a class="extend next" rel="next" href="/page/9/"><i class="fa fa-angle-right"></i></a>
   </nav>
 
 
@@ -595,7 +551,7 @@
         <nav class="site-state motion-element">
           <div class="site-state-item site-state-posts">
             <a href="/archives">
-              <span class="site-state-item-count">35</span>
+              <span class="site-state-item-count">34</span>
               <span class="site-state-item-name">日志</span>
             </a>
           </div>

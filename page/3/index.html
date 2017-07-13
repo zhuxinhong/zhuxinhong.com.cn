@@ -242,137 +242,6 @@
             
               
                 
-                <a class="post-title-link" href="/2017/06/03/编写高质量代码/字符串/" itemprop="url">
-                  字符串
-                </a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            <span class="post-meta-item-icon">
-              <i class="fa fa-calendar-o"></i>
-            </span>
-            <span class="post-meta-item-text">发表于</span>
-            <time itemprop="dateCreated" datetime="2017-06-03T00:00:00+08:00" content="2017-06-03">
-              2017-06-03
-            </time>
-          </span>
-
-          
-            <span class="post-category" >
-              &nbsp; | &nbsp;
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-              
-                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
-                  <a href="/categories/编写高质量代码/" itemprop="url" rel="index">
-                    <span itemprop="name">编写高质量代码</span>
-                  </a>
-                </span>
-
-                
-                
-
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-
-          
-          
-
-          
-        </div>
-      </header>
-    
-
-
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <ul>
-<li><a href="#字符串拼接方法">字符串拼接方法</a></li>
-</ul>
-<h3 id="字符串拼接方法"><a href="#字符串拼接方法" class="headerlink" title="字符串拼接方法"></a>字符串拼接方法</h3><p>对一个字符串进行拼接有三种方法：加号、concat 及 StringBuilder （或 StringBuffer）的 append 方法，这三者之间有什么区别吗？</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">str += “c”;</span><br><span class="line">str = str.concat(<span class="string">"c"</span>);</span><br></pre></td></tr></table></figure>
-<p>上面两种不同字符串拼接方式、循环5万次后检查执行时间，加号方式执行时间为 2000ms，而 concat 方法执行时间为 685ms，时间相差一倍，如果使用 StringBuilder，执行时间 7ms。从这个试验中可以看出 append 方法最快，concat 其次，加号最慢。</p>
-<h5 id="加号方法"><a href="#加号方法" class="headerlink" title="加号方法"></a>加号方法</h5><p>编译器对字符串的加号做了优化，它会使用 StringBuilder 的 append 方法追加，讲道理它的执行时间也应该在 10ms 以内，不过它最终是通过 toString 方法转换成 String 字符串的，例子中的代码与如下代码相同：</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">str = <span class="keyword">new</span> StringBuilder(str).append(<span class="string">"c"</span>).toString();</span><br></pre></td></tr></table></figure>
-<p>这与纯粹使用 StringBuilder 的 append 方法是不同的：</p>
-<ol>
-<li>每次循环都会创建一个 StringBuilder 对象</li>
-<li>每次执行完毕都要调用 toString 方法将其转换为字符串</li>
-</ol>
-<h5 id="concat-方法"><a href="#concat-方法" class="headerlink" title="concat 方法"></a>concat 方法</h5><p>我们看一下 concat 源码实现：</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> String <span class="title">concat</span><span class="params">(String str)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">int</span> otherLen = str.length();</span><br><span class="line">        <span class="keyword">if</span> (otherLen == <span class="number">0</span>) &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">this</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">int</span> len = value.length;</span><br><span class="line">        <span class="keyword">char</span> buf[] = Arrays.copyOf(value, len + otherLen);</span><br><span class="line">        str.getChars(buf, len);</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> String(buf, <span class="keyword">true</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>整体看上去是一个数组拷贝，虽然在内存中处理都是原子性操作，速度非常快。不过最后的 return 语句，每次 concat 操作都会新创建一个 String 对象，这就是 concat 速度慢下来的真正原因。</p>
-<h5 id="append-方法"><a href="#append-方法" class="headerlink" title="append 方法"></a>append 方法</h5><p>StringBuilder 的 append 方法直接由父类 AbstractStringBuilder 实现，代码如下：</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> AbstractStringBuilder <span class="title">append</span><span class="params">(String str)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (str == <span class="keyword">null</span>)</span><br><span class="line">        <span class="keyword">return</span> appendNull();</span><br><span class="line">    <span class="keyword">int</span> len = str.length();</span><br><span class="line">    ensureCapacityInternal(count + len);</span><br><span class="line">    str.getChars(<span class="number">0</span>, len, value, count);</span><br><span class="line">    count += len;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">this</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>整个 append 方法都在做字符数组处理，加上后数组拷贝，这些都是基本的数据处理，没有新建任何对象，所以速度也就最快了。</p>
-
-          
-        
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
-      
-
-  
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-            
-            
-              
-                
                 <a class="post-title-link" href="/2017/03/23/JavaWeb/可能错过的Java7特性/" itemprop="url">
                   Java7 -- 可能错过的Java7特性
                 </a>
@@ -558,11 +427,153 @@
 
 
     
+      
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
+                <a class="post-title-link" href="/2017/01/23/编写高质量代码/类、对象及方法/" itemprop="url">
+                  类、对象及方法
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2017-01-23T00:00:00+08:00" content="2017-01-23">
+              2017-01-23
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/编写高质量代码/" itemprop="url" rel="index">
+                    <span itemprop="name">编写高质量代码</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+
+          
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <ul>
+<li><a href="#构造函数尽量简化">构造函数尽量简化</a></li>
+<li><a href="#使用匿名类的构造函数">使用匿名类的构造函数</a></li>
+</ul>
+<h3 id="构造函数尽量简化"><a href="#构造函数尽量简化" class="headerlink" title="构造函数尽量简化"></a>构造函数尽量简化</h3><p>看一段代码</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Sample2</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        Server s = <span class="keyword">new</span> SimpleServer(<span class="number">1000</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">abstract</span> <span class="class"><span class="keyword">class</span> <span class="title">Server</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> DEFAULT_PORT = <span class="number">40000</span>;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">Server</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">int</span> port = getPort();</span><br><span class="line">        System.out.println(<span class="string">"端口号:"</span> + port);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">protected</span> <span class="keyword">abstract</span> <span class="keyword">int</span> <span class="title">getPort</span><span class="params">()</span></span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">SimpleServer</span> <span class="keyword">extends</span> <span class="title">Server</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">int</span> port = <span class="number">100</span>;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">SimpleServer</span><span class="params">(<span class="keyword">int</span> _port)</span> </span>&#123;</span><br><span class="line">        port = _port;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">protected</span> <span class="keyword">int</span> <span class="title">getPort</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> Math.random() &gt; <span class="number">0.5</span> ? port : DEFAULT_PORT;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>多次执行，结果只有2种，永远不会出现“端口号:100”或是”端口号:1000”</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">端口号:40000</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">端口号:0</span><br></pre></td></tr></table></figure>
+<p>子类实例化时，会先初始化父类（这里只是初始化不是生成父类对象），也就是初始化父类的变量，调用父类的构造函数，然后再初始化子类的变量，调用子类构造函数。</p>
+<p>接着分析上面的程序，执行过程如下：</p>
+<ol>
+<li>子类SimpleServer的构造函数接收int类型参数：1000。</li>
+<li>父类初始化常变量，DEFAULT_PORT初始化为40000。</li>
+<li>执行父类午餐构造函数，即子类的有参构造默认包含了super()方法。</li>
+<li>父类构造函数执行到getPort，调用子类实现。</li>
+<li>子类的getPort返回port值（注意，此时port变量还未赋值，是0）或DEFAULT_PORT（此时是40000）了。</li>
+<li>父类初始化完毕，开始初始化子类实例变量，port赋值100。</li>
+<li>执行子类构造函数，port被重新赋值为1000.</li>
+<li>子类SimpleServer实例化结束，对象创建完毕。</li>
+</ol>
+<hr>
+<h3 id="使用匿名类的构造函数"><a href="#使用匿名类的构造函数" class="headerlink" title="使用匿名类的构造函数"></a>使用匿名类的构造函数</h3><p>看一段代码</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">    List l1 = <span class="keyword">new</span> ArrayList();</span><br><span class="line">    List l2 = <span class="keyword">new</span> ArrayList() &#123;&#125;;</span><br><span class="line">    List l3 = <span class="keyword">new</span> ArrayList() &#123;&#123;&#125;&#125;;</span><br><span class="line"></span><br><span class="line">    System.out.println(l1.getClass() == l2.getClass());</span><br><span class="line">    System.out.println(l2.getClass() == l3.getClass());</span><br><span class="line">    System.out.println(l1.getClass() == l3.getClass());</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>执行结果</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">false</span><br><span class="line">false</span><br><span class="line">false</span><br></pre></td></tr></table></figure>
+<p>l1 很容易理解，只是声明了 ArrayList 实例对象，l2 代表的是一个匿名类的生命和赋值，它定义了一个继承于 ArrayList 的匿名类，只是没有覆写任何方法。</p>
+<p>l3 也是一个匿名类的定义，它的代码类似于：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Sub</span> <span class="keyword">extends</span> <span class="title">ArrayList</span> </span>&#123;</span><br><span class="line">	(</span><br><span class="line">		<span class="comment">//初始化块</span></span><br><span class="line">	)</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">//声明赋值</span></span><br><span class="line">List l3 = <span class="keyword">new</span> Sub();</span><br></pre></td></tr></table></figure>
+<p>匿名类虽然没有名字，但也是可以有构造函数的，它用构造函数块来代替。</p>
+
+          
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
   </section>
 
   
   <nav class="pagination">
-    <a class="extend prev" rel="prev" href="/page/2/"><i class="fa fa-angle-left"></i></a><a class="page-number" href="/">1</a><a class="page-number" href="/page/2/">2</a><span class="page-number current">3</span><a class="page-number" href="/page/4/">4</a><span class="space">&hellip;</span><a class="page-number" href="/page/18/">18</a><a class="extend next" rel="next" href="/page/4/"><i class="fa fa-angle-right"></i></a>
+    <a class="extend prev" rel="prev" href="/page/2/"><i class="fa fa-angle-left"></i></a><a class="page-number" href="/">1</a><a class="page-number" href="/page/2/">2</a><span class="page-number current">3</span><a class="page-number" href="/page/4/">4</a><span class="space">&hellip;</span><a class="page-number" href="/page/17/">17</a><a class="extend next" rel="next" href="/page/4/"><i class="fa fa-angle-right"></i></a>
   </nav>
 
 
@@ -603,7 +614,7 @@
         <nav class="site-state motion-element">
           <div class="site-state-item site-state-posts">
             <a href="/archives">
-              <span class="site-state-item-count">35</span>
+              <span class="site-state-item-count">34</span>
               <span class="site-state-item-name">日志</span>
             </a>
           </div>

@@ -242,148 +242,6 @@
             
               
                 
-                <a class="post-title-link" href="/2017/01/23/编写高质量代码/类、对象及方法/" itemprop="url">
-                  类、对象及方法
-                </a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            <span class="post-meta-item-icon">
-              <i class="fa fa-calendar-o"></i>
-            </span>
-            <span class="post-meta-item-text">发表于</span>
-            <time itemprop="dateCreated" datetime="2017-01-23T00:00:00+08:00" content="2017-01-23">
-              2017-01-23
-            </time>
-          </span>
-
-          
-            <span class="post-category" >
-              &nbsp; | &nbsp;
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-              
-                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
-                  <a href="/categories/编写高质量代码/" itemprop="url" rel="index">
-                    <span itemprop="name">编写高质量代码</span>
-                  </a>
-                </span>
-
-                
-                
-
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-
-          
-          
-
-          
-        </div>
-      </header>
-    
-
-
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <ul>
-<li><a href="#构造函数尽量简化">构造函数尽量简化</a></li>
-<li><a href="#使用匿名类的构造函数">使用匿名类的构造函数</a></li>
-</ul>
-<h3 id="构造函数尽量简化"><a href="#构造函数尽量简化" class="headerlink" title="构造函数尽量简化"></a>构造函数尽量简化</h3><p>看一段代码</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Sample2</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        Server s = <span class="keyword">new</span> SimpleServer(<span class="number">1000</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">abstract</span> <span class="class"><span class="keyword">class</span> <span class="title">Server</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> DEFAULT_PORT = <span class="number">40000</span>;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">Server</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">int</span> port = getPort();</span><br><span class="line">        System.out.println(<span class="string">"端口号:"</span> + port);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">protected</span> <span class="keyword">abstract</span> <span class="keyword">int</span> <span class="title">getPort</span><span class="params">()</span></span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">SimpleServer</span> <span class="keyword">extends</span> <span class="title">Server</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">int</span> port = <span class="number">100</span>;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">SimpleServer</span><span class="params">(<span class="keyword">int</span> _port)</span> </span>&#123;</span><br><span class="line">        port = _port;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">protected</span> <span class="keyword">int</span> <span class="title">getPort</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> Math.random() &gt; <span class="number">0.5</span> ? port : DEFAULT_PORT;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>多次执行，结果只有2种，永远不会出现“端口号:100”或是”端口号:1000”</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">端口号:40000</span><br></pre></td></tr></table></figure>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">端口号:0</span><br></pre></td></tr></table></figure>
-<p>子类实例化时，会先初始化父类（这里只是初始化不是生成父类对象），也就是初始化父类的变量，调用父类的构造函数，然后再初始化子类的变量，调用子类构造函数。</p>
-<p>接着分析上面的程序，执行过程如下：</p>
-<ol>
-<li>子类SimpleServer的构造函数接收int类型参数：1000。</li>
-<li>父类初始化常变量，DEFAULT_PORT初始化为40000。</li>
-<li>执行父类午餐构造函数，即子类的有参构造默认包含了super()方法。</li>
-<li>父类构造函数执行到getPort，调用子类实现。</li>
-<li>子类的getPort返回port值（注意，此时port变量还未赋值，是0）或DEFAULT_PORT（此时是40000）了。</li>
-<li>父类初始化完毕，开始初始化子类实例变量，port赋值100。</li>
-<li>执行子类构造函数，port被重新赋值为1000.</li>
-<li>子类SimpleServer实例化结束，对象创建完毕。</li>
-</ol>
-<hr>
-<h3 id="使用匿名类的构造函数"><a href="#使用匿名类的构造函数" class="headerlink" title="使用匿名类的构造函数"></a>使用匿名类的构造函数</h3><p>看一段代码</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">    List l1 = <span class="keyword">new</span> ArrayList();</span><br><span class="line">    List l2 = <span class="keyword">new</span> ArrayList() &#123;&#125;;</span><br><span class="line">    List l3 = <span class="keyword">new</span> ArrayList() &#123;&#123;&#125;&#125;;</span><br><span class="line"></span><br><span class="line">    System.out.println(l1.getClass() == l2.getClass());</span><br><span class="line">    System.out.println(l2.getClass() == l3.getClass());</span><br><span class="line">    System.out.println(l1.getClass() == l3.getClass());</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>执行结果</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">false</span><br><span class="line">false</span><br><span class="line">false</span><br></pre></td></tr></table></figure>
-<p>l1 很容易理解，只是声明了 ArrayList 实例对象，l2 代表的是一个匿名类的生命和赋值，它定义了一个继承于 ArrayList 的匿名类，只是没有覆写任何方法。</p>
-<p>l3 也是一个匿名类的定义，它的代码类似于：</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Sub</span> <span class="keyword">extends</span> <span class="title">ArrayList</span> </span>&#123;</span><br><span class="line">	(</span><br><span class="line">		<span class="comment">//初始化块</span></span><br><span class="line">	)</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">//声明赋值</span></span><br><span class="line">List l3 = <span class="keyword">new</span> Sub();</span><br></pre></td></tr></table></figure>
-<p>匿名类虽然没有名字，但也是可以有构造函数的，它用构造函数块来代替。</p>
-
-          
-        
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
-      
-
-  
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-            
-            
-              
-                
                 <a class="post-title-link" href="/2016/12/19/JavaWeb/Java8新特性 -- StreamAPI/" itemprop="url">
                   Java8 -- StreamAPI
                 </a>
@@ -557,11 +415,175 @@
 
 
     
+      
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
+                <a class="post-title-link" href="/2016/12/13/JavaWeb/Java8新特性 -- 初识lambda/" itemprop="url">
+                  Java8 -- 初识lambda
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2016-12-13T00:00:00+08:00" content="2016-12-13">
+              2016-12-13
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/Java-Web/" itemprop="url" rel="index">
+                    <span itemprop="name">Java Web</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+
+          
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h1 id="Java8新特性-–-lambda表达式"><a href="#Java8新特性-–-lambda表达式" class="headerlink" title="Java8新特性 – lambda表达式"></a>Java8新特性 – lambda表达式</h1><h3 id="新引入概念"><a href="#新引入概念" class="headerlink" title="新引入概念"></a>新引入概念</h3><ul>
+<li>默认接口方法</li>
+</ul>
+<p>JDK8之前，接口不能定义任何实现，现在可以添加默认方法允许为接口方法定义一个或多个默认实现。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">A</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">default</span> <span class="keyword">void</span> <span class="title">hello</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">"This is A ."</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<ul>
+<li>函数式接口</li>
+</ul>
+<p>函数式接口是指仅指定了一个抽象方法的接口，例如 Runnable 或者 Comparator。</p>
+<p>接着上面默认接口方法，当一个接口仅定义了唯一一个方法，就称之为函数式接口，其功能由其唯一方法定义。 </p>
+<p>可以在任意函数式接口上标注 @FunctionalInterface ，这样做有两个好处：    </p>
+<ol>
+<li>编译器会检查标注改注解的实体，检查它是否是只包含一个抽象方法的接口。</li>
+<li>javadoc 页面上也会包含一条说明，说明这个接口是一个函数式接口。</li>
+</ol>
+<p>ps:    该注解并不要求强制使用，使用注解会让代码看上去更清楚。</p>
+<h2 id="lambda表达式是什么"><a href="#lambda表达式是什么" class="headerlink" title="lambda表达式是什么"></a>lambda表达式是什么</h2><p>lambda表达式本质是一个匿名方法，但仅限于实现由函数式接口定义的方法。因此，lambda表达式会产生一个匿名类，常被称为闭包。</p>
+<p>lambda表达式是一段可以传递的代码，因此它可以被执行一次或多次。</p>
+<p>函数式接口可以指定Object定义的任何公有方法，例如equals()，而不影响其作为“函数式接口”的状态。</p>
+<h2 id="lambda语法特征"><a href="#lambda语法特征" class="headerlink" title="lambda语法特征"></a>lambda语法特征</h2><ol>
+<li>运算符 -&gt;</li>
+<li>没有方法名称</li>
+<li>形参类型推导</li>
+<li>返回类型推导</li>
+</ol>
+<h2 id="示例"><a href="#示例" class="headerlink" title="示例"></a>示例</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Sample0</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="class"><span class="keyword">class</span> <span class="title">S1</span> <span class="keyword">implements</span> <span class="title">Runnable</span> </span>&#123;</span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">            System.out.println(<span class="string">"This is S1"</span>);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        test1();</span><br><span class="line"></span><br><span class="line">        test2();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">static</span> <span class="keyword">void</span> <span class="title">test1</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        Sample0 sample0 = <span class="keyword">new</span> Sample0();</span><br><span class="line">        S1 s1 = sample0.new S1();</span><br><span class="line">        s1.run();</span><br><span class="line"></span><br><span class="line">        Runnable abc = () -&gt; System.out.println(<span class="string">"This is lambda"</span>);</span><br><span class="line">        abc.run();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">static</span> <span class="keyword">void</span> <span class="title">test2</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        List&lt;Integer&gt; list = <span class="keyword">new</span> ArrayList&lt;&gt;();</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; <span class="number">10</span>; i++) &#123;</span><br><span class="line">            list.add(i);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        list.forEach(System.out::println);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">MyValue</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">double</span> <span class="title">myValue</span><span class="params">()</span></span>;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">MyValue2</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">double</span> <span class="title">myValue</span><span class="params">(<span class="keyword">int</span> i)</span></span>;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Sample1</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> MyValue myValue;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        myValue = () -&gt; Math.random();</span><br><span class="line"></span><br><span class="line">        MyValue _myValue = () -&gt; <span class="number">1.1</span>;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">        MyValue2 myValue2 = n -&gt; n * <span class="number">100</span>;</span><br><span class="line"></span><br><span class="line">        MyValue2 _myValue2 = (n) -&gt; n * <span class="number">100</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="变量捕获"><a href="#变量捕获" class="headerlink" title="变量捕获"></a>变量捕获</h2><p>lambda表达式和块lambda表达式作用域访问和普通作用域基本一致，但是，当lambda表达式使用其外层作用域内定义的局部变量时，会产生一种特殊的情况，成为变量捕获。这种情况下，lambda表达式只能使用实际上为final的局部变量，修改局部变量会移除其实质上的final状态(可以不显示声明final关键字)，从而使捕获该变量变得不合法。</p>
+<p>lambda表达式可以使用和修改其调用类的实例变量，只是不能使用其外层作用域中的局部变量，除非该变量实质上是final。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">MyFunc</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">int</span> <span class="title">func</span><span class="params">(<span class="keyword">int</span> n)</span></span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Sample2</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">int</span> num = <span class="number">10</span>;</span><br><span class="line"></span><br><span class="line">        MyFunc myFunc = n -&gt; &#123;</span><br><span class="line">            <span class="keyword">int</span> res = n + num;</span><br><span class="line">            <span class="keyword">return</span> res;</span><br><span class="line">        &#125;;</span><br><span class="line"></span><br><span class="line">		<span class="comment">//输出18</span></span><br><span class="line">        System.out.println(myFunc.func(<span class="number">8</span>));</span><br><span class="line">		<span class="comment">//非法 编译器检查错误</span></span><br><span class="line">       <span class="comment">// num = 9;</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="方法引用"><a href="#方法引用" class="headerlink" title="方法引用"></a>方法引用</h2><p>方法引用提供了一种引用方法而不执行方法的方式。该特性与lambda表达式相关，因为它也需要由兼容的函数式接口构成的目标类型上下文。</p>
+<h3 id="静态方法的方法引用"><a href="#静态方法的方法引用" class="headerlink" title="静态方法的方法引用"></a>静态方法的方法引用</h3><h4 id="语法"><a href="#语法" class="headerlink" title="语法"></a>语法</h4><p>ClassName::methodName</p>
+<p>类名与方法名之间使用双冒号分隔开。::是JDK8新增的分隔符，专门用于此目的。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">IntPredicate</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">boolean</span> <span class="title">test</span><span class="params">(<span class="keyword">int</span> i)</span></span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">MyIntPredicates</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">static</span> <span class="keyword">boolean</span> <span class="title">isPrime</span><span class="params">(<span class="keyword">int</span> n)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (n &lt; <span class="number">2</span>)</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">2</span>; i &lt; n / i; i++) &#123;</span><br><span class="line">            <span class="keyword">if</span> (n % i == <span class="number">0</span>)</span><br><span class="line">                <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">static</span> <span class="keyword">boolean</span> <span class="title">isEven</span><span class="params">(<span class="keyword">int</span> n)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> n % <span class="number">2</span> == <span class="number">0</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">static</span> <span class="keyword">boolean</span> <span class="title">isPositive</span><span class="params">(<span class="keyword">int</span> n)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> n &gt; <span class="number">0</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Sample1</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">static</span> <span class="keyword">boolean</span> <span class="title">numTest</span><span class="params">(IntPredicate p, <span class="keyword">int</span> v)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> p.test(v);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">boolean</span> result;</span><br><span class="line"></span><br><span class="line">        result = numTest(MyIntPredicates::isPrime, <span class="number">17</span>);</span><br><span class="line"></span><br><span class="line">        result = numTest(MyIntPredicates::isEven, <span class="number">12</span>);</span><br><span class="line"></span><br><span class="line">        result = numTest(MyIntPredicates::isPositive, <span class="number">11</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>注意<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">result = numTest(MyIntPredicates::isPrime, <span class="number">17</span>);</span><br></pre></td></tr></table></figure></p>
+<p>这里将对静态方法 isPrime() 引用传递给了 numTest() 方法的第一个参数，这是可行的，因为 isPrime 与 IntPredicate 函数式接口兼容( 其中 isPrime 提供了 IntPredicate 的 test() 方法的实现)。</p>
+<h3 id="实例方法的方法引用"><a href="#实例方法的方法引用" class="headerlink" title="实例方法的方法引用"></a>实例方法的方法引用</h3><h4 id="语法-1"><a href="#语法-1" class="headerlink" title="语法"></a>语法</h4><p>objRef::methodName</p>
+<p>语法与静态方法语法类似，只不过这里是对象引用，而不是类名。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">IntPredicate</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">boolean</span> <span class="title">test</span><span class="params">(<span class="keyword">int</span> i)</span></span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">MyIntNum</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">int</span> v;</span><br><span class="line"></span><br><span class="line">    MyIntNum(<span class="keyword">int</span> x) &#123;</span><br><span class="line">        <span class="keyword">this</span>.v = x;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">int</span> <span class="title">getNum</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> v;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">boolean</span> <span class="title">isFactor</span><span class="params">(<span class="keyword">int</span> n)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> (v % n) == <span class="number">0</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Sample2</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">boolean</span> result;</span><br><span class="line"></span><br><span class="line">        MyIntNum myIntNum = <span class="keyword">new</span> MyIntNum(<span class="number">12</span>);</span><br><span class="line"></span><br><span class="line">        MyIntNum myIntNum2 = <span class="keyword">new</span> MyIntNum(<span class="number">16</span>);</span><br><span class="line"></span><br><span class="line">        IntPredicate ip = myIntNum::isFactor;</span><br><span class="line">        result = ip.test(<span class="number">3</span>);</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">        ip = myIntNum2::isFactor;</span><br><span class="line">        result = ip.test(<span class="number">3</span>);</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="构造函数引用"><a href="#构造函数引用" class="headerlink" title="构造函数引用"></a>构造函数引用</h3><h4 id="语法-2"><a href="#语法-2" class="headerlink" title="语法"></a>语法</h4><p>classname::new</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">MyFunc</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="function">MyClass <span class="title">func</span><span class="params">(String s)</span></span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">MyClass</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    MyClass(String str) &#123;</span><br><span class="line">        <span class="keyword">this</span>.str = str;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    MyClass() &#123;</span><br><span class="line">        <span class="keyword">this</span>.str = <span class="string">""</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> String str;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">getStr</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> str;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setStr</span><span class="params">(String str)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.str = str;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Sample3</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        MyFunc myFunc = MyClass::<span class="keyword">new</span>;</span><br><span class="line"></span><br><span class="line">        MyClass mc = myFunc.func(<span class="string">"test"</span>);</span><br><span class="line"></span><br><span class="line">        System.out.println(mc.getStr());</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>表达式 MyClass:new 创建了对 MyClass 构造函数的引用，并不针对哪个构造函数。后面的 func() 方法接受一个 String 类型的形参，所以被引用的构造函数是 MyClass(String str)。</p>
+<h3 id="预定义函数式接口"><a href="#预定义函数式接口" class="headerlink" title="预定义函数式接口"></a>预定义函数式接口</h3><p>JDK8 中包含了新包 java.util.function，其中提供了一些预定义的函数式接口。现在 Java8 本身API使用了这些接口，任何一个 lambda 表达式都可以等价转换成现在所使用API中对应的函数式接口。</p>
+
+          
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
   </section>
 
   
   <nav class="pagination">
-    <a class="extend prev" rel="prev" href="/page/3/"><i class="fa fa-angle-left"></i></a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/3/">3</a><span class="page-number current">4</span><a class="page-number" href="/page/5/">5</a><span class="space">&hellip;</span><a class="page-number" href="/page/18/">18</a><a class="extend next" rel="next" href="/page/5/"><i class="fa fa-angle-right"></i></a>
+    <a class="extend prev" rel="prev" href="/page/3/"><i class="fa fa-angle-left"></i></a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/3/">3</a><span class="page-number current">4</span><a class="page-number" href="/page/5/">5</a><span class="space">&hellip;</span><a class="page-number" href="/page/17/">17</a><a class="extend next" rel="next" href="/page/5/"><i class="fa fa-angle-right"></i></a>
   </nav>
 
 
@@ -602,7 +624,7 @@
         <nav class="site-state motion-element">
           <div class="site-state-item site-state-posts">
             <a href="/archives">
-              <span class="site-state-item-count">35</span>
+              <span class="site-state-item-count">34</span>
               <span class="site-state-item-name">日志</span>
             </a>
           </div>

@@ -359,8 +359,8 @@
             
               
                 
-                <a class="post-title-link" href="/2015/06/28/Redis设计与实现/Redis对象/" itemprop="url">
-                  Redis对象
+                <a class="post-title-link" href="/2015/06/27/Redis设计与实现/Redis压缩列表/" itemprop="url">
+                  Redis压缩列表
                 </a>
               
             
@@ -373,8 +373,8 @@
               <i class="fa fa-calendar-o"></i>
             </span>
             <span class="post-meta-item-text">发表于</span>
-            <time itemprop="dateCreated" datetime="2015-06-28T00:00:00+08:00" content="2015-06-28">
-              2015-06-28
+            <time itemprop="dateCreated" datetime="2015-06-27T00:00:00+08:00" content="2015-06-27">
+              2015-06-27
             </time>
           </span>
 
@@ -422,12 +422,10 @@
       
         
           
-            <p>Redis中每个对象都由一个redisObject结构表示：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">typeof struct redisObject &#123;</span><br><span class="line">	//类型</span><br><span class="line">	unsigned <span class="built_in">type</span> : 4;</span><br><span class="line">	//编码</span><br><span class="line">	unsigned encoding : 4;</span><br><span class="line">	//指向底层数据结构的指针</span><br><span class="line">	void *ptr;</span><br><span class="line">	// . . .</span><br><span class="line">&#125; robj;</span><br></pre></td></tr></table></figure>
-<p>type  对象的类型<br>REDIS_STRING 字符串对象<br>REDIS_LIST 列表对象<br>REDIS_HASH 哈希对象<br>REDIS_SET 集合对象<br>REDIS_ZSET 有序集合对象</p>
-<p>对于Redis保存的键值对来说，键总是一个字符串对象，而值可以是上述对象中的任意对象。使用TYPE命令返回的结果是数据库对应键的值对象类型。</p>
-<p>encoding 记录对象底层数据结构的实现。使用OBJECT ENCODING 可查看一个数据库键的值对象编码。</p>
-<p>Redis对象的内存回收采用的是类似JVM垃圾回收的方法之一  引用计数法。</p>
+            <p>压缩列表（ziplist）是列表键和哈希键的底层实现之一。当一个列表键只包含少量列表项，并且每项都是小整数或短字符串时，Redis就会使用压缩列表作为列表键的底层实现。</p>
+<p>ziplis组成：<br>zlbytes : 记录列表占用内存字节数：在重新分配内存或计算zlend时使用<br>zltail : 记录压缩列表表尾节点距离列表的起始地址有多少字节<br>zllen : 记录压缩列表包含节点数量<br>entryX : 各个节点<br>zlend : 标记压缩列表末端</p>
+<p>压缩列表节点构成 entryX :<br>previous_entry_length : 记录前1个节点长度，单位为字节，程序可通过指针运算，根据当前节点的起始地址计算出前一个节点的起始地址。如前一节点长度小于254字节，则值为1个字节；反之若前一节点长度大于等于254字节，值为5字节，其中第一字节为0xFE(十进制254)，之后4个字节用于保存前1节点长度。<br>encoding : 记录节点的content属性所保存数据的类型及长度<br>content : 节点值</p>
+<p>连锁更新<br>例如在一个压缩列表中，有多个连续的长度为250-253的节点e1至eN，现在在表头插入一个长度大于254的节点。<br>想像一下，新节点插入后，e1需要修改previous_entry_length的值从1个字节扩展到5个字节，并且该变化会递归到eN。<br>因此连锁更新在最坏的情况下需要对压缩列表执行N次空间重分配，每次空间重分配的最坏复杂度为O(N)，所以连锁更新的最坏复杂度为O(N平方)。<br>但尽管该操作复杂度较高，但实际环境中，存在多个连续的250-253字节长度之间的节点并不多，所以我们可以不必担心连锁更新对性能的影响。</p>
 
           
         
@@ -460,7 +458,7 @@
 
   
   <nav class="pagination">
-    <a class="extend prev" rel="prev" href="/page/14/"><i class="fa fa-angle-left"></i></a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/14/">14</a><span class="page-number current">15</span><a class="page-number" href="/page/16/">16</a><span class="space">&hellip;</span><a class="page-number" href="/page/18/">18</a><a class="extend next" rel="next" href="/page/16/"><i class="fa fa-angle-right"></i></a>
+    <a class="extend prev" rel="prev" href="/page/14/"><i class="fa fa-angle-left"></i></a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/14/">14</a><span class="page-number current">15</span><a class="page-number" href="/page/16/">16</a><a class="page-number" href="/page/17/">17</a><a class="extend next" rel="next" href="/page/16/"><i class="fa fa-angle-right"></i></a>
   </nav>
 
 
@@ -501,7 +499,7 @@
         <nav class="site-state motion-element">
           <div class="site-state-item site-state-posts">
             <a href="/archives">
-              <span class="site-state-item-count">35</span>
+              <span class="site-state-item-count">34</span>
               <span class="site-state-item-name">日志</span>
             </a>
           </div>

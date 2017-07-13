@@ -242,133 +242,6 @@
             
               
                 
-                <a class="post-title-link" href="/2015/07/22/Redis设计与实现/Redis客户端/" itemprop="url">
-                  Redis客户端
-                </a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            <span class="post-meta-item-icon">
-              <i class="fa fa-calendar-o"></i>
-            </span>
-            <span class="post-meta-item-text">发表于</span>
-            <time itemprop="dateCreated" datetime="2015-07-22T00:00:00+08:00" content="2015-07-22">
-              2015-07-22
-            </time>
-          </span>
-
-          
-            <span class="post-category" >
-              &nbsp; | &nbsp;
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-              
-                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
-                  <a href="/categories/Redis设计与实现/" itemprop="url" rel="index">
-                    <span itemprop="name">Redis设计与实现</span>
-                  </a>
-                </span>
-
-                
-                
-
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-
-          
-          
-
-          
-        </div>
-      </header>
-    
-
-
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>通过使用由I/O多路复用技术实现的文件事件处理器，Redis服务器使用单线程单进程的方式来处理命令请求，并与多个客户端进行网络通信。<br>redisClient结构保存客户端的数据结构：  </p>
-<ul>
-<li>套接字描述符  </li>
-<li>名字  </li>
-<li>标志位  </li>
-<li>正在使用的数据库指针，数据库号码    </li>
-<li>当前要执行的命令、参数、参数个数，以及指向命令实现函数的指针  </li>
-<li>输入缓冲和输出缓冲  </li>
-<li>复制状态信息和复制所需数据结构  </li>
-<li>执行BRPOP、BLPOP等列表阻塞命令时使用的数据结构  </li>
-<li>事物状态，执行WATCH命令用到的数据结构  </li>
-<li>执行发布和订阅用到的数据结构  </li>
-<li>身份验证标志  </li>
-<li>创建时间、最后一次通信时间，输出缓冲区大小超出软性限制的事件  </li>
-</ul>
-
-          
-        
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
-      
-
-  
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-            
-            
-              
-                
                 <a class="post-title-link" href="/2015/07/12/Redis设计与实现/Redis时间事件/" itemprop="url">
                   Redis时间事件
                 </a>
@@ -465,11 +338,131 @@
 
 
     
+      
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
+                <a class="post-title-link" href="/2015/07/11/Redis设计与实现/Redis持久化-AOF/" itemprop="url">
+                  Redis持久化-AOF
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2015-07-11T00:00:00+08:00" content="2015-07-11">
+              2015-07-11
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/Redis设计与实现/" itemprop="url" rel="index">
+                    <span itemprop="name">Redis设计与实现</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+
+          
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>Redis提供了AOF(Append Only File)持久化功能，AOF通过保存服务器所执行命令来记录数据库状态的，和MySQL记录增删改的log有点像哈。</p>
+<p>AOF持久化功能实现分为命令追加(append)、文件写入(write)和文件同步(sync)三个步骤。</p>
+<p>1.AOF命令追加<br>当开启AOF持久化功能时，服务器会在执行完一个写命令后，会以协议格式将执行的写命令追加到服务器状态的aof_buf缓冲区末尾。</p>
+<p>2.AOF文件写入和同步<br>Redis服务进程就是一个事件循环，循环中的文件事件负责接受客户端的命令请求，以及向客户端发送命令回复，而时间事件则负责执行像serverCron函数这样需要定时运行的函数。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">def eventLoop():</span><br><span class="line"><span class="keyword">while</span> True:</span><br><span class="line">	//处理文件事件，接收命令以及发送命令</span><br><span class="line">	//处理命令时可能会有新内容被追加到aof_buf中</span><br><span class="line">	processFileEvents()</span><br><span class="line">	//处理时间事件</span><br><span class="line">	processTimeEvents()</span><br><span class="line">	//考虑是否将aof_buf中内容写入和保存到aof文件</span><br><span class="line">	flushAppendOnlyFile()</span><br></pre></td></tr></table></figure></p>
+<p>flushAppendOnlyFile函数的行为由服务器配置的appendfsync选项值来决定。<br>appendfsync配置：<br>always : 服务器在每个事件循环都要将aof_buf缓冲区的所有内容写到AOF文件，并同步，效率最慢，但最安全。<br>everysec : 服务器在每个事件循环都将aof_bug缓冲区的所有文件写到AOF文件，并且每隔1s就在子线程中对AOF文件做同步，效率快。<br>no : 服务器在每个事件循环都将aof_bug缓冲区的所有文件写到AOF文件，此模式下的flushAppendOnlyFile无须执行同步操作，同步AOF文件由操作系统决定，写入速度最快。</p>
+<p>3.AOF重写<br>随着服务器运行时间的流逝，AOF文件中的内容会越来越多，可能会对Redis服务器和宿主计算机造成影响。<br>虽然Redis将生成新AOF文件替换旧AOF文件功能命名为AOF文件重写，但实际上，AOF文件重写并不需要对现有AOF文件进行任何读取、分析和写入操作，这个功能是通过读取服务器当前数据库状态来实现的。<br>实际操作中，Redis依次遍历数据库中所有key，并根据key类型的不同，取出相应值并生成对应类型的写入语句。同时，为了避免在执行命令时造成客户端输入缓冲区溢出，重写程序在处理列表、哈希表、集合、有序集合这4种可能会带有多个元素的键时，会先检查键所包含元素的数量，如果数量超过了redis.h/REDIS_AOF_REWRITE_ITEMS_PER_CMD常量的值，那重写程序会使用多条命令来记录键的值。当前版本中，REDIS_AOF_REWRITE_ITEMS_PER_CMD常量值为64，所以每条语句最多会写入64个元素。</p>
+<p>4.AOF后台重写<br>上面介绍的AOF重写可以很好的完成创建一个新AOF文件的任务，但是，这个操作会进行大量的写入操作，所以调用这个函数的线程将被长时间阻塞，因为Redis服务器使用单个线程来处理命令请求，所以如果由服务器调用AOF重写，那么在重写期间，服务器将无法处理客户端发来的请求。<br>Redis并不希望AOF的重写操作造成服务器无法处理请求，所以需要将重写放到子进程里执行，这样做可以达到两个目的：<br>1)子进程执行AOF重写期间，服务器可以继续处理客户端的命令请求。<br>2)子进程带有服务器进程的数据副本，使用子进程而不是线程，可以在避免使用锁的情况下，保证数据安全性。</p>
+<p>不过这里仍然存在一个问题：在子进程执行AOF重写期间，服务器处理客户端的命令请求时，对现有数据库状态进行修改操作，会使得服务器当前数据库状态和重写后的AOF文件所保存的数据库状态不一致。<br>为了解决这个问题，Redis服务器设置了一个AOF重写缓冲区，这个缓冲区在服务器创建子进程之后开始使用，当Redis执行完一个写命令后，它会同时将这个写命令发送给AOF缓冲区和AOF重写缓冲区。<br>以上就是AOF后台重写，即BGREWRITEAOF命令的实现原理。</p>
+
+          
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
   </section>
 
   
   <nav class="pagination">
-    <a class="extend prev" rel="prev" href="/page/10/"><i class="fa fa-angle-left"></i></a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/10/">10</a><span class="page-number current">11</span><a class="page-number" href="/page/12/">12</a><span class="space">&hellip;</span><a class="page-number" href="/page/18/">18</a><a class="extend next" rel="next" href="/page/12/"><i class="fa fa-angle-right"></i></a>
+    <a class="extend prev" rel="prev" href="/page/10/"><i class="fa fa-angle-left"></i></a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/10/">10</a><span class="page-number current">11</span><a class="page-number" href="/page/12/">12</a><span class="space">&hellip;</span><a class="page-number" href="/page/17/">17</a><a class="extend next" rel="next" href="/page/12/"><i class="fa fa-angle-right"></i></a>
   </nav>
 
 
@@ -510,7 +503,7 @@
         <nav class="site-state motion-element">
           <div class="site-state-item site-state-posts">
             <a href="/archives">
-              <span class="site-state-item-count">35</span>
+              <span class="site-state-item-count">34</span>
               <span class="site-state-item-name">日志</span>
             </a>
           </div>
