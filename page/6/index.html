@@ -242,8 +242,8 @@
             
               
                 
-                <a class="post-title-link" href="/2016/05/28/Java Web/深入分析ClassLoader/" itemprop="url">
-                  深入分析ClassLoader
+                <a class="post-title-link" href="/2016/07/05/HBase/初识HBase/" itemprop="url">
+                  初识HBase
                 </a>
               
             
@@ -256,8 +256,8 @@
               <i class="fa fa-calendar-o"></i>
             </span>
             <span class="post-meta-item-text">发表于</span>
-            <time itemprop="dateCreated" datetime="2016-05-28T00:00:00+08:00" content="2016-05-28">
-              2016-05-28
+            <time itemprop="dateCreated" datetime="2016-07-05T00:00:00+08:00" content="2016-07-05">
+              2016-07-05
             </time>
           </span>
 
@@ -270,8 +270,8 @@
               <span class="post-meta-item-text">分类于</span>
               
                 <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
-                  <a href="/categories/Java-Web/" itemprop="url" rel="index">
-                    <span itemprop="name">Java Web</span>
+                  <a href="/categories/HBase/" itemprop="url" rel="index">
+                    <span itemprop="name">HBase</span>
                   </a>
                 </span>
 
@@ -305,38 +305,62 @@
       
         
           
-            <p>ClassLoader除了能将Class加载到JVM中之外，还能审查每个类该由谁加载。它是一种父优先的等级加载机制。</p>
-<h2 id="ClassLoader等级加载机制"><a href="#ClassLoader等级加载机制" class="headerlink" title="ClassLoader等级加载机制"></a>ClassLoader等级加载机制</h2><ol>
-<li>Bootstrap ClassLoader，主要加载JVM自身工作需要的类，完全由JVM自己控制，外部无法访问，这个ClassLoader不遵守等级加载规则。</li>
-<li>ExtClassLoader，不是JVM亲自实现。服务目标在System.getProperties(“java.ext.dirs”)目录下。</li>
-<li>AppClassLoader，父类是ExtClassLoader，所有在System.getProperties(“java.class.path”)目录下的类都可以被这个类加载器加载，这就是我们常用到的classpath。</li>
-</ol>
-<p>如果我们要实现自己的类加载器，不管是直接实现抽象类ClassLoader，还是继承URLClassLoader或其他子类，它的父加载器都是AppClassLoader，不管调用哪个父类构造器，创建对象都必须最终调用getSystemCLassLoader()作为父加载器，而getSystemClassLoader()方法获取到的正是AppClassLoader。</p>
-<p>Bootstrap ClassLoader并不属于JVM的类层次结构，因为BootstrapClassLoader并没有遵守ClassLoader的加载规则。Bootstrap ClassLoader并没有子类，ExtClassLoader父类也不是Bootstrap ClassLoader，ExtClassLoader并没有父类，应用中能提取到的顶层父类是ExtClassLoader。</p>
-<p>ExtClassLoader和AppClassLoader都位于sun.misc.Launcher类中，它们是Launcher类的内部类，都继承了URLClassLoader类，URLClassLoader实现了抽象类ClassLoader。</p>
-<h2 id="如何加载class文件"><a href="#如何加载class文件" class="headerlink" title="如何加载class文件"></a>如何加载class文件</h2><p>抽象类ClassLoader中并没有定义如何加载，需要子类实现findClass()方法。看一下URLClassLoader实现findClass()过程：    </p>
-<ol>
-<li>通过URLClassPath类取得加载的class文件字节流，找到后读取它的byte字节流。    </li>
-<li>调用defineClass()创建类对象。</li>
-</ol>
-<p>创建URLClassLoader对象会根据传过来的URL数组中路径来判断是文件还是jar包，根据路径的不同分别创建FileLoader和JarLoader，或者使用默认的加载器。</p>
-<h3 id="验证与解析"><a href="#验证与解析" class="headerlink" title="验证与解析"></a>验证与解析</h3><ol>
-<li>字节码验证，确保格式正确，行为正确。</li>
-<li>类准备，准备字段、方法和实现接口所必须的数据结构。</li>
-<li>解析，类装入器装入类引用的其他所有类。    </li>
-<li>初始化对象，该阶段末尾静态字段被初始化默认值。</li>
-</ol>
-<h2 id="实现自己的ClassLoader"><a href="#实现自己的ClassLoader" class="headerlink" title="实现自己的ClassLoader"></a>实现自己的ClassLoader</h2><p>应用场景：    </p>
-<ul>
-<li>在自定义路径下查找自定义的class类文件，也许我们需要的class文件并不总是在classPath下面。    </li>
-<li>对我们自己要加载的类做特殊处理，如保证通过网络传输的安全性，可以将类经过加密后传输，在加载到JVM之前需要对类的字节码再解密。        </li>
-<li>可以定义类的实现机制，例如实现热部署：检查已经加载的class文件是否被修改，如修改可重新加载。    </li>
+            <h2 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h2><p>HBase是一个构建在HDFS之上、分布式、面向列的开源数据库，由Google BigTable的开源实现，它主要用于存储海量数据，是Hadoop生态系统中的重要一员。</p>
+<h2 id="HBase优势"><a href="#HBase优势" class="headerlink" title="HBase优势"></a>HBase优势</h2><h3 id="1-成熟"><a href="#1-成熟" class="headerlink" title="1.成熟"></a>1.成熟</h3><ul>
+<li>社区成熟    </li>
+<li>理论充分经过实践</li>
+<li>丰富的工具支持, hbck、phoenix、solr</li>
 </ul>
-<p>JVM表示一个类是否是同一个类有两个条件：    </p>
-<ol>
-<li>检查完整类名是否一致。        </li>
-<li>检查加载这个类的ClassLoader是否是同一个，这里指的是ClassLoader实例是否是同一个。</li>
+<h3 id="2-高效"><a href="#2-高效" class="headerlink" title="2.高效"></a>2.高效</h3><ul>
+<li>将随机嘟列转化为顺序读写，适应高并发写入</li>
+<li>均衡效果好读写性能和机器数保持线性关系</li>
+<li>行中没有保存数据的列不占存储空间</li>
+</ul>
+<h3 id="3-分布式特性"><a href="#3-分布式特性" class="headerlink" title="3.分布式特性"></a>3.分布式特性</h3><ul>
+<li>基于HDFS、Zookeeper</li>
+<li>一致性、可用性、分区容忍性</li>
+<li>大数据存储</li>
+<li>易扩展</li>
+</ul>
+<h2 id="HBase表特点"><a href="#HBase表特点" class="headerlink" title="HBase表特点"></a>HBase表特点</h2><ul>
+<li>大：一个表可以有数十亿行，上百万列</li>
+<li>面向列：面向列（族）的存储和权限访问，列（族）独立索引</li>
+<li>稀疏：对于为空（null）的列，并不占用存储空间，因此，表可以设计的非常稀疏</li>
+<li>数据类型单一：HBase中的数据类型都是字符串(string)</li>
+<li>无模式：每行都有一个可排序的主键和任意多的列，列可以根据需要动态增加，同一张表中不同的行可以有截然不同的列</li>
+</ul>
+<h2 id="HBase-VS-RDBMS"><a href="#HBase-VS-RDBMS" class="headerlink" title="HBase VS RDBMS"></a>HBase VS RDBMS</h2><ul>
+<li>数据类型<br>HBase中的数据都是字符串类型</li>
+<li>数据操作<br>HBase只有普通的增删改查等操作，没有表之间的关联查询</li>
+<li>存储模式<br>HBase是基于列式存储的，而RDBMS是基于行式存储的</li>
+<li>应用场景<br>HBase适合存储大量数据，查询效率极高</li>
+</ul>
+<hr>
+<h2 id="HBase概念"><a href="#HBase概念" class="headerlink" title="HBase概念"></a>HBase概念</h2><h3 id="1-主键"><a href="#1-主键" class="headerlink" title="1.主键"></a>1.主键</h3><ul>
+<li>用来检索记录的主键</li>
+<li>访问HBase表中的行，只有三种方式：<ol>
+<li>通过单个Row Key访问</li>
+<li>通过Row Key的range</li>
+<li>全表扫描</li>
 </ol>
+</li>
+<li>主键为任意字符串，最大长度为64kb，按字典顺序存储，在HBase内部保存为字节数组</li>
+</ul>
+<h3 id="2-列族"><a href="#2-列族" class="headerlink" title="2.列族"></a>2.列族</h3><ul>
+<li>列族在创建表的时候声明，一个列族可以包含多个列，列中的数据都是以二进制形式存在，没有数据类型</li>
+<li>列族是一些列的集合</li>
+<li>一个列族所有列成员是有着相同的前缀。比如，列courses:histor和courses:math都是列族courses的成员，冒号是列族的分隔符，用来区分前缀和列名</li>
+</ul>
+<h3 id="3-时间戳与存储单元"><a href="#3-时间戳与存储单元" class="headerlink" title="3.时间戳与存储单元"></a>3.时间戳与存储单元</h3><ul>
+<li>HBase中通过row和columns确定的为一个存贮单元称为cell。每个cell都保存着同一份数据的多个版本。</li>
+<li>在写入数据时，时间戳可以由HBase自动赋值（当前系统时间精确到毫秒），也可以显示赋值。</li>
+<li>每个cell中，不用版本的数据按照时间的倒序排序。</li>
+</ul>
+<h2 id="HBase数据模型"><a href="#HBase数据模型" class="headerlink" title="HBase数据模型"></a>HBase数据模型</h2><h3 id="HBase存储细节"><a href="#HBase存储细节" class="headerlink" title="HBase存储细节"></a>HBase存储细节</h3><ul>
+<li>每个列族存储在HDFS上的一个单独文件夹中</li>
+<li>Key和Version number会在每个列族中存储一份</li>
+<li>空值不会被保存</li>
+</ul>
 
           
         
@@ -386,8 +410,8 @@
             
               
                 
-                <a class="post-title-link" href="/2016/05/22/Java Web/Tomcat的系统架构/" itemprop="url">
-                  Tomcat系统架构
+                <a class="post-title-link" href="/2016/06/07/Scala/Scala基础/" itemprop="url">
+                  Scala基础
                 </a>
               
             
@@ -400,8 +424,8 @@
               <i class="fa fa-calendar-o"></i>
             </span>
             <span class="post-meta-item-text">发表于</span>
-            <time itemprop="dateCreated" datetime="2016-05-22T00:00:00+08:00" content="2016-05-22">
-              2016-05-22
+            <time itemprop="dateCreated" datetime="2016-06-07T00:00:00+08:00" content="2016-06-07">
+              2016-06-07
             </time>
           </span>
 
@@ -414,8 +438,8 @@
               <span class="post-meta-item-text">分类于</span>
               
                 <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
-                  <a href="/categories/Java-Web/" itemprop="url" rel="index">
-                    <span itemprop="name">Java Web</span>
+                  <a href="/categories/Scala/" itemprop="url" rel="index">
+                    <span itemprop="name">Scala</span>
                   </a>
                 </span>
 
@@ -449,46 +473,59 @@
       
         
           
-            <h1 id="Tomcat总体结构"><a href="#Tomcat总体结构" class="headerlink" title="Tomcat总体结构"></a>Tomcat总体结构</h1><p>Tomcat有2个核心组件：  </p>
-<ul>
-<li>Connector  </li>
-<li>Container  </li>
+            <h2 id="变量"><a href="#变量" class="headerlink" title="变量"></a>变量</h2><ul>
+<li>val，定义immutable variable，不可变        </li>
+<li>var，定义mutable variable，可变</li>
+<li>lazy val，惰性常量    </li>
 </ul>
-<p>其中Connector组件可以被替换，一个Container可以选择对用多个Connector。多个Connector和一个Container形成一个Service。有了Service就可以对外提供服务了。但Service需要一个生存环境，这时就非Server莫属了。所以整个Tomcat的生命周期由Server控制。</p>
-<p>Connector主要负责对外交流，Container主要处理Connector接受的请求，主要处理内部事务。其实，Service只是在Connector和Container外面多包一层，把它们组装在一起，对外提供服务。一个Service可以设置多个Connector，但只能有一个Container容器。</p>
-<h2 id="Service"><a href="#Service" class="headerlink" title="Service"></a>Service</h2><p><img src="http://o7s628cn2.bkt.clouddn.com/image/javaweb/Service.png" alt="Service"></p>
-<p>从org.apache.catalina.Service接口中定义方法可以看出，它主要是为了关联Connector和Container，同时会初始化其他组件。所有组件的生命周期在一个Lifecycle的接口中控制。</p>
-<p><img src="http://o7s628cn2.bkt.clouddn.com/image/javaweb/StandardService.png" alt="StandardService"></p>
-<p>从StandardService类结构方法可以看出，除了Service接口方法的实现以及控制组件生命周期的Lifecycle接口的实现，还有几个方法用于实现时间监听方法。不仅是这个Service组件，在Tomcat中其他组件也同样有这个几个方法，这也是一个典型设计模式。</p>
-<p>下面看一下StandardService中几个主要方法，setContainer方法如下：</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setContainer</span><span class="params">(Container container)</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">        Container oldContainer = <span class="keyword">this</span>.container;</span><br><span class="line">        <span class="keyword">if</span> ((oldContainer != <span class="keyword">null</span>) &amp;&amp; (oldContainer <span class="keyword">instanceof</span> Engine))</span><br><span class="line">            ((Engine) oldContainer).setService(<span class="keyword">null</span>);</span><br><span class="line">        <span class="keyword">this</span>.container = container;</span><br><span class="line">        <span class="keyword">if</span> ((<span class="keyword">this</span>.container != <span class="keyword">null</span>) &amp;&amp; (<span class="keyword">this</span>.container <span class="keyword">instanceof</span> Engine))</span><br><span class="line">            ((Engine) <span class="keyword">this</span>.container).setService(<span class="keyword">this</span>);</span><br><span class="line">        <span class="keyword">if</span> (getState().isAvailable() &amp;&amp; (<span class="keyword">this</span>.container != <span class="keyword">null</span>)) &#123;</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                <span class="keyword">this</span>.container.start();</span><br><span class="line">            &#125; <span class="keyword">catch</span> (LifecycleException e) &#123;</span><br><span class="line">                <span class="comment">// Ignore</span></span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> (getState().isAvailable() &amp;&amp; (oldContainer != <span class="keyword">null</span>)) &#123;</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                oldContainer.stop();</span><br><span class="line">            &#125; <span class="keyword">catch</span> (LifecycleException e) &#123;</span><br><span class="line">                <span class="comment">// Ignore</span></span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// Report this property change to interested listeners</span></span><br><span class="line">        support.firePropertyChange(<span class="string">"container"</span>, oldContainer, <span class="keyword">this</span>.container);</span><br><span class="line"></span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
-<p>这段代码很简单，首先判断当前Service有没有已经关联的Container，如果已经关联，去除这个关联关系—-((Engine) oldContainer).setService(null)。如果这个oldContainer已经启动了，结束它的生命周期，然后再替换新的。</p>
-<p>AddConnector方法如下：</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">addConnector</span><span class="params">(Connector connector)</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">synchronized</span> (connectors) &#123;</span><br><span class="line">            connector.setService(<span class="keyword">this</span>);</span><br><span class="line">            Connector results[] = <span class="keyword">new</span> Connector[connectors.length + <span class="number">1</span>];</span><br><span class="line">            System.arraycopy(connectors, <span class="number">0</span>, results, <span class="number">0</span>, connectors.length);</span><br><span class="line">            results[connectors.length] = connector;</span><br><span class="line">            connectors = results;</span><br><span class="line"></span><br><span class="line">            <span class="keyword">if</span> (getState().isAvailable()) &#123;</span><br><span class="line">                <span class="keyword">try</span> &#123;</span><br><span class="line">                    connector.start();</span><br><span class="line">                &#125; <span class="keyword">catch</span> (LifecycleException e) &#123;</span><br><span class="line">                    log.error(sm.getString(</span><br><span class="line">                            <span class="string">"standardService.connector.startFailed"</span>,</span><br><span class="line">                            connector), e);</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            <span class="comment">// Report this property change to interested listeners</span></span><br><span class="line">            support.firePropertyChange(<span class="string">"connector"</span>, <span class="keyword">null</span>, connector);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
-<p>首先设置关联关系，然后初始化，开始新的生命周期。Connector用的是数组，而不是List集合，从性能角度考虑可以理解。有趣的是这里用了数组但并没有一开始就分配一个固定大小的数组。</p>
-<h2 id="Server"><a href="#Server" class="headerlink" title="Server"></a>Server</h2><p>Server要完成的任务很简单，提供一个接口让其他程序能够访问到这个Service集合，同时要维护它所包含的所有Service生命周期，包括如何初始化、如何结束服务、如何找到别人要访问的Service。</p>
-<p>Server的类结构图如下：<br><img src="http://o7s628cn2.bkt.clouddn.com/image/javaweb/Server.png" alt="Server"></p>
-<p>它的标准实现类StandardServer实现了上面这些方法，同时也实现了Lifecycle、MbeanRegistration两个接口的所有方法。下面看一下StandardServer一个重要方法addService的实现：</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">addService</span><span class="params">(Service service)</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    service.setServer(<span class="keyword">this</span>);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">synchronized</span> (services) &#123;</span><br><span class="line">        Service results[] = <span class="keyword">new</span> Service[services.length + <span class="number">1</span>];</span><br><span class="line">        System.arraycopy(services, <span class="number">0</span>, results, <span class="number">0</span>, services.length);</span><br><span class="line">        results[services.length] = service;</span><br><span class="line">        services = results;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> (getState().isAvailable()) &#123;</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                service.start();</span><br><span class="line">            &#125; <span class="keyword">catch</span> (LifecycleException e) &#123;</span><br><span class="line">                <span class="comment">// Ignore</span></span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// Report this property change to interested listeners</span></span><br><span class="line">        support.firePropertyChange(<span class="string">"service"</span>, <span class="keyword">null</span>, service);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>从第一行就知道了Service和Server是相互关联的，Server也是和Service管理Connector一样管理它，也是将Service放在一个数组中。</p>
-<h2 id="Lifecycle"><a href="#Lifecycle" class="headerlink" title="Lifecycle"></a>Lifecycle</h2><p>在Tomcat中组件的生命周期通过Lifecycle接口来控制，组件只要集成这个接口并实现其中方法就可以统一被拥有它的组件控制了。最高级的组件就是Server，而控制Server的是Startup，也就是启动和关闭Tomcat。Lifecycle接口方法的实现都在其他组件中，组件的生命周期由包含它的父组件控制，所以它的Start方法自然就是调用它下面组件的Start方法，Stop方法也是一样。</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">startInternal</span><span class="params">()</span> <span class="keyword">throws</span> LifecycleException </span>&#123;</span><br><span class="line"></span><br><span class="line">    fireLifecycleEvent(CONFIGURE_START_EVENT, <span class="keyword">null</span>);</span><br><span class="line">    setState(LifecycleState.STARTING);</span><br><span class="line"></span><br><span class="line">    globalNamingResources.start();</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// Start our defined Services</span></span><br><span class="line">    <span class="keyword">synchronized</span> (services) &#123;</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; services.length; i++) &#123;</span><br><span class="line">            services[i].start();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">stopInternal</span><span class="params">()</span> <span class="keyword">throws</span> LifecycleException </span>&#123;</span><br><span class="line"></span><br><span class="line">    setState(LifecycleState.STOPPING);</span><br><span class="line">    fireLifecycleEvent(CONFIGURE_STOP_EVENT, <span class="keyword">null</span>);</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// Stop our defined Services</span></span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; services.length; i++) &#123;</span><br><span class="line">        services[i].stop();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    globalNamingResources.stop();</span><br><span class="line">    </span><br><span class="line">    stopAwait();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>监听的代码会包围Service组件的启动过程，但所有Service必须要实现Lifecycle接口，这样做会更加灵活。</p>
-<h2 id="Connector组件"><a href="#Connector组件" class="headerlink" title="Connector组件"></a>Connector组件</h2><p>它的主要任务数负责接收浏览器发过来的TCP连接请求，创建一个Request和Response对象分别用于和请求端交换数据。然后会产生一个线程来处理这个请求并把产生的Request和Response对象传给处理这个请求的线程，处理这个请求的线程就是Container要做的事了。</p>
-<p>在Tomcat7中，Connector有3种选择：    </p>
-<ul>
-<li>BIO–Http11Protocol</li>
-<li>NIO–Http11NioProtocol</li>
-<li>apr–Http11AprProtocol</li>
+<h2 id="数据类型"><a href="#数据类型" class="headerlink" title="数据类型"></a>数据类型</h2><p>超级父类 Any</p>
+<p>Byte, Short, Int, Long, Char, String, Float, Double, Boolean</p>
+<p>null表示对象引用类型为空，nothing表示程序异常终止。</p>
+<figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">scala&gt; <span class="function"><span class="keyword">def</span> <span class="title">foo</span></span>()=<span class="keyword">throw</span> <span class="keyword">new</span> <span class="type">Exception</span>(<span class="string">"error"</span>)</span><br><span class="line">foo: ()<span class="type">Nothing</span></span><br></pre></td></tr></table></figure>
+<p>String构建与Java的String之上，新增字符串插值特性。</p>
+<figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> name = <span class="string">"Hello"</span>	</span><br><span class="line"><span class="string">s"new name is <span class="subst">$&#123;name&#125;</span>"</span></span><br></pre></td></tr></table></figure>
+<p>可以不显示指定变量类型，Scala会自动进行类型推导。</p>
+<h2 id="代码块"><a href="#代码块" class="headerlink" title="代码块"></a>代码块</h2><figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">&#123;exp1 ;exp2&#125;</span><br><span class="line"></span><br><span class="line">&#123;</span><br><span class="line">exp1</span><br><span class="line">exp2</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>表达式可以写在一行，分号分隔。也可以写多行。</p>
+<h2 id="函数"><a href="#函数" class="headerlink" title="函数"></a>函数</h2><figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">functionName</span></span>( param: <span class="type">ParamType</span>): <span class="type">ReturnType</span> = &#123;</span><br><span class="line">	<span class="comment">//function body: expressions</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">scala&gt; <span class="function"><span class="keyword">def</span> <span class="title">add</span></span>(x:<span class="type">Int</span>, y:<span class="type">Int</span>)= &#123;x+y&#125;</span><br><span class="line">add: (x: <span class="type">Int</span>, y: <span class="type">Int</span>)<span class="type">Int</span></span><br><span class="line"></span><br><span class="line">scala&gt; add(<span class="number">1</span>,<span class="number">1</span>)</span><br><span class="line">res4: <span class="type">Int</span> = <span class="number">2</span></span><br><span class="line"></span><br><span class="line">scala&gt; <span class="function"><span class="keyword">def</span> <span class="title">add</span></span>(x:<span class="type">Int</span>, y:<span class="type">Int</span>):<span class="type">Int</span>= &#123;x+y&#125;</span><br><span class="line">add: (x: <span class="type">Int</span>, y: <span class="type">Int</span>)<span class="type">Int</span></span><br><span class="line"></span><br><span class="line">scala&gt; add(<span class="number">1</span>,<span class="number">1</span>)</span><br><span class="line">res5: <span class="type">Int</span> = <span class="number">2</span></span><br></pre></td></tr></table></figure>
+<p>多个参数用逗号分隔。</p>
+<h2 id="if表达式"><a href="#if表达式" class="headerlink" title="if表达式"></a>if表达式</h2><figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (logical_exp) valA <span class="keyword">else</span> valB</span><br></pre></td></tr></table></figure>
+<p>和Java类似。</p>
+<h2 id="for表达式"><a href="#for表达式" class="headerlink" title="for表达式"></a>for表达式</h2><figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">scala&gt; <span class="keyword">val</span> l = <span class="type">List</span>(<span class="string">"a"</span>, <span class="string">"b"</span>, <span class="string">"c"</span>)</span><br><span class="line">l: <span class="type">List</span>[<span class="type">String</span>] = <span class="type">List</span>(a, b, c)</span><br><span class="line"></span><br><span class="line">scala&gt; <span class="keyword">for</span> (</span><br><span class="line">s &lt;- l</span><br><span class="line">) println(s)</span><br><span class="line">a</span><br><span class="line">b</span><br><span class="line">c</span><br></pre></td></tr></table></figure>
+<h2 id="try表达式"><a href="#try表达式" class="headerlink" title="try表达式"></a>try表达式</h2><figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">try</span>&#123; &#125;</span><br><span class="line"><span class="keyword">catch</span>&#123; &#125;</span><br><span class="line"><span class="keyword">finally</span>&#123; &#125;</span><br></pre></td></tr></table></figure>
+<p>与Java不同，try是表达式，不是关键字。</p>
+<figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">try</span>&#123;</span><br><span class="line">	<span class="type">Integer</span>.parseInt(<span class="string">"abc"</span>)</span><br><span class="line">&#125; <span class="keyword">catch</span> &#123;</span><br><span class="line">	<span class="keyword">case</span> _ =&gt; <span class="number">0</span></span><br><span class="line">&#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">	println(<span class="string">"always be printed"</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="match表达式"><a href="#match表达式" class="headerlink" title="match表达式"></a>match表达式</h2><figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">exp <span class="keyword">match</span> &#123;</span><br><span class="line">	<span class="keyword">case</span> p1 =&gt; val1</span><br><span class="line">	<span class="keyword">case</span> p2 =&gt; val2</span><br><span class="line">	...</span><br><span class="line">	<span class="keyword">case</span> _ =&gt; valn</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> code = <span class="number">1</span></span><br><span class="line"><span class="keyword">val</span> result_match = code <span class="keyword">match</span> &#123;</span><br><span class="line">	<span class="keyword">case</span> <span class="number">1</span> =&gt; <span class="string">"ONE"</span></span><br><span class="line">	<span class="keyword">case</span> <span class="number">2</span> =&gt; <span class="string">"TWO"</span></span><br><span class="line">	<span class="keyword">case</span> _ =&gt; <span class="string">"OTHERS"</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>_ 表示通配，相当于Java中switch语句的default关键字。</p>
+<h2 id="求值策略"><a href="#求值策略" class="headerlink" title="求值策略"></a>求值策略</h2><ul>
+<li>Call By Value 对函数实参求值，且仅求值一次</li>
+<li>Call By Name    函数实参每次在函数体内被用到时都会求值</li>
 </ul>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="title">Connector</span><span class="params">(String protocol)</span> </span>&#123;</span><br><span class="line">    setProtocol(protocol);</span><br><span class="line">    <span class="comment">// Instantiate protocol handler</span></span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        Class&lt;?&gt; clazz = Class.forName(protocolHandlerClassName);</span><br><span class="line">        <span class="keyword">this</span>.protocolHandler = (ProtocolHandler) clazz.newInstance();</span><br><span class="line">    &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">        log.error(sm.getString(</span><br><span class="line">                <span class="string">"coyoteConnector.protocolHandlerInstantiationFailed"</span>), e);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>通过上述代码可以看出，Connector会根据我们在server.xml中配置的Connector类型来初始化。</p>
-<p>这里以常用的NIO来说明，找到Http11NioProtocol基类的start方法：</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">start</span><span class="params">()</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (getLog().isInfoEnabled())</span><br><span class="line">        getLog().info(sm.getString(<span class="string">"abstractProtocolHandler.start"</span>,</span><br><span class="line">                getNameInternal()));</span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        endpoint.start();</span><br><span class="line">    &#125; <span class="keyword">catch</span> (Exception ex) &#123;</span><br><span class="line">        getLog().error(sm.getString(<span class="string">"abstractProtocolHandler.startError"</span>,</span><br><span class="line">                getNameInternal()), ex);</span><br><span class="line">        <span class="keyword">throw</span> ex;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Start async timeout thread</span></span><br><span class="line">    asyncTimeout = <span class="keyword">new</span> AsyncTimeout();</span><br><span class="line">    Thread timeoutThread = <span class="keyword">new</span> Thread(asyncTimeout, getNameInternal() + <span class="string">"-AsyncTimeout"</span>);</span><br><span class="line">    timeoutThread.setPriority(endpoint.getThreadPriority());</span><br><span class="line">    timeoutThread.setDaemon(<span class="keyword">true</span>);</span><br><span class="line">    timeoutThread.start();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>start方法中调用endpoint.start()，找到对应方法，在NioEndpoint类中：</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">startInternal</span><span class="params">()</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> (!running) &#123;</span><br><span class="line">            running = <span class="keyword">true</span>;</span><br><span class="line">            paused = <span class="keyword">false</span>;</span><br><span class="line"></span><br><span class="line">            processorCache = <span class="keyword">new</span> SynchronizedStack&lt;&gt;(SynchronizedStack.DEFAULT_SIZE,</span><br><span class="line">                    socketProperties.getProcessorCache());</span><br><span class="line">            eventCache = <span class="keyword">new</span> SynchronizedStack&lt;&gt;(SynchronizedStack.DEFAULT_SIZE,</span><br><span class="line">                            socketProperties.getEventCache());</span><br><span class="line">            nioChannels = <span class="keyword">new</span> SynchronizedStack&lt;&gt;(SynchronizedStack.DEFAULT_SIZE,</span><br><span class="line">                    socketProperties.getBufferPool());</span><br><span class="line"></span><br><span class="line">            <span class="comment">// Create worker collection</span></span><br><span class="line">            <span class="keyword">if</span> ( getExecutor() == <span class="keyword">null</span> ) &#123;</span><br><span class="line">                createExecutor();</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            initializeConnectionLatch();</span><br><span class="line"></span><br><span class="line">            <span class="comment">// Start poller threads</span></span><br><span class="line">            pollers = <span class="keyword">new</span> Poller[getPollerThreadCount()];</span><br><span class="line">            <span class="keyword">for</span> (<span class="keyword">int</span> i=<span class="number">0</span>; i&lt;pollers.length; i++) &#123;</span><br><span class="line">                pollers[i] = <span class="keyword">new</span> Poller();</span><br><span class="line">                Thread pollerThread = <span class="keyword">new</span> Thread(pollers[i], getName() + <span class="string">"-ClientPoller-"</span>+i);</span><br><span class="line">                pollerThread.setPriority(threadPriority);</span><br><span class="line">                pollerThread.setDaemon(<span class="keyword">true</span>);</span><br><span class="line">                pollerThread.start();</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            startAcceptorThreads();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
-<p>当执行到startAcceptorThreads()时，就会进入等待请求的状态，知道一个新的请求到来才会激活它继续执行。</p>
+<p>Scala默认使用Call By Value<br>如果函数形参类型以 =&gt; 开头，那么会使用Call By Name        </p>
+<p>def foo(x: Int) = x //call by value<br>def foo(x: =&gt; Int) = x //call by name    </p>
+<p>call by name在调用时不会解析入参中的表达式，call by value则相反。</p>
+<h2 id="函数-1"><a href="#函数-1" class="headerlink" title="函数"></a>函数</h2><p>Scala函数特性：    </p>
+<ol>
+<li>把函数作为实参传递给另一个函数。    </li>
+<li>把函数作为返回值。    </li>
+<li>把函数赋值给变量。    </li>
+<li>把函数存储在数据结构里。    </li>
+<li>函数和普通变量一样，具有函数的类型。</li>
+</ol>
+<h2 id="函数类型"><a href="#函数类型" class="headerlink" title="函数类型"></a>函数类型</h2><p>函数类型格式为 A =&gt; B ，表示一个接受类型A的参数，并返回类型B的函数。</p>
+<p>例子： Int =&gt; String 是把整型映射为字符串的函数类型。</p>
+<h2 id="高阶函数"><a href="#高阶函数" class="headerlink" title="高阶函数"></a>高阶函数</h2><p>用函数作为形参或返回值的函数，称为高阶函数。</p>
+<figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">operate</span></span>(f: (<span class="type">Int</span>, <span class="type">Int</span>) =&gt; <span class="type">Int</span>) = &#123;</span><br><span class="line">	f(<span class="number">4</span>, <span class="number">4</span>)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">greeting</span></span>() = (name: <span class="type">String</span>) =&gt; &#123;<span class="string">"hello"</span> + <span class="string">" "</span> + name&#125;	<span class="comment">//匿名函数</span></span><br></pre></td></tr></table></figure>
+<h2 id="柯里化"><a href="#柯里化" class="headerlink" title="柯里化"></a>柯里化</h2><p>柯里化函数，把具有多个参数的函数转换为一条函数链，每个节点上是单一参数。</p>
+<p>例子：以下2个add函数定义是等价的</p>
+<figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">add</span></span>(x: <span class="type">Int</span>, y: <span class="type">Int</span>) = x + y	</span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">add</span></span>(x: <span class="type">Int</span>)(y: <span class="type">Int</span>) = x + y <span class="comment">//Scala柯里化语法</span></span><br></pre></td></tr></table></figure>
+<h2 id="尾递归函数"><a href="#尾递归函数" class="headerlink" title="尾递归函数"></a>尾递归函数</h2><p>尾递归函数中所有递归形式的调用都出现在函数的末尾。</p>
+<p>当编译器检测到一个函数调用是尾递归的时候，它就覆盖当前的活动记录而不是在栈中去创建一个新的。（避免堆栈内存溢出）</p>
+<p>例子：</p>
+<figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@annotation</span>.tailrec</span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">factorial</span></span>(n: <span class="type">Int</span>, m: <span class="type">Int</span>): <span class="type">Int</span> =</span><br><span class="line">	<span class="keyword">if</span> (n &lt;= <span class="number">0</span>) m</span><br><span class="line">	<span class="keyword">else</span> factoria(n<span class="number">-1</span>, m*n)</span><br><span class="line">factorial(<span class="number">5</span>, <span class="number">1</span>)</span><br></pre></td></tr></table></figure>
+<figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">sum</span></span>(f: <span class="type">Int</span> =&gt; <span class="type">Int</span>)(a: <span class="type">Int</span>)(b: <span class="type">Int</span>): <span class="type">Int</span> = &#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@annotation</span>.tailrec</span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">loop</span></span>(n: <span class="type">Int</span>, acc: <span class="type">Int</span>): <span class="type">Int</span> = &#123;</span><br><span class="line">      <span class="keyword">if</span> (n &gt; b) &#123;</span><br><span class="line">        println(<span class="string">s"n=<span class="subst">$&#123;n&#125;</span>, acc=<span class="subst">$&#123;acc&#125;</span>"</span>)</span><br><span class="line">        acc</span><br><span class="line">      &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        println(<span class="string">s"n=<span class="subst">$&#123;n&#125;</span>, acc=<span class="subst">$&#123;acc&#125;</span>"</span>)</span><br><span class="line">        loop(n + <span class="number">1</span>, acc + f(n))</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    loop(a, <span class="number">0</span>)</span><br><span class="line">&#125;</span><br><span class="line">  </span><br><span class="line">  sum(x =&gt; x)(<span class="number">1</span>)(<span class="number">5</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment">//输出</span></span><br><span class="line">n=<span class="number">1</span>, acc=<span class="number">0</span></span><br><span class="line">n=<span class="number">2</span>, acc=<span class="number">1</span></span><br><span class="line">n=<span class="number">3</span>, acc=<span class="number">3</span></span><br><span class="line">n=<span class="number">4</span>, acc=<span class="number">6</span></span><br><span class="line">n=<span class="number">5</span>, acc=<span class="number">10</span></span><br><span class="line">n=<span class="number">6</span>, acc=<span class="number">15</span></span><br></pre></td></tr></table></figure>
 
           
         
@@ -521,7 +558,7 @@
 
   
   <nav class="pagination">
-    <a class="extend prev" rel="prev" href="/page/5/"><i class="fa fa-angle-left"></i></a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/5/">5</a><span class="page-number current">6</span><a class="page-number" href="/page/7/">7</a><span class="space">&hellip;</span><a class="page-number" href="/page/17/">17</a><a class="extend next" rel="next" href="/page/7/"><i class="fa fa-angle-right"></i></a>
+    <a class="extend prev" rel="prev" href="/page/5/"><i class="fa fa-angle-left"></i></a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/5/">5</a><span class="page-number current">6</span><a class="page-number" href="/page/7/">7</a><span class="space">&hellip;</span><a class="page-number" href="/page/18/">18</a><a class="extend next" rel="next" href="/page/7/"><i class="fa fa-angle-right"></i></a>
   </nav>
 
 
@@ -562,7 +599,7 @@
         <nav class="site-state motion-element">
           <div class="site-state-item site-state-posts">
             <a href="/archives">
-              <span class="site-state-item-count">33</span>
+              <span class="site-state-item-count">35</span>
               <span class="site-state-item-name">日志</span>
             </a>
           </div>
@@ -570,7 +607,7 @@
           
             <div class="site-state-item site-state-categories">
               <a href="/categories">
-                <span class="site-state-item-count">7</span>
+                <span class="site-state-item-count">8</span>
                 <span class="site-state-item-name">分类</span>
               </a>
             </div>
@@ -579,7 +616,7 @@
           
             <div class="site-state-item site-state-tags">
               <a href="/tags">
-                <span class="site-state-item-count">13</span>
+                <span class="site-state-item-count">14</span>
                 <span class="site-state-item-name">标签</span>
               </a>
             </div>

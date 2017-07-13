@@ -1,0 +1,689 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/vendors/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+ 
+
+
+
+
+<link href="/vendors/font-awesome/css/font-awesome.min.css?v=4.4.0" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.0.1" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="Java 并发," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="http://static.hdslb.com/images/favicon.ico?v=5.0.1" />
+
+
+
+
+
+
+<meta name="description" content="并发编程的挑战与实现挑战并发编程是为了让程序更快，与此同时会面临非常多的挑战，接下来会介绍几种问题的解决方法。
+上下文切换单核处理器也支持多线程执行代码，CPU通过给每个线程分配CPU时间片来实现这个机制。时间片是CPU分配给各个线程的时间，因为时间片非常短，所以CPU通过不停地切换线程执行，让我们感觉多个线程是同时执行。
+CPU通过时间片分配算法来循环执行任务，在切换前会保存上一个任务的状态，以">
+<meta property="og:type" content="article">
+<meta property="og:title" content="并发编程的挑战与底层实现原理">
+<meta property="og:url" content="http://zhuxinhong.github.io/2017/07/13/Java并发/并发编程的挑战/index.html">
+<meta property="og:site_name" content="zhuxinhong blog">
+<meta property="og:description" content="并发编程的挑战与实现挑战并发编程是为了让程序更快，与此同时会面临非常多的挑战，接下来会介绍几种问题的解决方法。
+上下文切换单核处理器也支持多线程执行代码，CPU通过给每个线程分配CPU时间片来实现这个机制。时间片是CPU分配给各个线程的时间，因为时间片非常短，所以CPU通过不停地切换线程执行，让我们感觉多个线程是同时执行。
+CPU通过时间片分配算法来循环执行任务，在切换前会保存上一个任务的状态，以">
+<meta property="og:updated_time" content="2017-07-13T15:52:34.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="并发编程的挑战与底层实现原理">
+<meta name="twitter:description" content="并发编程的挑战与实现挑战并发编程是为了让程序更快，与此同时会面临非常多的挑战，接下来会介绍几种问题的解决方法。
+上下文切换单核处理器也支持多线程执行代码，CPU通过给每个线程分配CPU时间片来实现这个机制。时间片是CPU分配给各个线程的时间，因为时间片非常短，所以CPU通过不停地切换线程执行，让我们感觉多个线程是同时执行。
+CPU通过时间片分配算法来循环执行任务，在切换前会保存上一个任务的状态，以">
+
+
+
+<script type="text/javascript" id="hexo.configuration">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    scheme: 'Pisces',
+    sidebar: {"position":"left","display":"post"},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: undefined,
+      author: '博主'
+    }
+  };
+</script>
+
+
+
+
+  <link rel="canonical" href="http://zhuxinhong.github.io/2017/07/13/Java并发/并发编程的挑战/"/>
+
+  <title> 并发编程的挑战与底层实现原理 | zhuxinhong blog </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container one-collumn sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-meta ">
+  
+
+  <div class="custom-logo-site-title">
+    <a href="/"  class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <span class="site-title">zhuxinhong blog</span>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+  <p class="site-subtitle">java coder</p>
+</div>
+
+<div class="site-nav-toggle">
+  <button>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+  </button>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                并发编程的挑战与底层实现原理
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2017-07-13T00:00:00+08:00" content="2017-07-13">
+              2017-07-13
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/Java并发/" itemprop="url" rel="index">
+                    <span itemprop="name">Java并发</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+
+          
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="并发编程的挑战与实现"><a href="#并发编程的挑战与实现" class="headerlink" title="并发编程的挑战与实现"></a>并发编程的挑战与实现</h1><h2 id="挑战"><a href="#挑战" class="headerlink" title="挑战"></a>挑战</h2><p>并发编程是为了让程序更快，与此同时会面临非常多的挑战，接下来会介绍几种问题的解决方法。</p>
+<h3 id="上下文切换"><a href="#上下文切换" class="headerlink" title="上下文切换"></a>上下文切换</h3><p>单核处理器也支持多线程执行代码，CPU通过给每个线程分配CPU时间片来实现这个机制。时间片是CPU分配给各个线程的时间，因为时间片非常短，所以CPU通过不停地切换线程执行，让我们感觉多个线程是同时执行。</p>
+<p>CPU通过时间片分配算法来循环执行任务，在切换前会保存上一个任务的状态，以便下次切换回这个任务时，可以再加载这个任务的状态。所以任务从保存到再加载的过程就是一次上下文切换。</p>
+<p>并发执行线程过多，不一定就比串行快，因为线程有创建和上下文切换的开销。</p>
+<h4 id="减少上下文切换"><a href="#减少上下文切换" class="headerlink" title="减少上下文切换"></a>减少上下文切换</h4><ul>
+<li><p>无锁并发编程</p>
+<p>多线程竞争锁会引起上下文切换，可以采用一些办法来避免使用锁，如将数据的ID按照Hash算法取模分段，不同的线程处理不同段的数据，Java7的ConcurrentHashMap使用的就是分段锁。</p>
+</li>
+<li><p>CAS算法</p>
+<p>Java的Atomic包使用CAS算法来更新数据，并且不需要加锁。</p>
+</li>
+<li><p>使用最少线程</p>
+<p>避免创建不必要的线程，比如任务很少，但创建了很多线程来处理，造成大量线程处于等待状态。</p>
+</li>
+<li><p>协程</p>
+<p>在单线程里实现多任务的调度，并在单线程里维持多个任务间的切换。  </p>
+</li>
+</ul>
+<h3 id="避免死锁"><a href="#避免死锁" class="headerlink" title="避免死锁"></a>避免死锁</h3><ul>
+<li>避免一个线程同时获取多个锁。</li>
+<li>避免一个线程在锁内同时占用多个资源，尽量保证每个锁只占用一个资源。</li>
+<li>使用定时锁，使用 lock.tryLock(timeout) 来替代内部锁机制。</li>
+<li>数据库锁，加锁和解锁必须在一个数据库连接里，否则会出现解锁失败。</li>
+</ul>
+<h3 id="资源限制"><a href="#资源限制" class="headerlink" title="资源限制"></a>资源限制</h3><p>资源限制是指在并发编程时，程序的执行受限于计算机硬件资源或软件资源，例如服务器带宽的上传/下载速递、磁盘IO和CPU处理速度。软件资源限制有数据库的连接数和socket连接数。</p>
+<p>对于硬件资源限制，考虑使用集群并行执行程序。比如ODPS、Hadoop、Redis集群，不同的机器处理不同的数据。通过“数据ID%机器数”，计算得到一个机器编号，然后由对应编号机器处理。</p>
+<p>对于软件资源限制，可以考虑使用资源池将资源复用。比如使用连接池数据库和socket连接复用。    </p>
+<h2 id="Java并发机制的底层实现原理"><a href="#Java并发机制的底层实现原理" class="headerlink" title="Java并发机制的底层实现原理"></a>Java并发机制的底层实现原理</h2><p>Java代码在编译后会变成Java字节码，字节码被类加载器加载到JVM里，JVM执行字节码，最终需要转化为汇编指令在CPU上执行，Java中所使用的并发机制依赖于JVM的实现和CPU的指令。</p>
+<h3 id="volatile"><a href="#volatile" class="headerlink" title="volatile"></a>volatile</h3><p>volatile是轻量级的synchronized，在多处理器开发中保证了共享变量的“可见性”。可见性的意思是当一个线程修改一个共享变量时，另外一个线程能读到这个修改的值。如果volatile变量修饰符使用恰当的话，它比synchronized的使用和执行成本更低，因为它不会引起线程上下文的切换和调度。</p>
+<p>在了解volatile实现原理之前，我们先简单了解下CPU术语与说明。</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">术语</th>
+<th style="text-align:center">英文单词</th>
+<th style="text-align:center">描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">内存屏障</td>
+<td style="text-align:center">memory barriers</td>
+<td style="text-align:center">一组处理器指令，用于实现对内存操作的顺序限制</td>
+</tr>
+<tr>
+<td style="text-align:center">缓冲航</td>
+<td style="text-align:center">cache line</td>
+<td style="text-align:center">缓冲中可以分配的最小存储单位。处理器填写缓存线时会加载整个缓存线，需要使用多个主内存读周期</td>
+</tr>
+<tr>
+<td style="text-align:center">原子操作</td>
+<td style="text-align:center">atomic operations</td>
+<td style="text-align:center">不可中断的一个或一系列操作</td>
+</tr>
+<tr>
+<td style="text-align:center">缓存行填充</td>
+<td style="text-align:center">cache line fill</td>
+<td style="text-align:center">当处理器识别到从内存中读取操作数是可缓存的，处理器读取整个缓存行到适当的缓存（L1，L2，L3的或所有）</td>
+</tr>
+<tr>
+<td style="text-align:center">写命中</td>
+<td style="text-align:center">write hit</td>
+<td style="text-align:center">当处理器将操作数写回到一个内存缓存的区域时，它首先检查这个缓存的内存地址是否在缓存行中，如果存在一个有效的缓存行，则处理器将这个操作数写回到缓存，而不是写回到主存，这个操作称为写命中</td>
+</tr>
+<tr>
+<td style="text-align:center">写缺失</td>
+<td style="text-align:center">write misses the cache</td>
+<td style="text-align:center">一个有效的缓存行被写入到不存在的内存区域</td>
+</tr>
+</tbody>
+</table>
+<p>我们在X86处理器下通过工具获取JIT编译器生成的汇编指令来查看对volatile进行写操作时，CPU会做什么事情。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">volatile</span> instance = <span class="keyword">new</span> Singleton();</span><br></pre></td></tr></table></figure>
+<p>转变成汇编代码</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">0x01a3de1d: movb $0x0,0x1104800(%esi); 0x01a3de24: lock add1 $0x0,(%esp);</span><br></pre></td></tr></table></figure>
+<p>通过查IA-32架构软件开发者手册可知，Lock前缀的指令在多核处理器下引发两件事情。</p>
+<p>1)    将当前处理器缓存行的数据写回到系统内存。</p>
+<p>2)    这个写回内存的操作会使在其他CPU里缓存了该内存地址的数据无效。</p>
+<p>为了提高处理速度，处理器不直接和内存进行通信，而是将系统内存的数据读到内部缓存（L1,L2或其他）后再进行操作，但操作完不知道何时会写到主存。如何对声明了volatile的变量进行写操作，JVM就会向处理器发送一条Lock前缀的指令，将这个变量所在缓存行的数据写回到系统内存。但是就算写回到内存，如果其他处理器缓存的值还是旧的，再执行计算操作就会有问题。所以在多处理器下，为了保证各个处理器的缓存是一致的，就会实现缓存一致性协议，每个处理器通过嗅探在总线上传播的数据来检查自己缓存的值是不是过期了，当处理器发现自己缓存行对应的内存地址被修改，就会将当前处理器的缓存行设置成无效状态，当处理器对这个数据进行修改操作的时候，会重新从系统内存中把数据读到处理器缓存里。</p>
+<h3 id="synchronized"><a href="#synchronized" class="headerlink" title="synchronized"></a>synchronized</h3><p>synchronized在多线程并发编程中一直是元老级角色，很多人会称它为重量级锁。但是，随着Java SE 1.6对synchronized进行了各种优化之后，有些情况下它就并不那么重了。下面详细介绍Java SE 1.6中为了减少获得锁和释放锁带来的性能消耗而引入的偏向锁和轻量级锁，以及锁的存储结构和升级过程。</p>
+<p>synchronized实现同步的基础：</p>
+<ul>
+<li>普通同步方法，锁是当前实例对象。</li>
+<li>静态同步方法，锁是当前类的Class对象。</li>
+<li>同步方法块，锁是Synchronized括号里配置的对象。</li>
+</ul>
+<p>从JVM规范中可以看到Synchronized在JVM里的实现原理，JVM基于进入和退出Monitor对象来实现方法同步和代码块同步，但两者实现细节不一样。代码块同步是使用monitorenter和monitorexit指令实现的，而方法同步是使用另外一种方式实现的，细节再JVM规范里并没有详细说明。但是，方法的同样可以使用这两个指令来实现。</p>
+<p>monitorenter指令是在编译后插入到同步代码块的开始位置，而monitorexit是插入到方法结束处和异常处，JVM要保证每个monitorenter必须有对应的monitorexit与之配对。任何对象都有一个monitor与之关联，当且一个monitor背持有后，它将处于锁定状态。线程执行到monitorenter指令时，将会尝试获取对象所对应的monitor的所有权，即尝试获得对象的锁。</p>
+<h3 id="java-util-concurrent-atomic"><a href="#java-util-concurrent-atomic" class="headerlink" title="java.util.concurrent.atomic"></a>java.util.concurrent.atomic</h3>
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Java-并发/" rel="tag">#Java 并发</a>
+          
+        </div>
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/06/12/编写高质量代码/工程质量/" rel="next" title="工程质量">
+                <i class="fa fa-chevron-left"></i> 工程质量
+              </a>
+            
+          </div>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/07/13/Java并发/volatile应用/" rel="prev" title="">
+                 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel ">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="http://o7s628cn2.bkt.clouddn.com/image/avatar.png"
+               alt="祝欣鸿" />
+          <p class="site-author-name" itemprop="name">祝欣鸿</p>
+          <p class="site-description motion-element" itemprop="description">时光如白马，稍纵即逝。术业有专攻，一生做好一件事真的很重要。</p>
+        </div>
+        <nav class="site-state motion-element">
+          <div class="site-state-item site-state-posts">
+            <a href="/archives">
+              <span class="site-state-item-count">35</span>
+              <span class="site-state-item-name">日志</span>
+            </a>
+          </div>
+
+          
+            <div class="site-state-item site-state-categories">
+              <a href="/categories">
+                <span class="site-state-item-count">8</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            <div class="site-state-item site-state-tags">
+              <a href="/tags">
+                <span class="site-state-item-count">14</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+        
+        
+
+        
+        
+
+      </section>
+
+      
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+            
+              
+            
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#并发编程的挑战与实现"><span class="nav-number">1.</span> <span class="nav-text">并发编程的挑战与实现</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#挑战"><span class="nav-number">1.1.</span> <span class="nav-text">挑战</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#上下文切换"><span class="nav-number">1.1.1.</span> <span class="nav-text">上下文切换</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#减少上下文切换"><span class="nav-number">1.1.1.1.</span> <span class="nav-text">减少上下文切换</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#避免死锁"><span class="nav-number">1.1.2.</span> <span class="nav-text">避免死锁</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#资源限制"><span class="nav-number">1.1.3.</span> <span class="nav-text">资源限制</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Java并发机制的底层实现原理"><span class="nav-number">1.2.</span> <span class="nav-text">Java并发机制的底层实现原理</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#volatile"><span class="nav-number">1.2.1.</span> <span class="nav-text">volatile</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#synchronized"><span class="nav-number">1.2.2.</span> <span class="nav-text">synchronized</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#java-util-concurrent-atomic"><span class="nav-number">1.2.3.</span> <span class="nav-text">java.util.concurrent.atomic</span></a></li></ol></li></ol></li></ol></div>
+            
+          </div>
+        </section>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">祝欣鸿</span>
+</div>
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Pisces
+  </a>
+</div>
+
+        
+
+        
+      </div>
+    </footer>
+
+    <div class="back-to-top">
+      <i class="fa fa-arrow-up"></i>
+    </div>
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+  
+  <script type="text/javascript" src="/vendors/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/vendors/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/vendors/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/vendors/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/vendors/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/vendors/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.0.1"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.0.1"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.0.1"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.0.1"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.0.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.0.1"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.0.1"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
