@@ -242,6 +242,133 @@
             
               
                 
+                <a class="post-title-link" href="/2015/07/22/Redis设计与实现/Redis客户端/" itemprop="url">
+                  Redis客户端
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2015-07-22T00:00:00+08:00" content="2015-07-22">
+              2015-07-22
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/Redis设计与实现/" itemprop="url" rel="index">
+                    <span itemprop="name">Redis设计与实现</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+
+          
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>通过使用由I/O多路复用技术实现的文件事件处理器，Redis服务器使用单线程单进程的方式来处理命令请求，并与多个客户端进行网络通信。<br>redisClient结构保存客户端的数据结构：  </p>
+<ul>
+<li>套接字描述符  </li>
+<li>名字  </li>
+<li>标志位  </li>
+<li>正在使用的数据库指针，数据库号码    </li>
+<li>当前要执行的命令、参数、参数个数，以及指向命令实现函数的指针  </li>
+<li>输入缓冲和输出缓冲  </li>
+<li>复制状态信息和复制所需数据结构  </li>
+<li>执行BRPOP、BLPOP等列表阻塞命令时使用的数据结构  </li>
+<li>事物状态，执行WATCH命令用到的数据结构  </li>
+<li>执行发布和订阅用到的数据结构  </li>
+<li>身份验证标志  </li>
+<li>创建时间、最后一次通信时间，输出缓冲区大小超出软性限制的事件  </li>
+</ul>
+
+          
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
                 <a class="post-title-link" href="/2015/07/22/Redis设计与实现/Redis服务器单机数据库的实现/" itemprop="url">
                   Redis服务器单机数据库的实现
                 </a>
@@ -325,133 +452,6 @@
 <li>将AOP缓冲区内容写入AOF文件  </li>
 <li>关闭异步客户端  </li>
 <li>增加cronloops计数器的值  </li>
-</ul>
-
-          
-        
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
-      
-
-  
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-            
-            
-              
-                
-                <a class="post-title-link" href="/2015/07/22/Redis设计与实现/Redis客户端/" itemprop="url">
-                  Redis客户端
-                </a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            <span class="post-meta-item-icon">
-              <i class="fa fa-calendar-o"></i>
-            </span>
-            <span class="post-meta-item-text">发表于</span>
-            <time itemprop="dateCreated" datetime="2015-07-22T00:00:00+08:00" content="2015-07-22">
-              2015-07-22
-            </time>
-          </span>
-
-          
-            <span class="post-category" >
-              &nbsp; | &nbsp;
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-              
-                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
-                  <a href="/categories/Redis设计与实现/" itemprop="url" rel="index">
-                    <span itemprop="name">Redis设计与实现</span>
-                  </a>
-                </span>
-
-                
-                
-
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-
-          
-          
-
-          
-        </div>
-      </header>
-    
-
-
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>通过使用由I/O多路复用技术实现的文件事件处理器，Redis服务器使用单线程单进程的方式来处理命令请求，并与多个客户端进行网络通信。<br>redisClient结构保存客户端的数据结构：  </p>
-<ul>
-<li>套接字描述符  </li>
-<li>名字  </li>
-<li>标志位  </li>
-<li>正在使用的数据库指针，数据库号码    </li>
-<li>当前要执行的命令、参数、参数个数，以及指向命令实现函数的指针  </li>
-<li>输入缓冲和输出缓冲  </li>
-<li>复制状态信息和复制所需数据结构  </li>
-<li>执行BRPOP、BLPOP等列表阻塞命令时使用的数据结构  </li>
-<li>事物状态，执行WATCH命令用到的数据结构  </li>
-<li>执行发布和订阅用到的数据结构  </li>
-<li>身份验证标志  </li>
-<li>创建时间、最后一次通信时间，输出缓冲区大小超出软性限制的事件  </li>
 </ul>
 
           
