@@ -78,22 +78,18 @@
 
 
 
-<meta name="description" content="引用计数算法给对象添加引用计数器，每增加一个地方引用时，计数器加1，引用失效时，计数器减1。
-主流的JVM里面并没有选用引用计数法来管理内存，原因是它很难解决对象之间相互循环引用的问题。微软的COM技术、使用ActionScript的FlashPlayer、Python语言和游戏脚本领域被广泛应用的Squirrel中都使用了引用计数法管理内存。
-可达性分析算法通过一系列称为”GC Roots”的对">
+<meta name="description" content="引用计数算法给对象添加引用计数器，每增加一个地方引用时，计数器加1，引用失效时，计数器减1。 主流的JVM里面并没有选用引用计数法来管理内存，原因是它很难解决对象之间相互循环引用的问题。微软的COM技术、使用ActionScript的FlashPlayer、Python语言和游戏脚本领域被广泛应用的Squirrel中都使用了引用计数法管理内存。 可达性分析算法通过一系列称为”GC Roots”的对">
+<meta name="keywords" content="JVM">
 <meta property="og:type" content="article">
 <meta property="og:title" content="垃圾收集器算法">
 <meta property="og:url" content="http://zhuxinhong.github.io/2016/05/15/深入理解Java虚拟机/垃圾收集器算法/index.html">
 <meta property="og:site_name" content="zhuxinhong blog">
-<meta property="og:description" content="引用计数算法给对象添加引用计数器，每增加一个地方引用时，计数器加1，引用失效时，计数器减1。
-主流的JVM里面并没有选用引用计数法来管理内存，原因是它很难解决对象之间相互循环引用的问题。微软的COM技术、使用ActionScript的FlashPlayer、Python语言和游戏脚本领域被广泛应用的Squirrel中都使用了引用计数法管理内存。
-可达性分析算法通过一系列称为”GC Roots”的对">
+<meta property="og:description" content="引用计数算法给对象添加引用计数器，每增加一个地方引用时，计数器加1，引用失效时，计数器减1。 主流的JVM里面并没有选用引用计数法来管理内存，原因是它很难解决对象之间相互循环引用的问题。微软的COM技术、使用ActionScript的FlashPlayer、Python语言和游戏脚本领域被广泛应用的Squirrel中都使用了引用计数法管理内存。 可达性分析算法通过一系列称为”GC Roots”的对">
+<meta property="og:locale" content="zh-Hans">
 <meta property="og:updated_time" content="2016-06-08T10:28:53.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="垃圾收集器算法">
-<meta name="twitter:description" content="引用计数算法给对象添加引用计数器，每增加一个地方引用时，计数器加1，引用失效时，计数器减1。
-主流的JVM里面并没有选用引用计数法来管理内存，原因是它很难解决对象之间相互循环引用的问题。微软的COM技术、使用ActionScript的FlashPlayer、Python语言和游戏脚本领域被广泛应用的Squirrel中都使用了引用计数法管理内存。
-可达性分析算法通过一系列称为”GC Roots”的对">
+<meta name="twitter:description" content="引用计数算法给对象添加引用计数器，每增加一个地方引用时，计数器加1，引用失效时，计数器减1。 主流的JVM里面并没有选用引用计数法来管理内存，原因是它很难解决对象之间相互循环引用的问题。微软的COM技术、使用ActionScript的FlashPlayer、Python语言和游戏脚本领域被广泛应用的Squirrel中都使用了引用计数法管理内存。 可达性分析算法通过一系列称为”GC Roots”的对">
 
 
 
@@ -443,7 +439,7 @@
         <nav class="site-state motion-element">
           <div class="site-state-item site-state-posts">
             <a href="/archives">
-              <span class="site-state-item-count">34</span>
+              <span class="site-state-item-count">35</span>
               <span class="site-state-item-name">日志</span>
             </a>
           </div>
@@ -451,7 +447,7 @@
           
             <div class="site-state-item site-state-categories">
               <a href="/categories">
-                <span class="site-state-item-count">8</span>
+                <span class="site-state-item-count">9</span>
                 <span class="site-state-item-name">分类</span>
               </a>
             </div>
@@ -460,7 +456,7 @@
           
             <div class="site-state-item site-state-tags">
               <a href="/tags">
-                <span class="site-state-item-count">14</span>
+                <span class="site-state-item-count">16</span>
                 <span class="site-state-item-name">标签</span>
               </a>
             </div>

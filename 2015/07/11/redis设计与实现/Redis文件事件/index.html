@@ -79,11 +79,13 @@
 
 
 <meta name="description" content="Redis 服务器是一个事件驱动程序，服务器需要处理以下两类事件：1）文件事件Redis服务器通过套接字与客户端（或其他Redis服务器）进行连接，而文件事件就是服务器对套接字操作的抽象。服务器与客户端（或其他服务器）的通信会产生相应的文件事件，而服务器则通过监听并处理这些时间来完成一系列网络通信操作。2）时间事件Redis服务器中的一些操作（比如serverCron函数）需要在给定的时间点执行，">
+<meta name="keywords" content="Redis">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Redis文件事件">
 <meta property="og:url" content="http://zhuxinhong.github.io/2015/07/11/Redis设计与实现/Redis文件事件/index.html">
 <meta property="og:site_name" content="zhuxinhong blog">
 <meta property="og:description" content="Redis 服务器是一个事件驱动程序，服务器需要处理以下两类事件：1）文件事件Redis服务器通过套接字与客户端（或其他Redis服务器）进行连接，而文件事件就是服务器对套接字操作的抽象。服务器与客户端（或其他服务器）的通信会产生相应的文件事件，而服务器则通过监听并处理这些时间来完成一系列网络通信操作。2）时间事件Redis服务器中的一些操作（比如serverCron函数）需要在给定的时间点执行，">
+<meta property="og:locale" content="zh-Hans">
 <meta property="og:updated_time" content="2016-06-08T10:28:53.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Redis文件事件">
@@ -336,16 +338,16 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2015/07/04/Redis设计与实现/RedisRDB文件结构/" rel="next" title="RedisRDB文件结构">
-                <i class="fa fa-chevron-left"></i> RedisRDB文件结构
+              <a href="/2015/07/11/Redis设计与实现/Redis持久化-AOF/" rel="next" title="Redis持久化-AOF">
+                <i class="fa fa-chevron-left"></i> Redis持久化-AOF
               </a>
             
           </div>
 
           <div class="post-nav-prev post-nav-item">
             
-              <a href="/2015/07/11/Redis设计与实现/Redis持久化-AOF/" rel="prev" title="Redis持久化-AOF">
-                Redis持久化-AOF <i class="fa fa-chevron-right"></i>
+              <a href="/2015/07/12/Redis设计与实现/Redis时间事件/" rel="prev" title="Redis时间事件">
+                Redis时间事件 <i class="fa fa-chevron-right"></i>
               </a>
             
           </div>
@@ -414,7 +416,7 @@
         <nav class="site-state motion-element">
           <div class="site-state-item site-state-posts">
             <a href="/archives">
-              <span class="site-state-item-count">34</span>
+              <span class="site-state-item-count">35</span>
               <span class="site-state-item-name">日志</span>
             </a>
           </div>
@@ -422,7 +424,7 @@
           
             <div class="site-state-item site-state-categories">
               <a href="/categories">
-                <span class="site-state-item-count">8</span>
+                <span class="site-state-item-count">9</span>
                 <span class="site-state-item-name">分类</span>
               </a>
             </div>
@@ -431,7 +433,7 @@
           
             <div class="site-state-item site-state-tags">
               <a href="/tags">
-                <span class="site-state-item-count">14</span>
+                <span class="site-state-item-count">16</span>
                 <span class="site-state-item-name">标签</span>
               </a>
             </div>

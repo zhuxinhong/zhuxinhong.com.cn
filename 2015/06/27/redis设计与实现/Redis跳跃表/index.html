@@ -78,19 +78,18 @@
 
 
 
-<meta name="description" content="Redis使用跳跃表作为有序集合键的底层实现之一，如果一个有序集合包含的元素数量较多，或者有序集合中成员是较长的字符串时，Redis就会使用跳跃表来作为有序集合键的底层实现。和链表、字典等数据结构在Redis内部的广泛应用不同，Redis只在实现有序集合键和集群节点中用到跳跃表。
-跳跃表节点 zskiplistNode12345678910111213141516typeof struct zsk">
+<meta name="description" content="Redis使用跳跃表作为有序集合键的底层实现之一，如果一个有序集合包含的元素数量较多，或者有序集合中成员是较长的字符串时，Redis就会使用跳跃表来作为有序集合键的底层实现。和链表、字典等数据结构在Redis内部的广泛应用不同，Redis只在实现有序集合键和集群节点中用到跳跃表。 跳跃表节点 zskiplistNode12345678910111213141516typeof struct zsk">
+<meta name="keywords" content="Redis">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Redis跳跃表">
 <meta property="og:url" content="http://zhuxinhong.github.io/2015/06/27/Redis设计与实现/Redis跳跃表/index.html">
 <meta property="og:site_name" content="zhuxinhong blog">
-<meta property="og:description" content="Redis使用跳跃表作为有序集合键的底层实现之一，如果一个有序集合包含的元素数量较多，或者有序集合中成员是较长的字符串时，Redis就会使用跳跃表来作为有序集合键的底层实现。和链表、字典等数据结构在Redis内部的广泛应用不同，Redis只在实现有序集合键和集群节点中用到跳跃表。
-跳跃表节点 zskiplistNode12345678910111213141516typeof struct zsk">
+<meta property="og:description" content="Redis使用跳跃表作为有序集合键的底层实现之一，如果一个有序集合包含的元素数量较多，或者有序集合中成员是较长的字符串时，Redis就会使用跳跃表来作为有序集合键的底层实现。和链表、字典等数据结构在Redis内部的广泛应用不同，Redis只在实现有序集合键和集群节点中用到跳跃表。 跳跃表节点 zskiplistNode12345678910111213141516typeof struct zsk">
+<meta property="og:locale" content="zh-Hans">
 <meta property="og:updated_time" content="2016-06-08T10:28:53.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Redis跳跃表">
-<meta name="twitter:description" content="Redis使用跳跃表作为有序集合键的底层实现之一，如果一个有序集合包含的元素数量较多，或者有序集合中成员是较长的字符串时，Redis就会使用跳跃表来作为有序集合键的底层实现。和链表、字典等数据结构在Redis内部的广泛应用不同，Redis只在实现有序集合键和集群节点中用到跳跃表。
-跳跃表节点 zskiplistNode12345678910111213141516typeof struct zsk">
+<meta name="twitter:description" content="Redis使用跳跃表作为有序集合键的底层实现之一，如果一个有序集合包含的元素数量较多，或者有序集合中成员是较长的字符串时，Redis就会使用跳跃表来作为有序集合键的底层实现。和链表、字典等数据结构在Redis内部的广泛应用不同，Redis只在实现有序集合键和集群节点中用到跳跃表。 跳跃表节点 zskiplistNode12345678910111213141516typeof struct zsk">
 
 
 
@@ -344,8 +343,8 @@
 
           <div class="post-nav-prev post-nav-item">
             
-              <a href="/2015/06/28/Redis设计与实现/Redis哈希对象/" rel="prev" title="Redis哈希对象">
-                Redis哈希对象 <i class="fa fa-chevron-right"></i>
+              <a href="/2015/06/28/Redis设计与实现/Redis对象/" rel="prev" title="Redis对象">
+                Redis对象 <i class="fa fa-chevron-right"></i>
               </a>
             
           </div>
@@ -414,7 +413,7 @@
         <nav class="site-state motion-element">
           <div class="site-state-item site-state-posts">
             <a href="/archives">
-              <span class="site-state-item-count">34</span>
+              <span class="site-state-item-count">35</span>
               <span class="site-state-item-name">日志</span>
             </a>
           </div>
@@ -422,7 +421,7 @@
           
             <div class="site-state-item site-state-categories">
               <a href="/categories">
-                <span class="site-state-item-count">8</span>
+                <span class="site-state-item-count">9</span>
                 <span class="site-state-item-name">分类</span>
               </a>
             </div>
@@ -431,7 +430,7 @@
           
             <div class="site-state-item site-state-tags">
               <a href="/tags">
-                <span class="site-state-item-count">14</span>
+                <span class="site-state-item-count">16</span>
                 <span class="site-state-item-name">标签</span>
               </a>
             </div>

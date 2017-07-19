@@ -78,25 +78,18 @@
 
 
 
-<meta name="description" content="哈希对象编码可以是ziplist或者hashtable。
-ziplist编码的哈希对象使用压缩列表作为底层实现。有新的键值对要保存时，程序会先将键值对的键推到列表表尾，再将键值对的值推到列表表尾。
-hashtable编码的哈希对象使用字典作为底层实现，哈希对象中的每个键值对都是用一个字典键值对来保存。
-当哈希对象满足下面2个条件时，哈希对象使用ziplist编码，其余都使用hashtable编码：">
+<meta name="description" content="哈希对象编码可以是ziplist或者hashtable。 ziplist编码的哈希对象使用压缩列表作为底层实现。有新的键值对要保存时，程序会先将键值对的键推到列表表尾，再将键值对的值推到列表表尾。 hashtable编码的哈希对象使用字典作为底层实现，哈希对象中的每个键值对都是用一个字典键值对来保存。 当哈希对象满足下面2个条件时，哈希对象使用ziplist编码，其余都使用hashtable编码：">
+<meta name="keywords" content="Redis">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Redis哈希对象">
 <meta property="og:url" content="http://zhuxinhong.github.io/2015/06/28/Redis设计与实现/Redis哈希对象/index.html">
 <meta property="og:site_name" content="zhuxinhong blog">
-<meta property="og:description" content="哈希对象编码可以是ziplist或者hashtable。
-ziplist编码的哈希对象使用压缩列表作为底层实现。有新的键值对要保存时，程序会先将键值对的键推到列表表尾，再将键值对的值推到列表表尾。
-hashtable编码的哈希对象使用字典作为底层实现，哈希对象中的每个键值对都是用一个字典键值对来保存。
-当哈希对象满足下面2个条件时，哈希对象使用ziplist编码，其余都使用hashtable编码：">
+<meta property="og:description" content="哈希对象编码可以是ziplist或者hashtable。 ziplist编码的哈希对象使用压缩列表作为底层实现。有新的键值对要保存时，程序会先将键值对的键推到列表表尾，再将键值对的值推到列表表尾。 hashtable编码的哈希对象使用字典作为底层实现，哈希对象中的每个键值对都是用一个字典键值对来保存。 当哈希对象满足下面2个条件时，哈希对象使用ziplist编码，其余都使用hashtable编码：">
+<meta property="og:locale" content="zh-Hans">
 <meta property="og:updated_time" content="2016-06-08T10:28:53.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Redis哈希对象">
-<meta name="twitter:description" content="哈希对象编码可以是ziplist或者hashtable。
-ziplist编码的哈希对象使用压缩列表作为底层实现。有新的键值对要保存时，程序会先将键值对的键推到列表表尾，再将键值对的值推到列表表尾。
-hashtable编码的哈希对象使用字典作为底层实现，哈希对象中的每个键值对都是用一个字典键值对来保存。
-当哈希对象满足下面2个条件时，哈希对象使用ziplist编码，其余都使用hashtable编码：">
+<meta name="twitter:description" content="哈希对象编码可以是ziplist或者hashtable。 ziplist编码的哈希对象使用压缩列表作为底层实现。有新的键值对要保存时，程序会先将键值对的键推到列表表尾，再将键值对的值推到列表表尾。 hashtable编码的哈希对象使用字典作为底层实现，哈希对象中的每个键值对都是用一个字典键值对来保存。 当哈希对象满足下面2个条件时，哈希对象使用ziplist编码，其余都使用hashtable编码：">
 
 
 
@@ -344,16 +337,16 @@ hashtable编码的哈希对象使用字典作为底层实现，哈希对象中�
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2015/06/27/Redis设计与实现/Redis跳跃表/" rel="next" title="Redis跳跃表">
-                <i class="fa fa-chevron-left"></i> Redis跳跃表
+              <a href="/2015/06/28/Redis设计与实现/Redis对象/" rel="next" title="Redis对象">
+                <i class="fa fa-chevron-left"></i> Redis对象
               </a>
             
           </div>
 
           <div class="post-nav-prev post-nav-item">
             
-              <a href="/2015/06/28/Redis设计与实现/Redis对象/" rel="prev" title="Redis对象">
-                Redis对象 <i class="fa fa-chevron-right"></i>
+              <a href="/2015/07/01/Redis设计与实现/Redis持久化-RDB/" rel="prev" title="Redis持久化-RDB">
+                Redis持久化-RDB <i class="fa fa-chevron-right"></i>
               </a>
             
           </div>
@@ -422,7 +415,7 @@ hashtable编码的哈希对象使用字典作为底层实现，哈希对象中�
         <nav class="site-state motion-element">
           <div class="site-state-item site-state-posts">
             <a href="/archives">
-              <span class="site-state-item-count">34</span>
+              <span class="site-state-item-count">35</span>
               <span class="site-state-item-name">日志</span>
             </a>
           </div>
@@ -430,7 +423,7 @@ hashtable编码的哈希对象使用字典作为底层实现，哈希对象中�
           
             <div class="site-state-item site-state-categories">
               <a href="/categories">
-                <span class="site-state-item-count">8</span>
+                <span class="site-state-item-count">9</span>
                 <span class="site-state-item-name">分类</span>
               </a>
             </div>
@@ -439,7 +432,7 @@ hashtable编码的哈希对象使用字典作为底层实现，哈希对象中�
           
             <div class="site-state-item site-state-tags">
               <a href="/tags">
-                <span class="site-state-item-count">14</span>
+                <span class="site-state-item-count">16</span>
                 <span class="site-state-item-name">标签</span>
               </a>
             </div>

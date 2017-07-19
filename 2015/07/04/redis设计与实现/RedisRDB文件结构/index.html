@@ -78,25 +78,18 @@
 
 
 
-<meta name="description" content="Redis RDB文件保存的是二进制数据，结构包括5部分:REDIS | db_version | databases | EOF | check_sum
-db_version长度为4个字节，它的值是一个字符串表示的整数，记录RDB文件的版本号。
-databases记录数据库实例，和各个数据库实例的键值对数据，如果redis-server中所有db都为空，那这个值也为空，长度为0字节。
-EOF常量">
+<meta name="description" content="Redis RDB文件保存的是二进制数据，结构包括5部分:REDIS | db_version | databases | EOF | check_sum db_version长度为4个字节，它的值是一个字符串表示的整数，记录RDB文件的版本号。 databases记录数据库实例，和各个数据库实例的键值对数据，如果redis-server中所有db都为空，那这个值也为空，长度为0字节。 EOF常量">
+<meta name="keywords" content="Redis">
 <meta property="og:type" content="article">
 <meta property="og:title" content="RedisRDB文件结构">
 <meta property="og:url" content="http://zhuxinhong.github.io/2015/07/04/Redis设计与实现/RedisRDB文件结构/index.html">
 <meta property="og:site_name" content="zhuxinhong blog">
-<meta property="og:description" content="Redis RDB文件保存的是二进制数据，结构包括5部分:REDIS | db_version | databases | EOF | check_sum
-db_version长度为4个字节，它的值是一个字符串表示的整数，记录RDB文件的版本号。
-databases记录数据库实例，和各个数据库实例的键值对数据，如果redis-server中所有db都为空，那这个值也为空，长度为0字节。
-EOF常量">
+<meta property="og:description" content="Redis RDB文件保存的是二进制数据，结构包括5部分:REDIS | db_version | databases | EOF | check_sum db_version长度为4个字节，它的值是一个字符串表示的整数，记录RDB文件的版本号。 databases记录数据库实例，和各个数据库实例的键值对数据，如果redis-server中所有db都为空，那这个值也为空，长度为0字节。 EOF常量">
+<meta property="og:locale" content="zh-Hans">
 <meta property="og:updated_time" content="2016-06-08T10:28:53.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="RedisRDB文件结构">
-<meta name="twitter:description" content="Redis RDB文件保存的是二进制数据，结构包括5部分:REDIS | db_version | databases | EOF | check_sum
-db_version长度为4个字节，它的值是一个字符串表示的整数，记录RDB文件的版本号。
-databases记录数据库实例，和各个数据库实例的键值对数据，如果redis-server中所有db都为空，那这个值也为空，长度为0字节。
-EOF常量">
+<meta name="twitter:description" content="Redis RDB文件保存的是二进制数据，结构包括5部分:REDIS | db_version | databases | EOF | check_sum db_version长度为4个字节，它的值是一个字符串表示的整数，记录RDB文件的版本号。 databases记录数据库实例，和各个数据库实例的键值对数据，如果redis-server中所有db都为空，那这个值也为空，长度为0字节。 EOF常量">
 
 
 
@@ -353,16 +346,16 @@ EOF常量">
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2015/07/01/Redis设计与实现/Redis中的数据库/" rel="next" title="Redis中的数据库">
-                <i class="fa fa-chevron-left"></i> Redis中的数据库
+              <a href="/2015/07/01/Redis设计与实现/Redis类型检查和命令多态/" rel="next" title="Redis类型检查和命令多态">
+                <i class="fa fa-chevron-left"></i> Redis类型检查和命令多态
               </a>
             
           </div>
 
           <div class="post-nav-prev post-nav-item">
             
-              <a href="/2015/07/11/Redis设计与实现/Redis文件事件/" rel="prev" title="Redis文件事件">
-                Redis文件事件 <i class="fa fa-chevron-right"></i>
+              <a href="/2015/07/11/Redis设计与实现/Redis持久化-AOF/" rel="prev" title="Redis持久化-AOF">
+                Redis持久化-AOF <i class="fa fa-chevron-right"></i>
               </a>
             
           </div>
@@ -431,7 +424,7 @@ EOF常量">
         <nav class="site-state motion-element">
           <div class="site-state-item site-state-posts">
             <a href="/archives">
-              <span class="site-state-item-count">34</span>
+              <span class="site-state-item-count">35</span>
               <span class="site-state-item-name">日志</span>
             </a>
           </div>
@@ -439,7 +432,7 @@ EOF常量">
           
             <div class="site-state-item site-state-categories">
               <a href="/categories">
-                <span class="site-state-item-count">8</span>
+                <span class="site-state-item-count">9</span>
                 <span class="site-state-item-name">分类</span>
               </a>
             </div>
@@ -448,7 +441,7 @@ EOF常量">
           
             <div class="site-state-item site-state-tags">
               <a href="/tags">
-                <span class="site-state-item-count">14</span>
+                <span class="site-state-item-count">16</span>
                 <span class="site-state-item-name">标签</span>
               </a>
             </div>

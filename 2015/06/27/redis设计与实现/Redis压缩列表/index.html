@@ -78,19 +78,18 @@
 
 
 
-<meta name="description" content="压缩列表（ziplist）是列表键和哈希键的底层实现之一。当一个列表键只包含少量列表项，并且每项都是小整数或短字符串时，Redis就会使用压缩列表作为列表键的底层实现。
-ziplis组成：zlbytes : 记录列表占用内存字节数：在重新分配内存或计算zlend时使用zltail : 记录压缩列表表尾节点距离列表的起始地址有多少字节zllen : 记录压缩列表包含节点数量entryX : 各个节点">
+<meta name="description" content="压缩列表（ziplist）是列表键和哈希键的底层实现之一。当一个列表键只包含少量列表项，并且每项都是小整数或短字符串时，Redis就会使用压缩列表作为列表键的底层实现。 ziplis组成：zlbytes : 记录列表占用内存字节数：在重新分配内存或计算zlend时使用zltail : 记录压缩列表表尾节点距离列表的起始地址有多少字节zllen : 记录压缩列表包含节点数量entryX : 各个节点">
+<meta name="keywords" content="Redis">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Redis压缩列表">
 <meta property="og:url" content="http://zhuxinhong.github.io/2015/06/27/Redis设计与实现/Redis压缩列表/index.html">
 <meta property="og:site_name" content="zhuxinhong blog">
-<meta property="og:description" content="压缩列表（ziplist）是列表键和哈希键的底层实现之一。当一个列表键只包含少量列表项，并且每项都是小整数或短字符串时，Redis就会使用压缩列表作为列表键的底层实现。
-ziplis组成：zlbytes : 记录列表占用内存字节数：在重新分配内存或计算zlend时使用zltail : 记录压缩列表表尾节点距离列表的起始地址有多少字节zllen : 记录压缩列表包含节点数量entryX : 各个节点">
+<meta property="og:description" content="压缩列表（ziplist）是列表键和哈希键的底层实现之一。当一个列表键只包含少量列表项，并且每项都是小整数或短字符串时，Redis就会使用压缩列表作为列表键的底层实现。 ziplis组成：zlbytes : 记录列表占用内存字节数：在重新分配内存或计算zlend时使用zltail : 记录压缩列表表尾节点距离列表的起始地址有多少字节zllen : 记录压缩列表包含节点数量entryX : 各个节点">
+<meta property="og:locale" content="zh-Hans">
 <meta property="og:updated_time" content="2016-06-08T10:28:53.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Redis压缩列表">
-<meta name="twitter:description" content="压缩列表（ziplist）是列表键和哈希键的底层实现之一。当一个列表键只包含少量列表项，并且每项都是小整数或短字符串时，Redis就会使用压缩列表作为列表键的底层实现。
-ziplis组成：zlbytes : 记录列表占用内存字节数：在重新分配内存或计算zlend时使用zltail : 记录压缩列表表尾节点距离列表的起始地址有多少字节zllen : 记录压缩列表包含节点数量entryX : 各个节点">
+<meta name="twitter:description" content="压缩列表（ziplist）是列表键和哈希键的底层实现之一。当一个列表键只包含少量列表项，并且每项都是小整数或短字符串时，Redis就会使用压缩列表作为列表键的底层实现。 ziplis组成：zlbytes : 记录列表占用内存字节数：在重新分配内存或计算zlend时使用zltail : 记录压缩列表表尾节点距离列表的起始地址有多少字节zllen : 记录压缩列表包含节点数量entryX : 各个节点">
 
 
 
@@ -415,7 +414,7 @@ ziplis组成：zlbytes : 记录列表占用内存字节数：在重新分配内�
         <nav class="site-state motion-element">
           <div class="site-state-item site-state-posts">
             <a href="/archives">
-              <span class="site-state-item-count">34</span>
+              <span class="site-state-item-count">35</span>
               <span class="site-state-item-name">日志</span>
             </a>
           </div>
@@ -423,7 +422,7 @@ ziplis组成：zlbytes : 记录列表占用内存字节数：在重新分配内�
           
             <div class="site-state-item site-state-categories">
               <a href="/categories">
-                <span class="site-state-item-count">8</span>
+                <span class="site-state-item-count">9</span>
                 <span class="site-state-item-name">分类</span>
               </a>
             </div>
@@ -432,7 +431,7 @@ ziplis组成：zlbytes : 记录列表占用内存字节数：在重新分配内�
           
             <div class="site-state-item site-state-tags">
               <a href="/tags">
-                <span class="site-state-item-count">14</span>
+                <span class="site-state-item-count">16</span>
                 <span class="site-state-item-name">标签</span>
               </a>
             </div>

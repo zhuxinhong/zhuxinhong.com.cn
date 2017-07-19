@@ -84,6 +84,7 @@
 <meta property="og:url" content="http://zhuxinhong.github.io/page/15/index.html">
 <meta property="og:site_name" content="zhuxinhong blog">
 <meta property="og:description" content="时光如白马，稍纵即逝。术业有专攻，一生做好一件事真的很重要。">
+<meta property="og:locale" content="zh-Hans">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="zhuxinhong blog">
 <meta name="twitter:description" content="时光如白马，稍纵即逝。术业有专攻，一生做好一件事真的很重要。">
@@ -359,8 +360,8 @@
             
               
                 
-                <a class="post-title-link" href="/2015/06/27/Redis设计与实现/Redis跳跃表/" itemprop="url">
-                  Redis跳跃表
+                <a class="post-title-link" href="/2015/06/28/Redis设计与实现/Redis对象/" itemprop="url">
+                  Redis对象
                 </a>
               
             
@@ -373,8 +374,8 @@
               <i class="fa fa-calendar-o"></i>
             </span>
             <span class="post-meta-item-text">发表于</span>
-            <time itemprop="dateCreated" datetime="2015-06-27T00:00:00+08:00" content="2015-06-27">
-              2015-06-27
+            <time itemprop="dateCreated" datetime="2015-06-28T00:00:00+08:00" content="2015-06-28">
+              2015-06-28
             </time>
           </span>
 
@@ -422,9 +423,12 @@
       
         
           
-            <p>Redis使用跳跃表作为有序集合键的底层实现之一，如果一个有序集合包含的元素数量较多，或者有序集合中成员是较长的字符串时，Redis就会使用跳跃表来作为有序集合键的底层实现。<br>和链表、字典等数据结构在Redis内部的广泛应用不同，Redis只在实现有序集合键和集群节点中用到跳跃表。</p>
-<p>跳跃表节点 zskiplistNode<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">typeof struct zskiplistNode &#123;</span><br><span class="line">	//层</span><br><span class="line">	struct zskipzlistLevel&#123;</span><br><span class="line">	//前进指针</span><br><span class="line">	struct zskiplistNode *forward;</span><br><span class="line">	//跨度</span><br><span class="line">	unsigned int span;</span><br><span class="line">	&#125; level[];</span><br><span class="line">	</span><br><span class="line">	//后退指针</span><br><span class="line">	struct zskiplistNode *backward;</span><br><span class="line">	//分值</span><br><span class="line">	double score;</span><br><span class="line">	//成员对象</span><br><span class="line">	rojb *obj;</span><br><span class="line">&#125; zskiplistNode;</span><br></pre></td></tr></table></figure></p>
-<p>跳跃表 zskiplist<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">typeof struct zskiplist &#123;</span><br><span class="line">	//表头节点和表尾节点</span><br><span class="line">	structz skiplistNode *header, *tail;</span><br><span class="line">	//表中节点数量</span><br><span class="line">	unsigned long length;</span><br><span class="line">	//表中层数最大节点的层数</span><br><span class="line">	int level;</span><br><span class="line">&#125; zskiplist;</span><br></pre></td></tr></table></figure></p>
+            <p>Redis中每个对象都由一个redisObject结构表示：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">typeof struct redisObject &#123;</span><br><span class="line">	//类型</span><br><span class="line">	unsigned <span class="built_in">type</span> : 4;</span><br><span class="line">	//编码</span><br><span class="line">	unsigned encoding : 4;</span><br><span class="line">	//指向底层数据结构的指针</span><br><span class="line">	void *ptr;</span><br><span class="line">	// . . .</span><br><span class="line">&#125; robj;</span><br></pre></td></tr></table></figure>
+<p>type  对象的类型<br>REDIS_STRING 字符串对象<br>REDIS_LIST 列表对象<br>REDIS_HASH 哈希对象<br>REDIS_SET 集合对象<br>REDIS_ZSET 有序集合对象</p>
+<p>对于Redis保存的键值对来说，键总是一个字符串对象，而值可以是上述对象中的任意对象。使用TYPE命令返回的结果是数据库对应键的值对象类型。</p>
+<p>encoding 记录对象底层数据结构的实现。使用OBJECT ENCODING 可查看一个数据库键的值对象编码。</p>
+<p>Redis对象的内存回收采用的是类似JVM垃圾回收的方法之一  引用计数法。</p>
 
           
         
@@ -457,7 +461,7 @@
 
   
   <nav class="pagination">
-    <a class="extend prev" rel="prev" href="/page/14/"><i class="fa fa-angle-left"></i></a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/14/">14</a><span class="page-number current">15</span><a class="page-number" href="/page/16/">16</a><a class="page-number" href="/page/17/">17</a><a class="extend next" rel="next" href="/page/16/"><i class="fa fa-angle-right"></i></a>
+    <a class="extend prev" rel="prev" href="/page/14/"><i class="fa fa-angle-left"></i></a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/14/">14</a><span class="page-number current">15</span><a class="page-number" href="/page/16/">16</a><span class="space">&hellip;</span><a class="page-number" href="/page/18/">18</a><a class="extend next" rel="next" href="/page/16/"><i class="fa fa-angle-right"></i></a>
   </nav>
 
 
@@ -498,7 +502,7 @@
         <nav class="site-state motion-element">
           <div class="site-state-item site-state-posts">
             <a href="/archives">
-              <span class="site-state-item-count">34</span>
+              <span class="site-state-item-count">35</span>
               <span class="site-state-item-name">日志</span>
             </a>
           </div>
@@ -506,7 +510,7 @@
           
             <div class="site-state-item site-state-categories">
               <a href="/categories">
-                <span class="site-state-item-count">8</span>
+                <span class="site-state-item-count">9</span>
                 <span class="site-state-item-name">分类</span>
               </a>
             </div>
@@ -515,7 +519,7 @@
           
             <div class="site-state-item site-state-tags">
               <a href="/tags">
-                <span class="site-state-item-count">14</span>
+                <span class="site-state-item-count">16</span>
                 <span class="site-state-item-name">标签</span>
               </a>
             </div>

@@ -78,22 +78,18 @@
 
 
 
-<meta name="description" content="Redis中每个对象都由一个redisObject结构表示：
-123456789typeof struct redisObject &amp;#123;	//类型	unsigned type : 4;	//编码	unsigned encoding : 4;	//指向底层数据结构的指针	void *ptr;	// . . .&amp;#125; robj;
-type  对象的类型REDIS_STRING 字符串对象">
+<meta name="description" content="Redis中每个对象都由一个redisObject结构表示： 123456789typeof struct redisObject &amp;#123;	//类型	unsigned type : 4;	//编码	unsigned encoding : 4;	//指向底层数据结构的指针	void *ptr;	// . . .&amp;#125; robj; type  对象的类型REDIS_STRING 字符串对象">
+<meta name="keywords" content="Redis">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Redis对象">
 <meta property="og:url" content="http://zhuxinhong.github.io/2015/06/28/Redis设计与实现/Redis对象/index.html">
 <meta property="og:site_name" content="zhuxinhong blog">
-<meta property="og:description" content="Redis中每个对象都由一个redisObject结构表示：
-123456789typeof struct redisObject &amp;#123;	//类型	unsigned type : 4;	//编码	unsigned encoding : 4;	//指向底层数据结构的指针	void *ptr;	// . . .&amp;#125; robj;
-type  对象的类型REDIS_STRING 字符串对象">
+<meta property="og:description" content="Redis中每个对象都由一个redisObject结构表示： 123456789typeof struct redisObject &amp;#123;	//类型	unsigned type : 4;	//编码	unsigned encoding : 4;	//指向底层数据结构的指针	void *ptr;	// . . .&amp;#125; robj; type  对象的类型REDIS_STRING 字符串对象">
+<meta property="og:locale" content="zh-Hans">
 <meta property="og:updated_time" content="2016-06-08T10:28:53.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Redis对象">
-<meta name="twitter:description" content="Redis中每个对象都由一个redisObject结构表示：
-123456789typeof struct redisObject &amp;#123;	//类型	unsigned type : 4;	//编码	unsigned encoding : 4;	//指向底层数据结构的指针	void *ptr;	// . . .&amp;#125; robj;
-type  对象的类型REDIS_STRING 字符串对象">
+<meta name="twitter:description" content="Redis中每个对象都由一个redisObject结构表示： 123456789typeof struct redisObject &amp;#123;	//类型	unsigned type : 4;	//编码	unsigned encoding : 4;	//指向底层数据结构的指针	void *ptr;	// . . .&amp;#125; robj; type  对象的类型REDIS_STRING 字符串对象">
 
 
 
@@ -342,16 +338,16 @@ type  对象的类型REDIS_STRING 字符串对象">
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2015/06/28/Redis设计与实现/Redis哈希对象/" rel="next" title="Redis哈希对象">
-                <i class="fa fa-chevron-left"></i> Redis哈希对象
+              <a href="/2015/06/27/Redis设计与实现/Redis跳跃表/" rel="next" title="Redis跳跃表">
+                <i class="fa fa-chevron-left"></i> Redis跳跃表
               </a>
             
           </div>
 
           <div class="post-nav-prev post-nav-item">
             
-              <a href="/2015/07/01/Redis设计与实现/Redis类型检查和命令多态/" rel="prev" title="Redis类型检查和命令多态">
-                Redis类型检查和命令多态 <i class="fa fa-chevron-right"></i>
+              <a href="/2015/06/28/Redis设计与实现/Redis哈希对象/" rel="prev" title="Redis哈希对象">
+                Redis哈希对象 <i class="fa fa-chevron-right"></i>
               </a>
             
           </div>
@@ -420,7 +416,7 @@ type  对象的类型REDIS_STRING 字符串对象">
         <nav class="site-state motion-element">
           <div class="site-state-item site-state-posts">
             <a href="/archives">
-              <span class="site-state-item-count">34</span>
+              <span class="site-state-item-count">35</span>
               <span class="site-state-item-name">日志</span>
             </a>
           </div>
@@ -428,7 +424,7 @@ type  对象的类型REDIS_STRING 字符串对象">
           
             <div class="site-state-item site-state-categories">
               <a href="/categories">
-                <span class="site-state-item-count">8</span>
+                <span class="site-state-item-count">9</span>
                 <span class="site-state-item-name">分类</span>
               </a>
             </div>
@@ -437,7 +433,7 @@ type  对象的类型REDIS_STRING 字符串对象">
           
             <div class="site-state-item site-state-tags">
               <a href="/tags">
-                <span class="site-state-item-count">14</span>
+                <span class="site-state-item-count">16</span>
                 <span class="site-state-item-name">标签</span>
               </a>
             </div>

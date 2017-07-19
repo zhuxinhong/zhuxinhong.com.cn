@@ -84,6 +84,7 @@
 <meta property="og:url" content="http://zhuxinhong.github.io/page/2/index.html">
 <meta property="og:site_name" content="zhuxinhong blog">
 <meta property="og:description" content="时光如白马，稍纵即逝。术业有专攻，一生做好一件事真的很重要。">
+<meta property="og:locale" content="zh-Hans">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="zhuxinhong blog">
 <meta name="twitter:description" content="时光如白马，稍纵即逝。术业有专攻，一生做好一件事真的很重要。">
@@ -242,6 +243,195 @@
             
               
                 
+                <a class="post-title-link" href="/2017/06/12/编写高质量代码/工程质量/" itemprop="url">
+                  工程质量
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2017-06-12T00:00:00+08:00" content="2017-06-12">
+              2017-06-12
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/编写高质量代码/" itemprop="url" rel="index">
+                    <span itemprop="name">编写高质量代码</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+
+          
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h1 id="开源工具的选择"><a href="#开源工具的选择" class="headerlink" title="开源工具的选择"></a>开源工具的选择</h1><ul>
+<li><p>普适性原则</p>
+<p>确保大部分项目成员对工具都比较熟悉。</p>
+</li>
+<li><p>唯一性原则</p>
+<p>相同的工具只选择一个或一种，不让多种相同或相似职能的工具共存。例如集合工具 Apache Commons 的 collections 包和 Google Guava 的 collections 工具包，在开发前就应该确认下来，不能让两者共存。</p>
+</li>
+<li><p>“大树纳凉”</p>
+<p>选择比较有名的开源组织，比如 Apache、Spring、Google 等。这些开源组织一则具有固定的开发运作风格，二则具有广阔的使用人群。</p>
+</li>
+<li><p>精而专</p>
+<p>我们选择的工具包应该是精而专的，而不是广而多。比如 Spring 框架提供了 Utils 工具包，但在一般情况下不要使用它，因为它不专，Utils 包只是 Spring 中的一个附加功能而已，要用就用 Apache Commons 的 BeanUtils、Long 等工具包。</p>
+</li>
+<li><p>高热度</p>
+<p>热度越高，更新越频繁，使用人群越光，BUG 曝光率越快，修复效率越高，对醒目的稳定性越好。</p>
+</li>
+</ul>
+<h1 id="良好的代码风格"><a href="#良好的代码风格" class="headerlink" title="良好的代码风格"></a>良好的代码风格</h1><ul>
+<li><p>整洁、统一、流行</p>
+<p>推荐 Google 的 Java 编码规范，《代码整洁之道》。</p>
+<ol>
+<li>好的变量命名，类的命名，方法命名。比如 Spring 源码里面命名老长老长的，但很好懂。</li>
+<li>方法入参超过 3 个就该考虑封装成对象。</li>
+</ol>
+</li>
+</ul>
+<ul>
+<li><p>便捷</p>
+<p>推荐 IDE code format。</p>
+</li>
+</ul>
+<h1 id="错误的编码习惯"><a href="#错误的编码习惯" class="headerlink" title="错误的编码习惯"></a>错误的编码习惯</h1><ol>
+<li><p>自由格式的代码</p>
+<p>不同项目，甚至同一个项目不同开发人员的风格也不同。</p>
+</li>
+<li><p>不使用抽象的代码</p>
+<p>抽象的意义不在于编码，而是在于对业务的理解，接口是对业务宏观的描述，而不是实现代码。</p>
+</li>
+<li><p>彰显个性的代码</p>
+<p>新技术只能作为技术的一个方向，不适合立刻投入生产中。项目的运行质量远远高于代码质量。“最小惊诧原则”，意思是说使用最常见的，而不是最新颖的功能。编码时，应寻找最常用的方法来实现。</p>
+</li>
+<li><p>死代码</p>
+<p>可能是忘记删除的代码，也可能是故意保留的类似“到此一游”的签名代码，这些代码按照正常的执行逻辑不可能被执行到。</p>
+</li>
+<li><p>冗余代码</p>
+<p>写了一个实现类，N 天后被废弃了，之后这个类就永久的保留下去了，没人知道它为什么没被删除掉。</p>
+</li>
+<li><p>自以为是的代码</p>
+<p>相信自己编写的工具类，而不是开源工具。宁愿自己写序列化工具，也不选择 kryo 或 protostuff；宁愿自己写日期处理工具，也不选择 Joda 或 date4j。</p>
+</li>
+</ol>
+<h1 id="技术自律"><a href="#技术自律" class="headerlink" title="技术自律"></a>技术自律</h1><ol>
+<li><p>熟悉工具</p>
+<p>常见工具类，例如 Apache Common， Google Guava。</p>
+</li>
+<li><p>坚持重构</p>
+<p>不要相信一次就能写出优秀的代码，这不现实，任何优秀的代码、算法都是经过多次重构磨炼的。</p>
+</li>
+<li><p>多写文档</p>
+<p>不仅仅是为了后续的参与人员，同时也为了整理自己的思维。</p>
+</li>
+<li><p>保持程序简单</p>
+<p>一个项目不要保持多个版本，即使有分支也必须定义出项目合并的条件，或时间约束或目标约束，不可任由版本扩散。</p>
+</li>
+<li><p>不重复造轮子</p>
+<p>在项目中使用已经成熟的工具或框架，而不是自己编写。但如果想共享一个新的框架，尽管去重复发明轮子，它不是以交付为目的，耳塞以技术研究为目的。</p>
+</li>
+<li><p>“剽窃”不可耻</p>
+<p>多看开源代码，学习一下人家的编码方式。</p>
+</li>
+<li><p>分享</p>
+<p>把自己的代码分享出去收获的不仅仅是赞许，还有自己能力的提升。</p>
+</li>
+<li><p>刨根问底</p>
+<p>”哦，这个问题加上这个参数就可以解决了”—-这不是解决问题的办法，在答案之后加上“是因为。。。”，这才是解决了问题。</p>
+</li>
+</ol>
+
+          
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
                 <a class="post-title-link" href="/2017/06/11/编写高质量代码/数组和集合/" itemprop="url">
                   数组和集合
                 </a>
@@ -370,142 +560,11 @@
 
 
     
-      
-
-  
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-            
-            
-              
-                
-                <a class="post-title-link" href="/2017/06/03/编写高质量代码/字符串/" itemprop="url">
-                  字符串
-                </a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            <span class="post-meta-item-icon">
-              <i class="fa fa-calendar-o"></i>
-            </span>
-            <span class="post-meta-item-text">发表于</span>
-            <time itemprop="dateCreated" datetime="2017-06-03T00:00:00+08:00" content="2017-06-03">
-              2017-06-03
-            </time>
-          </span>
-
-          
-            <span class="post-category" >
-              &nbsp; | &nbsp;
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-              
-                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
-                  <a href="/categories/编写高质量代码/" itemprop="url" rel="index">
-                    <span itemprop="name">编写高质量代码</span>
-                  </a>
-                </span>
-
-                
-                
-
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-
-          
-          
-
-          
-        </div>
-      </header>
-    
-
-
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <ul>
-<li><a href="#字符串拼接方法">字符串拼接方法</a></li>
-</ul>
-<h3 id="字符串拼接方法"><a href="#字符串拼接方法" class="headerlink" title="字符串拼接方法"></a>字符串拼接方法</h3><p>对一个字符串进行拼接有三种方法：加号、concat 及 StringBuilder （或 StringBuffer）的 append 方法，这三者之间有什么区别吗？</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">str += “c”;</span><br><span class="line">str = str.concat(<span class="string">"c"</span>);</span><br></pre></td></tr></table></figure>
-<p>上面两种不同字符串拼接方式、循环5万次后检查执行时间，加号方式执行时间为 2000ms，而 concat 方法执行时间为 685ms，时间相差一倍，如果使用 StringBuilder，执行时间 7ms。从这个试验中可以看出 append 方法最快，concat 其次，加号最慢。</p>
-<h5 id="加号方法"><a href="#加号方法" class="headerlink" title="加号方法"></a>加号方法</h5><p>编译器对字符串的加号做了优化，它会使用 StringBuilder 的 append 方法追加，讲道理它的执行时间也应该在 10ms 以内，不过它最终是通过 toString 方法转换成 String 字符串的，例子中的代码与如下代码相同：</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">str = <span class="keyword">new</span> StringBuilder(str).append(<span class="string">"c"</span>).toString();</span><br></pre></td></tr></table></figure>
-<p>这与纯粹使用 StringBuilder 的 append 方法是不同的：</p>
-<ol>
-<li>每次循环都会创建一个 StringBuilder 对象</li>
-<li>每次执行完毕都要调用 toString 方法将其转换为字符串</li>
-</ol>
-<h5 id="concat-方法"><a href="#concat-方法" class="headerlink" title="concat 方法"></a>concat 方法</h5><p>我们看一下 concat 源码实现：</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> String <span class="title">concat</span><span class="params">(String str)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">int</span> otherLen = str.length();</span><br><span class="line">        <span class="keyword">if</span> (otherLen == <span class="number">0</span>) &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">this</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">int</span> len = value.length;</span><br><span class="line">        <span class="keyword">char</span> buf[] = Arrays.copyOf(value, len + otherLen);</span><br><span class="line">        str.getChars(buf, len);</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> String(buf, <span class="keyword">true</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>整体看上去是一个数组拷贝，虽然在内存中处理都是原子性操作，速度非常快。不过最后的 return 语句，每次 concat 操作都会新创建一个 String 对象，这就是 concat 速度慢下来的真正原因。</p>
-<h5 id="append-方法"><a href="#append-方法" class="headerlink" title="append 方法"></a>append 方法</h5><p>StringBuilder 的 append 方法直接由父类 AbstractStringBuilder 实现，代码如下：</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> AbstractStringBuilder <span class="title">append</span><span class="params">(String str)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (str == <span class="keyword">null</span>)</span><br><span class="line">        <span class="keyword">return</span> appendNull();</span><br><span class="line">    <span class="keyword">int</span> len = str.length();</span><br><span class="line">    ensureCapacityInternal(count + len);</span><br><span class="line">    str.getChars(<span class="number">0</span>, len, value, count);</span><br><span class="line">    count += len;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">this</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>整个 append 方法都在做字符数组处理，加上后数组拷贝，这些都是基本的数据处理，没有新建任何对象，所以速度也就最快了。</p>
-
-          
-        
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
   </section>
 
   
   <nav class="pagination">
-    <a class="extend prev" rel="prev" href="/"><i class="fa fa-angle-left"></i></a><a class="page-number" href="/">1</a><span class="page-number current">2</span><a class="page-number" href="/page/3/">3</a><span class="space">&hellip;</span><a class="page-number" href="/page/17/">17</a><a class="extend next" rel="next" href="/page/3/"><i class="fa fa-angle-right"></i></a>
+    <a class="extend prev" rel="prev" href="/"><i class="fa fa-angle-left"></i></a><a class="page-number" href="/">1</a><span class="page-number current">2</span><a class="page-number" href="/page/3/">3</a><span class="space">&hellip;</span><a class="page-number" href="/page/18/">18</a><a class="extend next" rel="next" href="/page/3/"><i class="fa fa-angle-right"></i></a>
   </nav>
 
 
@@ -546,7 +605,7 @@
         <nav class="site-state motion-element">
           <div class="site-state-item site-state-posts">
             <a href="/archives">
-              <span class="site-state-item-count">34</span>
+              <span class="site-state-item-count">35</span>
               <span class="site-state-item-name">日志</span>
             </a>
           </div>
@@ -554,7 +613,7 @@
           
             <div class="site-state-item site-state-categories">
               <a href="/categories">
-                <span class="site-state-item-count">8</span>
+                <span class="site-state-item-count">9</span>
                 <span class="site-state-item-name">分类</span>
               </a>
             </div>
@@ -563,7 +622,7 @@
           
             <div class="site-state-item site-state-tags">
               <a href="/tags">
-                <span class="site-state-item-count">14</span>
+                <span class="site-state-item-count">16</span>
                 <span class="site-state-item-name">标签</span>
               </a>
             </div>

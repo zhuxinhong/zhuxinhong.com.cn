@@ -78,28 +78,18 @@
 
 
 
-<meta name="description" content="Redis命令请求的执行过程：
-1.发送命令请求客户端将命令请求转换成协议格式，通过连接到服务器的套接字发送给服务器。
-2.读取命令请求1）读取套接字协议格式的请求，保存到客户端状态的缓冲输入区。2）分析缓冲区命令，提取命令参数及个数，分别保存到客户端状态的argv属性和argc属性。3）调用命令执行器。
-3.命令执行器
-1）查找实现命令：根据客户端状态的argv[0]参数，查找参数指定的命令，保">
+<meta name="description" content="Redis命令请求的执行过程： 1.发送命令请求客户端将命令请求转换成协议格式，通过连接到服务器的套接字发送给服务器。 2.读取命令请求1）读取套接字协议格式的请求，保存到客户端状态的缓冲输入区。2）分析缓冲区命令，提取命令参数及个数，分别保存到客户端状态的argv属性和argc属性。3）调用命令执行器。 3.命令执行器 1）查找实现命令：根据客户端状态的argv[0]参数，查找参数指定的命令，保">
+<meta name="keywords" content="Redis">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Redis服务器单机数据库的实现">
 <meta property="og:url" content="http://zhuxinhong.github.io/2015/07/22/Redis设计与实现/Redis服务器单机数据库的实现/index.html">
 <meta property="og:site_name" content="zhuxinhong blog">
-<meta property="og:description" content="Redis命令请求的执行过程：
-1.发送命令请求客户端将命令请求转换成协议格式，通过连接到服务器的套接字发送给服务器。
-2.读取命令请求1）读取套接字协议格式的请求，保存到客户端状态的缓冲输入区。2）分析缓冲区命令，提取命令参数及个数，分别保存到客户端状态的argv属性和argc属性。3）调用命令执行器。
-3.命令执行器
-1）查找实现命令：根据客户端状态的argv[0]参数，查找参数指定的命令，保">
+<meta property="og:description" content="Redis命令请求的执行过程： 1.发送命令请求客户端将命令请求转换成协议格式，通过连接到服务器的套接字发送给服务器。 2.读取命令请求1）读取套接字协议格式的请求，保存到客户端状态的缓冲输入区。2）分析缓冲区命令，提取命令参数及个数，分别保存到客户端状态的argv属性和argc属性。3）调用命令执行器。 3.命令执行器 1）查找实现命令：根据客户端状态的argv[0]参数，查找参数指定的命令，保">
+<meta property="og:locale" content="zh-Hans">
 <meta property="og:updated_time" content="2016-06-08T10:28:53.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Redis服务器单机数据库的实现">
-<meta name="twitter:description" content="Redis命令请求的执行过程：
-1.发送命令请求客户端将命令请求转换成协议格式，通过连接到服务器的套接字发送给服务器。
-2.读取命令请求1）读取套接字协议格式的请求，保存到客户端状态的缓冲输入区。2）分析缓冲区命令，提取命令参数及个数，分别保存到客户端状态的argv属性和argc属性。3）调用命令执行器。
-3.命令执行器
-1）查找实现命令：根据客户端状态的argv[0]参数，查找参数指定的命令，保">
+<meta name="twitter:description" content="Redis命令请求的执行过程： 1.发送命令请求客户端将命令请求转换成协议格式，通过连接到服务器的套接字发送给服务器。 2.读取命令请求1）读取套接字协议格式的请求，保存到客户端状态的缓冲输入区。2）分析缓冲区命令，提取命令参数及个数，分别保存到客户端状态的argv属性和argc属性。3）调用命令执行器。 3.命令执行器 1）查找实现命令：根据客户端状态的argv[0]参数，查找参数指定的命令，保">
 
 
 
@@ -441,7 +431,7 @@
         <nav class="site-state motion-element">
           <div class="site-state-item site-state-posts">
             <a href="/archives">
-              <span class="site-state-item-count">34</span>
+              <span class="site-state-item-count">35</span>
               <span class="site-state-item-name">日志</span>
             </a>
           </div>
@@ -449,7 +439,7 @@
           
             <div class="site-state-item site-state-categories">
               <a href="/categories">
-                <span class="site-state-item-count">8</span>
+                <span class="site-state-item-count">9</span>
                 <span class="site-state-item-name">分类</span>
               </a>
             </div>
@@ -458,7 +448,7 @@
           
             <div class="site-state-item site-state-tags">
               <a href="/tags">
-                <span class="site-state-item-count">14</span>
+                <span class="site-state-item-count">16</span>
                 <span class="site-state-item-name">标签</span>
               </a>
             </div>

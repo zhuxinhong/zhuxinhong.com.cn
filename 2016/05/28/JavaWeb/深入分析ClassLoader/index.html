@@ -78,25 +78,18 @@
 
 
 
-<meta name="description" content="ClassLoader除了能将Class加载到JVM中之外，还能审查每个类该由谁加载。它是一种父优先的等级加载机制。
-ClassLoader等级加载机制
-Bootstrap ClassLoader，主要加载JVM自身工作需要的类，完全由JVM自己控制，外部无法访问，这个ClassLoader不遵守等级加载规则。
-ExtClassLoader，不是JVM亲自实现。服务目标在System.getPro">
+<meta name="description" content="ClassLoader除了能将Class加载到JVM中之外，还能审查每个类该由谁加载。它是一种父优先的等级加载机制。 ClassLoader等级加载机制 Bootstrap ClassLoader，主要加载JVM自身工作需要的类，完全由JVM自己控制，外部无法访问，这个ClassLoader不遵守等级加载规则。 ExtClassLoader，不是JVM亲自实现。服务目标在System.getPro">
+<meta name="keywords" content="Java,JVM">
 <meta property="og:type" content="article">
 <meta property="og:title" content="深入分析ClassLoader">
 <meta property="og:url" content="http://zhuxinhong.github.io/2016/05/28/JavaWeb/深入分析ClassLoader/index.html">
 <meta property="og:site_name" content="zhuxinhong blog">
-<meta property="og:description" content="ClassLoader除了能将Class加载到JVM中之外，还能审查每个类该由谁加载。它是一种父优先的等级加载机制。
-ClassLoader等级加载机制
-Bootstrap ClassLoader，主要加载JVM自身工作需要的类，完全由JVM自己控制，外部无法访问，这个ClassLoader不遵守等级加载规则。
-ExtClassLoader，不是JVM亲自实现。服务目标在System.getPro">
+<meta property="og:description" content="ClassLoader除了能将Class加载到JVM中之外，还能审查每个类该由谁加载。它是一种父优先的等级加载机制。 ClassLoader等级加载机制 Bootstrap ClassLoader，主要加载JVM自身工作需要的类，完全由JVM自己控制，外部无法访问，这个ClassLoader不遵守等级加载规则。 ExtClassLoader，不是JVM亲自实现。服务目标在System.getPro">
+<meta property="og:locale" content="zh-Hans">
 <meta property="og:updated_time" content="2016-06-08T10:28:53.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="深入分析ClassLoader">
-<meta name="twitter:description" content="ClassLoader除了能将Class加载到JVM中之外，还能审查每个类该由谁加载。它是一种父优先的等级加载机制。
-ClassLoader等级加载机制
-Bootstrap ClassLoader，主要加载JVM自身工作需要的类，完全由JVM自己控制，外部无法访问，这个ClassLoader不遵守等级加载规则。
-ExtClassLoader，不是JVM亲自实现。服务目标在System.getPro">
+<meta name="twitter:description" content="ClassLoader除了能将Class加载到JVM中之外，还能审查每个类该由谁加载。它是一种父优先的等级加载机制。 ClassLoader等级加载机制 Bootstrap ClassLoader，主要加载JVM自身工作需要的类，完全由JVM自己控制，外部无法访问，这个ClassLoader不遵守等级加载规则。 ExtClassLoader，不是JVM亲自实现。服务目标在System.getPro">
 
 
 
@@ -451,7 +444,7 @@ ExtClassLoader，不是JVM亲自实现。服务目标在System.getPro">
         <nav class="site-state motion-element">
           <div class="site-state-item site-state-posts">
             <a href="/archives">
-              <span class="site-state-item-count">34</span>
+              <span class="site-state-item-count">35</span>
               <span class="site-state-item-name">日志</span>
             </a>
           </div>
@@ -459,7 +452,7 @@ ExtClassLoader，不是JVM亲自实现。服务目标在System.getPro">
           
             <div class="site-state-item site-state-categories">
               <a href="/categories">
-                <span class="site-state-item-count">8</span>
+                <span class="site-state-item-count">9</span>
                 <span class="site-state-item-name">分类</span>
               </a>
             </div>
@@ -468,7 +461,7 @@ ExtClassLoader，不是JVM亲自实现。服务目标在System.getPro">
           
             <div class="site-state-item site-state-tags">
               <a href="/tags">
-                <span class="site-state-item-count">14</span>
+                <span class="site-state-item-count">16</span>
                 <span class="site-state-item-name">标签</span>
               </a>
             </div>

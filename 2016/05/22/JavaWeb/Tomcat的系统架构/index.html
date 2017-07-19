@@ -78,34 +78,21 @@
 
 
 
-<meta name="description" content="Tomcat总体结构Tomcat有2个核心组件：  
-
-Connector  
-Container  
-
-其中Connector组件可以被替换，一个Container可以选择对用多个Connector。多个Connector和一个Container形成一个Service。有了Service就可以对外提供服务了。但Service需要一个生存环境，这时就非Server莫属了。所以整个Tomcat的生命">
+<meta name="description" content="Tomcat总体结构Tomcat有2个核心组件：    Connector   Container    其中Connector组件可以被替换，一个Container可以选择对用多个Connector。多个Connector和一个Container形成一个Service。有了Service就可以对外提供服务了。但Service需要一个生存环境，这时就非Server莫属了。所以整个Tomcat的生命">
+<meta name="keywords" content="Java,Tomcat">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Tomcat系统架构">
 <meta property="og:url" content="http://zhuxinhong.github.io/2016/05/22/JavaWeb/Tomcat的系统架构/index.html">
 <meta property="og:site_name" content="zhuxinhong blog">
-<meta property="og:description" content="Tomcat总体结构Tomcat有2个核心组件：  
-
-Connector  
-Container  
-
-其中Connector组件可以被替换，一个Container可以选择对用多个Connector。多个Connector和一个Container形成一个Service。有了Service就可以对外提供服务了。但Service需要一个生存环境，这时就非Server莫属了。所以整个Tomcat的生命">
+<meta property="og:description" content="Tomcat总体结构Tomcat有2个核心组件：    Connector   Container    其中Connector组件可以被替换，一个Container可以选择对用多个Connector。多个Connector和一个Container形成一个Service。有了Service就可以对外提供服务了。但Service需要一个生存环境，这时就非Server莫属了。所以整个Tomcat的生命">
+<meta property="og:locale" content="zh-Hans">
 <meta property="og:image" content="http://o7s628cn2.bkt.clouddn.com/image/javaweb/Service.png">
 <meta property="og:image" content="http://o7s628cn2.bkt.clouddn.com/image/javaweb/StandardService.png">
 <meta property="og:image" content="http://o7s628cn2.bkt.clouddn.com/image/javaweb/Server.png">
 <meta property="og:updated_time" content="2016-09-05T02:02:26.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Tomcat系统架构">
-<meta name="twitter:description" content="Tomcat总体结构Tomcat有2个核心组件：  
-
-Connector  
-Container  
-
-其中Connector组件可以被替换，一个Container可以选择对用多个Connector。多个Connector和一个Container形成一个Service。有了Service就可以对外提供服务了。但Service需要一个生存环境，这时就非Server莫属了。所以整个Tomcat的生命">
+<meta name="twitter:description" content="Tomcat总体结构Tomcat有2个核心组件：    Connector   Container    其中Connector组件可以被替换，一个Container可以选择对用多个Connector。多个Connector和一个Container形成一个Service。有了Service就可以对外提供服务了。但Service需要一个生存环境，这时就非Server莫属了。所以整个Tomcat的生命">
 <meta name="twitter:image" content="http://o7s628cn2.bkt.clouddn.com/image/javaweb/Service.png">
 
 
@@ -469,7 +456,7 @@ Container
         <nav class="site-state motion-element">
           <div class="site-state-item site-state-posts">
             <a href="/archives">
-              <span class="site-state-item-count">34</span>
+              <span class="site-state-item-count">35</span>
               <span class="site-state-item-name">日志</span>
             </a>
           </div>
@@ -477,7 +464,7 @@ Container
           
             <div class="site-state-item site-state-categories">
               <a href="/categories">
-                <span class="site-state-item-count">8</span>
+                <span class="site-state-item-count">9</span>
                 <span class="site-state-item-name">分类</span>
               </a>
             </div>
@@ -486,7 +473,7 @@ Container
           
             <div class="site-state-item site-state-tags">
               <a href="/tags">
-                <span class="site-state-item-count">14</span>
+                <span class="site-state-item-count">16</span>
                 <span class="site-state-item-name">标签</span>
               </a>
             </div>

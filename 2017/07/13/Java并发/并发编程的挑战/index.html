@@ -78,22 +78,18 @@
 
 
 
-<meta name="description" content="并发编程的挑战与实现挑战并发编程是为了让程序更快，与此同时会面临非常多的挑战，接下来会介绍几种问题的解决方法。
-上下文切换单核处理器也支持多线程执行代码，CPU通过给每个线程分配CPU时间片来实现这个机制。时间片是CPU分配给各个线程的时间，因为时间片非常短，所以CPU通过不停地切换线程执行，让我们感觉多个线程是同时执行。
-CPU通过时间片分配算法来循环执行任务，在切换前会保存上一个任务的状态，以">
+<meta name="description" content="并发编程的挑战与实现挑战并发编程是为了让程序更快，与此同时会面临非常多的挑战，接下来会介绍几种问题的解决方法。 上下文切换单核处理器也支持多线程执行代码，CPU通过给每个线程分配CPU时间片来实现这个机制。时间片是CPU分配给各个线程的时间，因为时间片非常短，所以CPU通过不停地切换线程执行，让我们感觉多个线程是同时执行。 CPU通过时间片分配算法来循环执行任务，在切换前会保存上一个任务的状态，以">
+<meta name="keywords" content="Java 并发">
 <meta property="og:type" content="article">
 <meta property="og:title" content="并发编程的挑战与底层实现原理">
 <meta property="og:url" content="http://zhuxinhong.github.io/2017/07/13/Java并发/并发编程的挑战/index.html">
 <meta property="og:site_name" content="zhuxinhong blog">
-<meta property="og:description" content="并发编程的挑战与实现挑战并发编程是为了让程序更快，与此同时会面临非常多的挑战，接下来会介绍几种问题的解决方法。
-上下文切换单核处理器也支持多线程执行代码，CPU通过给每个线程分配CPU时间片来实现这个机制。时间片是CPU分配给各个线程的时间，因为时间片非常短，所以CPU通过不停地切换线程执行，让我们感觉多个线程是同时执行。
-CPU通过时间片分配算法来循环执行任务，在切换前会保存上一个任务的状态，以">
+<meta property="og:description" content="并发编程的挑战与实现挑战并发编程是为了让程序更快，与此同时会面临非常多的挑战，接下来会介绍几种问题的解决方法。 上下文切换单核处理器也支持多线程执行代码，CPU通过给每个线程分配CPU时间片来实现这个机制。时间片是CPU分配给各个线程的时间，因为时间片非常短，所以CPU通过不停地切换线程执行，让我们感觉多个线程是同时执行。 CPU通过时间片分配算法来循环执行任务，在切换前会保存上一个任务的状态，以">
+<meta property="og:locale" content="zh-Hans">
 <meta property="og:updated_time" content="2017-07-15T09:17:47.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="并发编程的挑战与底层实现原理">
-<meta name="twitter:description" content="并发编程的挑战与实现挑战并发编程是为了让程序更快，与此同时会面临非常多的挑战，接下来会介绍几种问题的解决方法。
-上下文切换单核处理器也支持多线程执行代码，CPU通过给每个线程分配CPU时间片来实现这个机制。时间片是CPU分配给各个线程的时间，因为时间片非常短，所以CPU通过不停地切换线程执行，让我们感觉多个线程是同时执行。
-CPU通过时间片分配算法来循环执行任务，在切换前会保存上一个任务的状态，以">
+<meta name="twitter:description" content="并发编程的挑战与实现挑战并发编程是为了让程序更快，与此同时会面临非常多的挑战，接下来会介绍几种问题的解决方法。 上下文切换单核处理器也支持多线程执行代码，CPU通过给每个线程分配CPU时间片来实现这个机制。时间片是CPU分配给各个线程的时间，因为时间片非常短，所以CPU通过不停地切换线程执行，让我们感觉多个线程是同时执行。 CPU通过时间片分配算法来循环执行任务，在切换前会保存上一个任务的状态，以">
 
 
 
@@ -476,6 +472,10 @@ CPU通过时间片分配算法来循环执行任务，在切换前会保存上�
 
           <div class="post-nav-prev post-nav-item">
             
+              <a href="/2017/07/16/SpringCloud/Hystrix/" rel="prev" title="Hystrix之hystrix-javanica">
+                Hystrix之hystrix-javanica <i class="fa fa-chevron-right"></i>
+              </a>
+            
           </div>
         </div>
       
@@ -542,7 +542,7 @@ CPU通过时间片分配算法来循环执行任务，在切换前会保存上�
         <nav class="site-state motion-element">
           <div class="site-state-item site-state-posts">
             <a href="/archives">
-              <span class="site-state-item-count">34</span>
+              <span class="site-state-item-count">35</span>
               <span class="site-state-item-name">日志</span>
             </a>
           </div>
@@ -550,7 +550,7 @@ CPU通过时间片分配算法来循环执行任务，在切换前会保存上�
           
             <div class="site-state-item site-state-categories">
               <a href="/categories">
-                <span class="site-state-item-count">8</span>
+                <span class="site-state-item-count">9</span>
                 <span class="site-state-item-name">分类</span>
               </a>
             </div>
@@ -559,7 +559,7 @@ CPU通过时间片分配算法来循环执行任务，在切换前会保存上�
           
             <div class="site-state-item site-state-tags">
               <a href="/tags">
-                <span class="site-state-item-count">14</span>
+                <span class="site-state-item-count">16</span>
                 <span class="site-state-item-name">标签</span>
               </a>
             </div>
