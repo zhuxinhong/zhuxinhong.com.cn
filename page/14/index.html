@@ -243,6 +243,123 @@
             
               
                 
+                <a class="post-title-link" href="/2015/07/01/Redis设计与实现/Redis类型检查和命令多态/" itemprop="url">
+                  Redis类型检查和命令多态
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2015-07-01T00:00:00+08:00" content="2015-07-01">
+              2015-07-01
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/Redis设计与实现/" itemprop="url" rel="index">
+                    <span itemprop="name">Redis设计与实现</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+
+          
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>Redis中用于操作键的命令基本可以分为2类。</p>
+<p>其中一种是可以对任何类型的键执行，比如DEL,EXPIRE,RENAME,TYPE,OBJECT,TTL等命令。</p>
+<p>另一种只能对特定的键执行，比如：<br>SET,GET,APPEND,STRLEN 等仅限用于字符串的键类型；<br>HDEL,HSET,HGET,HLEN 等仅限用于哈希键类型；<br>RPUSH,LPOP,LINSERT,LLEN 等仅限用于列表键类型；<br>SADD,SPOP,SINTER,SCARD 等仅限用于集合键类型；<br>ZADD,ZCARD,ZRANK,ZSCORE 等仅限用于有序集合键类型；</p>
+<p>在执行一个类型特定命令之前，Redis会先检查输入键类型是否正确，然后再决定是否执行命令。<br>如果键名称正确，再检查键对象是否是执行命令所需的类型，不是的话就返回一个类型错误。</p>
+<p>多态命令的实现除了检查键类型和命令是否匹配外，还会检查键的至对象所使用的编码。例如，LLEN命令。<br>如果列表对象编码为ziplist,，说明对象为压缩列表，程序使用ziplistlen作为底层实现返回列表长度。<br>如果列表对象编码为linkedlist，说明对象为双端链表，程序使用listLength作为底层实现返回链表长度。</p>
+
+          
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
                 <a class="post-title-link" href="/2015/07/01/Redis设计与实现/Redis中的数据库/" itemprop="url">
                   Redis中的数据库
                 </a>
@@ -324,123 +441,6 @@
 <p>当一个key被设为过期后，redisDb中键空间字典和过期字典中的键重复，并不会出现重复对象，2个key指向的都是同一个对象。</p>
 <p>key过期删除策略：<br>1.定时删除：设置过期键的时候，创意一个定时器；<br>2.惰性删除：放任过期键不管，每次访问时，判断是否过期，如过期则删除；<br>3.定期删除：每隔一段时间，redis会扫描过期键，发现过期则删除；</p>
 <p>Redis实际使用的是惰性删除和定期删除2种配合使用。<br>定期删除函数执行步骤：<br>1.从一定量的数据库中去除一定数量的随机键检查，删除其中的过期键；<br>2.全局变量current_db会记录当前函数检查的进度，并在下一次调用时，接着上一次的进度处理。<br>3.随着函数不断被执行，所有过期键都会被检查到，这时将current_db变量重置为0，再开始新一轮的检查。</p>
-
-          
-        
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
-      
-
-  
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-            
-            
-              
-                
-                <a class="post-title-link" href="/2015/07/01/Redis设计与实现/Redis类型检查和命令多态/" itemprop="url">
-                  Redis类型检查和命令多态
-                </a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            <span class="post-meta-item-icon">
-              <i class="fa fa-calendar-o"></i>
-            </span>
-            <span class="post-meta-item-text">发表于</span>
-            <time itemprop="dateCreated" datetime="2015-07-01T00:00:00+08:00" content="2015-07-01">
-              2015-07-01
-            </time>
-          </span>
-
-          
-            <span class="post-category" >
-              &nbsp; | &nbsp;
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-              
-                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
-                  <a href="/categories/Redis设计与实现/" itemprop="url" rel="index">
-                    <span itemprop="name">Redis设计与实现</span>
-                  </a>
-                </span>
-
-                
-                
-
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-
-          
-          
-
-          
-        </div>
-      </header>
-    
-
-
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>Redis中用于操作键的命令基本可以分为2类。</p>
-<p>其中一种是可以对任何类型的键执行，比如DEL,EXPIRE,RENAME,TYPE,OBJECT,TTL等命令。</p>
-<p>另一种只能对特定的键执行，比如：<br>SET,GET,APPEND,STRLEN 等仅限用于字符串的键类型；<br>HDEL,HSET,HGET,HLEN 等仅限用于哈希键类型；<br>RPUSH,LPOP,LINSERT,LLEN 等仅限用于列表键类型；<br>SADD,SPOP,SINTER,SCARD 等仅限用于集合键类型；<br>ZADD,ZCARD,ZRANK,ZSCORE 等仅限用于有序集合键类型；</p>
-<p>在执行一个类型特定命令之前，Redis会先检查输入键类型是否正确，然后再决定是否执行命令。<br>如果键名称正确，再检查键对象是否是执行命令所需的类型，不是的话就返回一个类型错误。</p>
-<p>多态命令的实现除了检查键类型和命令是否匹配外，还会检查键的至对象所使用的编码。例如，LLEN命令。<br>如果列表对象编码为ziplist,，说明对象为压缩列表，程序使用ziplistlen作为底层实现返回列表长度。<br>如果列表对象编码为linkedlist，说明对象为双端链表，程序使用listLength作为底层实现返回链表长度。</p>
 
           
         

@@ -78,18 +78,18 @@
 
 
 
-<meta name="description" content="HotSpot JVM 主要参数解释参数使用方式 -XX: +\ 开启option参数 -XX: -\ 关闭option参数 -XX: \=\ 将option参数值设为value  查看默认参数1-XX:+PrintFlagsFinal and -XX:+PrintFlagsInitial 1java -server -XX:+PrintFlagsFinal 内存管理参数   参数 默认值 说明">
+<meta name="description" content="HotSpot JVM 主要参数解释参数使用方式 -XX: +\ 开启option参数 -XX: -\ 关闭option参数 -XX: \=\ 将option参数值设为value  查看默认参数-XX:+PrintFlagsFinal-XX:+PrintFlagsInitial 1java -server -XX:+PrintFlagsFinal 内存管理参数   参数 默认值 说明     Xm">
 <meta name="keywords" content="Java,JVM">
 <meta property="og:type" content="article">
 <meta property="og:title" content="HotSpot 虚拟机主要参数">
 <meta property="og:url" content="http://zhuxinhong.github.io/2017/11/14/JavaWeb/JVM参数/index.html">
 <meta property="og:site_name" content="zhuxinhong blog">
-<meta property="og:description" content="HotSpot JVM 主要参数解释参数使用方式 -XX: +\ 开启option参数 -XX: -\ 关闭option参数 -XX: \=\ 将option参数值设为value  查看默认参数1-XX:+PrintFlagsFinal and -XX:+PrintFlagsInitial 1java -server -XX:+PrintFlagsFinal 内存管理参数   参数 默认值 说明">
+<meta property="og:description" content="HotSpot JVM 主要参数解释参数使用方式 -XX: +\ 开启option参数 -XX: -\ 关闭option参数 -XX: \=\ 将option参数值设为value  查看默认参数-XX:+PrintFlagsFinal-XX:+PrintFlagsInitial 1java -server -XX:+PrintFlagsFinal 内存管理参数   参数 默认值 说明     Xm">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2017-11-17T02:59:42.000Z">
+<meta property="og:updated_time" content="2017-11-17T07:28:13.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="HotSpot 虚拟机主要参数">
-<meta name="twitter:description" content="HotSpot JVM 主要参数解释参数使用方式 -XX: +\ 开启option参数 -XX: -\ 关闭option参数 -XX: \=\ 将option参数值设为value  查看默认参数1-XX:+PrintFlagsFinal and -XX:+PrintFlagsInitial 1java -server -XX:+PrintFlagsFinal 内存管理参数   参数 默认值 说明">
+<meta name="twitter:description" content="HotSpot JVM 主要参数解释参数使用方式 -XX: +\ 开启option参数 -XX: -\ 关闭option参数 -XX: \=\ 将option参数值设为value  查看默认参数-XX:+PrintFlagsFinal-XX:+PrintFlagsInitial 1java -server -XX:+PrintFlagsFinal 内存管理参数   参数 默认值 说明     Xm">
 
 
 
@@ -306,7 +306,7 @@
 <li>-XX: -\<option> 关闭option参数</option></li>
 <li>-XX: \<option>=\<value> 将option参数值设为value</value></option></li>
 </ul>
-<h2 id="查看默认参数"><a href="#查看默认参数" class="headerlink" title="查看默认参数"></a>查看默认参数</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">-XX:+PrintFlagsFinal and -XX:+PrintFlagsInitial</div></pre></td></tr></table></figure>
+<h2 id="查看默认参数"><a href="#查看默认参数" class="headerlink" title="查看默认参数"></a>查看默认参数</h2><p>-XX:+PrintFlagsFinal<br>-XX:+PrintFlagsInitial</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">java -server -XX:+PrintFlagsFinal</div></pre></td></tr></table></figure>
 <h2 id="内存管理参数"><a href="#内存管理参数" class="headerlink" title="内存管理参数"></a>内存管理参数</h2><table>
 <thead>
@@ -317,6 +317,16 @@
 </tr>
 </thead>
 <tbody>
+<tr>
+<td style="text-align:center">Xms</td>
+<td style="text-align:center"></td>
+<td style="text-align:center">InitialHeapSize，初始化堆大小</td>
+</tr>
+<tr>
+<td style="text-align:center">Xmx</td>
+<td style="text-align:center"></td>
+<td style="text-align:center">MaxHeapSize，最大堆大小</td>
+</tr>
 <tr>
 <td style="text-align:center">DisableExplicitGC</td>
 <td style="text-align:center">关闭</td>
@@ -346,6 +356,36 @@
 <td style="text-align:center">UseParellelGC</td>
 <td style="text-align:center">Server模式默认开启，其它模式关闭</td>
 <td style="text-align:center">在Server模式下默认值，打开后使用 Parallel Scavenge + Serial Old 收集器组合</td>
+</tr>
+<tr>
+<td style="text-align:center">UseParellelOldGC</td>
+<td style="text-align:center"></td>
+<td style="text-align:center">打开后，使用 Parallel Scavenge + Parallel Old 收集器组合进行 GC</td>
+</tr>
+<tr>
+<td style="text-align:center">SurvivorRatio</td>
+<td style="text-align:center">8</td>
+<td style="text-align:center">新生代中 Eden 与 Survivor 容量比值</td>
+</tr>
+<tr>
+<td style="text-align:center">PretenureSizeThreshold</td>
+<td style="text-align:center"></td>
+<td style="text-align:center">直接晋升到老年代的对象大小</td>
+</tr>
+<tr>
+<td style="text-align:center">MaxTenuringThreshold</td>
+<td style="text-align:center"></td>
+<td style="text-align:center">晋升到老年代的对象年龄</td>
+</tr>
+<tr>
+<td style="text-align:center">UseAdaptiveSizePolicy</td>
+<td style="text-align:center"></td>
+<td style="text-align:center">动态调整堆中各个区域大小以及进入老年代的年龄</td>
+</tr>
+<tr>
+<td style="text-align:center">HandlePromotionFailure</td>
+<td style="text-align:center"></td>
+<td style="text-align:center">是否允许分配担保失败，即老年代剩余空间不足以应付新生代整个Eden和Survivor区所有对象都存活的情况</td>
 </tr>
 <tr>
 <td style="text-align:center">ParallelGCThreads</td>
@@ -385,8 +425,8 @@
 </tr>
 <tr>
 <td style="text-align:center">CMSInitiatingOccupancyFraction</td>
-<td style="text-align:center"></td>
-<td style="text-align:center"></td>
+<td style="text-align:center">68%</td>
+<td style="text-align:center">设置 CMS 在老年代空间被使用多少后触发GC</td>
 </tr>
 <tr>
 <td style="text-align:center">UseCMSInitiatingOccupancyOnly</td>
@@ -408,9 +448,19 @@
 <td style="text-align:center"></td>
 <td style="text-align:center">当有系统 GC 调用时，永久代也被包括进 CMS 垃圾回收范围</td>
 </tr>
+<tr>
+<td style="text-align:center">UseCMSCompactAtFullCollection</td>
+<td style="text-align:center">true</td>
+<td style="text-align:center">设置 CMS 在完成 GC 后是否进行一次内存碎片整理</td>
+</tr>
+<tr>
+<td style="text-align:center">CMSFullGCsBeforeCompaction</td>
+<td style="text-align:center">0</td>
+<td style="text-align:center">设置 CMS 在进行若干次 GC 后再启动一次内存碎片整理</td>
+</tr>
 </tbody>
 </table>
-<h2 id="即时编译参数"><a href="#即时编译参数" class="headerlink" title="即时编译参数"></a>即时编译参数</h2><h2 id="类型加载参数"><a href="#类型加载参数" class="headerlink" title="类型加载参数"></a>类型加载参数</h2><h2 id="多线程相关参数"><a href="#多线程相关参数" class="headerlink" title="多线程相关参数"></a>多线程相关参数</h2><table>
+<h2 id="多线程相关参数"><a href="#多线程相关参数" class="headerlink" title="多线程相关参数"></a>多线程相关参数</h2><table>
 <thead>
 <tr>
 <th style="text-align:center">参数</th>
@@ -490,6 +540,11 @@
 <td style="text-align:center">HeapDumpOnOutOfMemoryError</td>
 <td style="text-align:center">关闭</td>
 <td style="text-align:center">发生 OOM 时是否生成堆转储快照</td>
+</tr>
+<tr>
+<td style="text-align:center">HeapDumpPath</td>
+<td style="text-align:center"></td>
+<td style="text-align:center">内存快照的生成路径</td>
 </tr>
 <tr>
 <td style="text-align:center">PrintGC</td>
@@ -671,7 +726,7 @@
               
             
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#HotSpot-JVM-主要参数解释"><span class="nav-number">1.</span> <span class="nav-text">HotSpot JVM 主要参数解释</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#参数使用方式"><span class="nav-number">1.1.</span> <span class="nav-text">参数使用方式</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#查看默认参数"><span class="nav-number">1.2.</span> <span class="nav-text">查看默认参数</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#内存管理参数"><span class="nav-number">1.3.</span> <span class="nav-text">内存管理参数</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#CMS-收集器参数"><span class="nav-number">1.4.</span> <span class="nav-text">CMS 收集器参数</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#即时编译参数"><span class="nav-number">1.5.</span> <span class="nav-text">即时编译参数</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#类型加载参数"><span class="nav-number">1.6.</span> <span class="nav-text">类型加载参数</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#多线程相关参数"><span class="nav-number">1.7.</span> <span class="nav-text">多线程相关参数</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#性能参数"><span class="nav-number">1.8.</span> <span class="nav-text">性能参数</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#调试参数"><span class="nav-number">1.9.</span> <span class="nav-text">调试参数</span></a></li></ol></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#HotSpot-JVM-主要参数解释"><span class="nav-number">1.</span> <span class="nav-text">HotSpot JVM 主要参数解释</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#参数使用方式"><span class="nav-number">1.1.</span> <span class="nav-text">参数使用方式</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#查看默认参数"><span class="nav-number">1.2.</span> <span class="nav-text">查看默认参数</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#内存管理参数"><span class="nav-number">1.3.</span> <span class="nav-text">内存管理参数</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#CMS-收集器参数"><span class="nav-number">1.4.</span> <span class="nav-text">CMS 收集器参数</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#多线程相关参数"><span class="nav-number">1.5.</span> <span class="nav-text">多线程相关参数</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#性能参数"><span class="nav-number">1.6.</span> <span class="nav-text">性能参数</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#调试参数"><span class="nav-number">1.7.</span> <span class="nav-text">调试参数</span></a></li></ol></li></ol></div>
             
           </div>
         </section>

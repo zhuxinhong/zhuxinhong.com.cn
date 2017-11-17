@@ -358,8 +358,8 @@
             
               
                 
-                <a class="post-title-link" href="/2015/06/28/Redis设计与实现/Redis对象/" itemprop="url">
-                  Redis对象
+                <a class="post-title-link" href="/2015/06/28/Redis设计与实现/Redis哈希对象/" itemprop="url">
+                  Redis哈希对象
                 </a>
               
             
@@ -421,12 +421,11 @@
       
         
           
-            <p>Redis中每个对象都由一个redisObject结构表示：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">typeof struct redisObject &#123;</div><div class="line">	//类型</div><div class="line">	unsigned <span class="built_in">type</span> : 4;</div><div class="line">	//编码</div><div class="line">	unsigned encoding : 4;</div><div class="line">	//指向底层数据结构的指针</div><div class="line">	void *ptr;</div><div class="line">	// . . .</div><div class="line">&#125; robj;</div></pre></td></tr></table></figure>
-<p>type  对象的类型<br>REDIS_STRING 字符串对象<br>REDIS_LIST 列表对象<br>REDIS_HASH 哈希对象<br>REDIS_SET 集合对象<br>REDIS_ZSET 有序集合对象</p>
-<p>对于Redis保存的键值对来说，键总是一个字符串对象，而值可以是上述对象中的任意对象。使用TYPE命令返回的结果是数据库对应键的值对象类型。</p>
-<p>encoding 记录对象底层数据结构的实现。使用OBJECT ENCODING 可查看一个数据库键的值对象编码。</p>
-<p>Redis对象的内存回收采用的是类似JVM垃圾回收的方法之一  引用计数法。</p>
+            <p>哈希对象编码可以是ziplist或者hashtable。</p>
+<p>ziplist编码的哈希对象使用压缩列表作为底层实现。有新的键值对要保存时，程序会先将键值对的键推到列表表尾，再将键值对的值推到列表表尾。</p>
+<p>hashtable编码的哈希对象使用字典作为底层实现，哈希对象中的每个键值对都是用一个字典键值对来保存。</p>
+<p>当哈希对象满足下面2个条件时，哈希对象使用ziplist编码，其余都使用hashtable编码：<br>a.哈希对象保存所有键值对的键和值字符长度都小于64字节；<br>b.哈希对象保存的键值对数量小于512个；</p>
+<p>上述2个条件的阀值是可以修改的，在配置文件中的 hash-max-ziplist-value 和 hash-max-ziplist-entries 选项中。</p>
 
           
         
