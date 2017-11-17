@@ -243,6 +243,119 @@
             
               
                 
+                <a class="post-title-link" href="/2015/06/24/Redis设计与实现/Redis链表数据结构/" itemprop="url">
+                  Redis链表数据结构
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2015-06-24T00:00:00+08:00" content="2015-06-24">
+              2015-06-24
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/Redis设计与实现/" itemprop="url" rel="index">
+                    <span itemprop="name">Redis设计与实现</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+
+          
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div></pre></td><td class="code"><pre><div class="line">typeof struct listNode &#123;</div><div class="line">	//前置节点</div><div class="line">	struct listNode *prev;</div><div class="line">	//后置节点</div><div class="line">	struct listNode *next;</div><div class="line">	//节点的值</div><div class="line">	void *value；</div><div class="line">	&#125; listNode;</div><div class="line">	链接的数据结构：</div><div class="line">	typeof struct list &#123;</div><div class="line">	//表头节点</div><div class="line">	listNode *head;</div><div class="line">	//表尾节点</div><div class="line">	listNode *tail;</div><div class="line">	//节点数量</div><div class="line">	unsiged long len;</div><div class="line">	//节点复制函数</div><div class="line">	void *(*dup) (void *ptr);</div><div class="line">	//节点释放函数</div><div class="line">	void (*free) (void *ptr);</div><div class="line">	//节点对比函数</div><div class="line">	int (*match) (void *ptr, void *key);</div><div class="line">&#125; list;</div></pre></td></tr></table></figure>
+
+          
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
                 <a class="post-title-link" href="/2015/06/23/Redis设计与实现/Redis简单动态字符串/" itemprop="url">
                   Redis简单动态字符串
                 </a>
@@ -307,7 +420,7 @@
         
           
             <p>Redis使用SDS(simple dynamic string)用作字符串默认实现。</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">struct sdshdr&#123;</span><br><span class="line">	//已使用buf数组的字节数量，也就是字符串长度</span><br><span class="line">	int len;</span><br><span class="line">	//未使用的长度</span><br><span class="line">	int free;</span><br><span class="line">	//保存字符串</span><br><span class="line">	char buf[];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">struct sdshdr&#123;</div><div class="line">	//已使用buf数组的字节数量，也就是字符串长度</div><div class="line">	int len;</div><div class="line">	//未使用的长度</div><div class="line">	int free;</div><div class="line">	//保存字符串</div><div class="line">	char buf[];</div><div class="line">&#125;</div></pre></td></tr></table></figure>
 <ul>
 <li><p>SDS遵循C语言字符串以空字符串结尾，保留1个字节的空字符串’\0’，该空串不记入len中。</p>
 </li>
@@ -400,7 +513,7 @@
         <nav class="site-state motion-element">
           <div class="site-state-item site-state-posts">
             <a href="/archives">
-              <span class="site-state-item-count">35</span>
+              <span class="site-state-item-count">36</span>
               <span class="site-state-item-name">日志</span>
             </a>
           </div>

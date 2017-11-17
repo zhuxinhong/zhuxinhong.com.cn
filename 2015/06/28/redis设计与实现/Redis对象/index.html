@@ -302,7 +302,7 @@
 
       
         <p>Redis中每个对象都由一个redisObject结构表示：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">typeof struct redisObject &#123;</span><br><span class="line">	//类型</span><br><span class="line">	unsigned <span class="built_in">type</span> : 4;</span><br><span class="line">	//编码</span><br><span class="line">	unsigned encoding : 4;</span><br><span class="line">	//指向底层数据结构的指针</span><br><span class="line">	void *ptr;</span><br><span class="line">	// . . .</span><br><span class="line">&#125; robj;</span><br></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">typeof struct redisObject &#123;</div><div class="line">	//类型</div><div class="line">	unsigned <span class="built_in">type</span> : 4;</div><div class="line">	//编码</div><div class="line">	unsigned encoding : 4;</div><div class="line">	//指向底层数据结构的指针</div><div class="line">	void *ptr;</div><div class="line">	// . . .</div><div class="line">&#125; robj;</div></pre></td></tr></table></figure>
 <p>type  对象的类型<br>REDIS_STRING 字符串对象<br>REDIS_LIST 列表对象<br>REDIS_HASH 哈希对象<br>REDIS_SET 集合对象<br>REDIS_ZSET 有序集合对象</p>
 <p>对于Redis保存的键值对来说，键总是一个字符串对象，而值可以是上述对象中的任意对象。使用TYPE命令返回的结果是数据库对应键的值对象类型。</p>
 <p>encoding 记录对象底层数据结构的实现。使用OBJECT ENCODING 可查看一个数据库键的值对象编码。</p>
@@ -338,16 +338,16 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2015/06/27/Redis设计与实现/Redis跳跃表/" rel="next" title="Redis跳跃表">
-                <i class="fa fa-chevron-left"></i> Redis跳跃表
+              <a href="/2015/06/28/Redis设计与实现/Redis哈希对象/" rel="next" title="Redis哈希对象">
+                <i class="fa fa-chevron-left"></i> Redis哈希对象
               </a>
             
           </div>
 
           <div class="post-nav-prev post-nav-item">
             
-              <a href="/2015/06/28/Redis设计与实现/Redis哈希对象/" rel="prev" title="Redis哈希对象">
-                Redis哈希对象 <i class="fa fa-chevron-right"></i>
+              <a href="/2015/07/01/Redis设计与实现/Redis持久化-RDB/" rel="prev" title="Redis持久化-RDB">
+                Redis持久化-RDB <i class="fa fa-chevron-right"></i>
               </a>
             
           </div>
@@ -416,7 +416,7 @@
         <nav class="site-state motion-element">
           <div class="site-state-item site-state-posts">
             <a href="/archives">
-              <span class="site-state-item-count">35</span>
+              <span class="site-state-item-count">36</span>
               <span class="site-state-item-name">日志</span>
             </a>
           </div>

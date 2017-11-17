@@ -243,6 +243,150 @@
             
               
                 
+                <a class="post-title-link" href="/2016/05/17/JavaWeb/深入分析IO工作机制/" itemprop="url">
+                  深入分析I/O工作机制
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2016-05-17T00:00:00+08:00" content="2016-05-17">
+              2016-05-17
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/Java-Web/" itemprop="url" rel="index">
+                    <span itemprop="name">Java Web</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+
+          
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h1 id="Java的I-O基本架构"><a href="#Java的I-O基本架构" class="headerlink" title="Java的I/O基本架构"></a>Java的I/O基本架构</h1><p>Java的I/O操作类在java.io下，大概有将近80个类，大概可以分为以下4类：  </p>
+<ul>
+<li>基于字节操作的IO接口：InputStream和OutputStream  </li>
+<li>基于字符操作的IO接口：Writer和Reader  </li>
+<li>基于磁盘操作的IO接口：File  </li>
+<li>基于网络操作的IO接口：Socket</li>
+</ul>
+<p>前2组主要是传输数据的数据格式，后两组主要是传输数据的方式，虽然Socket不在java.io下，在此仍然放在一起，因为IO核心问题要么是数据格式影响IO操作，要么是传输方式影响IO操作，也就是将什么样的数据写到什么地方的问题。</p>
+<h2 id="字节与字符的转化接口"><a href="#字节与字符的转化接口" class="headerlink" title="字节与字符的转化接口"></a>字节与字符的转化接口</h2><p>数据持久化或网络传输都是以字节进行的，所以必须要有从字符到字节或者字节到字符的转化。<br>InputStreamReader类是从字节到字符的转化桥梁，从InputStream到Reader的过程要指定编码字符集，否则将采用操作系统默认的字符集，很可能会出现乱码问题。StreamDecoder正是完成从字节到字符的解码的实现类。  </p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">try</span> &#123;</div><div class="line">	StringBuffer str = <span class="keyword">new</span> StringBuffer();</div><div class="line">	<span class="keyword">char</span>[] buf = <span class="keyword">new</span> <span class="keyword">char</span>[<span class="number">1024</span>];</div><div class="line">	FileReader f = <span class="keyword">new</span> FileReader(<span class="string">"file"</span>);</div><div class="line">	<span class="keyword">while</span>(f.read(buf) &gt; <span class="number">0</span>)&#123;</div><div class="line">		str.append(buf);</div><div class="line">	&#125;</div><div class="line">	str.toString();</div><div class="line">&#125; <span class="keyword">catch</span> (IOException e)&#123;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>FileReader就是按照上述方式读取文件，FileReader继承了InputStreamReader，实际上是读取文件流，然后通过StreamDecoder解码成char。<br>写入也是类似过程，通过OutputStreamWriter类完成从字符到字节的过程，有StreamEncoder完成解码过程。</p>
+<hr>
+<h1 id="磁盘I-O工作机制"><a href="#磁盘I-O工作机制" class="headerlink" title="磁盘I/O工作机制"></a>磁盘I/O工作机制</h1><p>读取和写入文件I/O操作都调用操作系统提供的接口，因为磁盘设备是操作系统管理的，应用程序要访问物理设备只能通过系统调用的方式。只要是操作系统调用，就存在内核空间地址和用户空间地址切换的问题，这是操作系统本身安全机制，而将内核程序运行使用的内存空间和用户程序运行的内存空间进行隔离造成的。这样虽然保证了内核程旭运行安全，但必然存在数据可能需要从内核空间向用户空间复制的问题。</p>
+<p>如果遇到非常耗时的操作，如磁盘I/O，数据从磁盘复制到内存空间，然后又从内核空间复制到用户空间，将会非常缓慢。这时OS为了加速I/O访问，在内核空间使用缓存机制，也就是从磁盘读取的文件按照一定的组织方式进行缓存，如果用户访问的是同一段磁盘地址的空间数据，那么OS将从内核缓存中直接取出返回给用户程序，这样可以减少I/O响应时间。</p>
+<h2 id="标准访问文件方式"><a href="#标准访问文件方式" class="headerlink" title="标准访问文件方式"></a>标准访问文件方式</h2><p>当程序调用read()接口时，操作系统检查在内核告诉缓存中有没有需要的数据，如果已经缓存了，那么直接从缓存中返回，如果没有，从磁盘中读取，然后缓存在操作系统缓存中。</p>
+<p>写入方式是，程序调用write()接口将数据从用户地址空间复制到内核地址空间的缓存中。这时对用户程序来说写已经完成，至于什么时候再写到磁盘中由OS决定，除非显示调用了sync同步命令。</p>
+<h2 id="直接I-O方式"><a href="#直接I-O方式" class="headerlink" title="直接I/O方式"></a>直接I/O方式</h2><p>程序直接访问磁盘，不经过OS内核数据缓冲区，这样做的目的是减少一次从内核缓冲区到用户程序缓存的数据复制。这种方式通常是在对数据的缓存管理由应用程序实现的数据库管理系统中。如在数据库管理系统中，系统明确知道应该缓存哪些数据，应该失效哪些数据，还可以对一些热点数据做预加载，提前将热点数据加载到内存，可以加速数据的访问效率。</p>
+<p>但直接I/O也有负面影响，如果访问的数据不在应用程序缓存中，那么每次数据都会从磁盘直接加载，这种加载会非常缓慢。通过直接I/O与异步I/O结合使用，会得到比较好的性能。</p>
+<h2 id="同步访问文件的方式"><a href="#同步访问文件的方式" class="headerlink" title="同步访问文件的方式"></a>同步访问文件的方式</h2><p>数据的读取和写入都是同步操作的，它与标准访问文件不同的是，只有当数据被成功写到磁盘时才返回给应用程序成功的标志。</p>
+<p>这种访问文件的方式性能比较差，只有在一些对数据安全性要求比较高的场景中才会使用，而且通常这种操作方式的硬件都是定制的。</p>
+<h2 id="异步访问文件的方式"><a href="#异步访问文件的方式" class="headerlink" title="异步访问文件的方式"></a>异步访问文件的方式</h2><p>当访问数据的线程发出请求之后，线程会接着去处理其他事情，而不是阻塞等待，当请求的数据返回后继续处理下面的操作。这种访问文件的方式可明显提供应用程序效率，但不会改变访问文件的效率。</p>
+<h2 id="内存映射方式"><a href="#内存映射方式" class="headerlink" title="内存映射方式"></a>内存映射方式</h2><p>OS将内存中某一块区域与磁盘中的文件关联起来，当腰访问内存中一段数据时，转换为访问文件的某一段数据。这种方式目的同样是减少数据从内核空间缓存到用户空间缓存的数据复制操作，因为这2个数据是共享的。</p>
+<h2 id="Java访问磁盘文件"><a href="#Java访问磁盘文件" class="headerlink" title="Java访问磁盘文件"></a>Java访问磁盘文件</h2><p>在Java中通常的File并不代表一个真实存在的文件对象，当指定一个路径描述符时，它会返回一个代表这个路径的虚拟对象，这个可能是一个真实存在的文件或者是一个包含多个文件的目录。大多数情况下，我们并不关心这个文件是否真的存在，而是关心对这个文件到底如何操作。</p>
+<p>何时会真正检查一个文件存不存在？要是在真正要读取这个文件时。例如，FileInputStream类都是操作一个文件的接口，注意到在创建一个FileInputStream对象时会创建一个FileDescriptor对象，其实这个对象就是真正代表一个存在的文件对象的描述。当操作一个文件对象时可以通过getFD()方法获取真正操作的与底层OS相关联的文件描述。例如，可以调用FileDescriptor.sync()方法将操作系统缓存中的数据强制刷新到物理磁盘中。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">public</span> <span class="title">FileInputStream</span><span class="params">(File file)</span> <span class="keyword">throws</span> FileNotFoundException </span>&#123;</div><div class="line">        String name = (file != <span class="keyword">null</span> ? file.getPath() : <span class="keyword">null</span>);</div><div class="line">        SecurityManager security = System.getSecurityManager();</div><div class="line">        <span class="keyword">if</span> (security != <span class="keyword">null</span>) &#123;</div><div class="line">            security.checkRead(name);</div><div class="line">        &#125;</div><div class="line">        <span class="keyword">if</span> (name == <span class="keyword">null</span>) &#123;</div><div class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> NullPointerException();</div><div class="line">        &#125;</div><div class="line">        <span class="keyword">if</span> (file.isInvalid()) &#123;</div><div class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> FileNotFoundException(<span class="string">"Invalid file path"</span>);</div><div class="line">        &#125;</div><div class="line">        fd = <span class="keyword">new</span> FileDescriptor();</div><div class="line">        fd.incrementAndGetUseCount();</div><div class="line">        <span class="keyword">this</span>.path = name;</div><div class="line">        open(name);</div><div class="line">    &#125;</div></pre></td></tr></table></figure>
+<p>当传入一个文件路径时，将会根据这个路径创建一个File对象来标识这个文件，然后根据这个File对象创建真正读取文件的操作对象，这时将会真正创建一个关联真实存在的磁盘文件的描述符FileDescriptor，通过这个对象可以直接控制这个磁盘文件。</p>
+<hr>
+<h1 id="Java-Socket工作机制"><a href="#Java-Socket工作机制" class="headerlink" title="Java Socket工作机制"></a>Java Socket工作机制</h1><h2 id="建立通信链路"><a href="#建立通信链路" class="headerlink" title="建立通信链路"></a>建立通信链路</h2><p>当客户端要与服务端通信时，客户端首先要创建一个Socket实例，OS将为这个Socket实例分配一个没有被使用的本地端口号，并创建一个包含本地地址、远程地址和端口号的套接字数据结构，这个数据结构将一直保存在系统中直到这个连接关闭。在创建Socket实例的构造函数正确返回之前，将要进行TCP的3次握手协议，TCP握手协议完成后，Socket实例对象将创建完成，否则抛出IOException错误。</p>
+<p>与之对应的服务端将创建一个ServerSocket实例，创建ServerSocket比较简单，只要指定的端口号未被占用，一般实例都会创建成功。同时OS也会为ServerSocket实例创建一个底层数据结构，这个数据结构包含指定监听的端口号和包含监听地址的通配符，通常情况下都是“*”，即监听所有地址。之后当调用accept()方法时，将进入阻塞状态，等待客户端的请求。</p>
+<p>当一个新的请求到来时，将为这个连接创建一个新的套接字数据结构，该套接字数据的信息包含的地址和端口信息正是请求源地址和端口。这个新创建的数据结构将会关联到ServerSocket实例的一个未完成的连接数据结构列表中。注意，这时服务端的与之对应的Socket实例并没有完成创建，而要等到与客户端的3次握手完成后，这个服务端的Socket实例才会返回，并将这个Socket实例对应的数据结构从未完成列表中移到已完成列表中。所以与ServerSocket所关联的列表中每个数据结构都代表与一个客户端建立的TCP连接。</p>
+<h2 id="数据传输"><a href="#数据传输" class="headerlink" title="数据传输"></a>数据传输</h2><p>当连接建立成功，服务端和客户端都会拥有一个Socket实例，每个Socket实例都有一个InputStream和一个OutputStream，并通过这两个对象交换数据。同时我们知道网络I/O都是以字节流传输的，当创建Socket对象时，OS将会为InputStream和OutputStream分别分配一定大小的缓存区，数据的写入和读取都是通过这个缓存区完成。</p>
+<p>写入端将数据写到OutputStream的SendQ队列中，当队列填满时，数据将被转移到另一端InputStream的RecvQ队列中，如果这时RecvQ已经满了，那么OutputStream的write方法将会阻塞，直到RecvQ队列有足够的空间容纳SendQ发送的数据。这个缓存区的大小及写入端的速度和读取端的速度非常影响这个连接的数据传输效率，由于可能会发生阻塞，所有网络I/O与磁盘I/O不同的是数据的写入和读取还要有一个协调的过程，如果两边同时传送数据可能会产生死锁。</p>
+
+          
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
                 <a class="post-title-link" href="/2016/05/15/深入理解Java虚拟机/垃圾收集器算法/" itemprop="url">
                   垃圾收集器算法
                 </a>
@@ -363,145 +507,6 @@
 
 
     
-      
-
-  
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-            
-            
-              
-                
-                <a class="post-title-link" href="/2016/05/11/JavaWeb/DNS域名解析过程/" itemprop="url">
-                  DNS域名解析过程
-                </a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            <span class="post-meta-item-icon">
-              <i class="fa fa-calendar-o"></i>
-            </span>
-            <span class="post-meta-item-text">发表于</span>
-            <time itemprop="dateCreated" datetime="2016-05-11T00:00:00+08:00" content="2016-05-11">
-              2016-05-11
-            </time>
-          </span>
-
-          
-            <span class="post-category" >
-              &nbsp; | &nbsp;
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-              
-                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
-                  <a href="/categories/Java-Web/" itemprop="url" rel="index">
-                    <span itemprop="name">Java Web</span>
-                  </a>
-                </span>
-
-                
-                
-
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-
-          
-          
-
-          
-        </div>
-      </header>
-    
-
-
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>当用户在浏览器输入www.abc.com，DNS解析将会有将近10个步骤。</p>
-<ol>
-<li>浏览器检查缓存有没有该域名对应的IP。如果有，这个解析过程就结束。浏览器缓存域名是有限制的，不仅大小有限制，时间也有限制，通过TTL属性设置域名缓存时间。</li>
-<li>浏览器缓存中没有，检查操作系统缓存中是否有解析结果。如果有，解析结束。没有的话，请求域名服务器解析该域名。</li>
-<li><p>网络配置有配置DNS服务器地址，操作系统把域名发送给这里的LDNS。Linux下通过以下命令查看。  </p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cat /etc/resolv.conf</span><br></pre></td></tr></table></figure>
-</li>
-<li><p>LDNS未命中，直接到Root Server域名服务器请求解析。</p>
-</li>
-<li>根域名服务器返回本地域名服务器一个服务器地址(gTLD Server)。gTLD是国际顶级域名服务器，如.com、.cn、.org等，全球只有13台左右。</li>
-<li>本地域名服务器再向上一步返回的gTLD服务器发送请求。</li>
-<li>gTLD服务器查找并返回此域名对应的Name Server域名服务器地址，这个Name Server通常就是你注册的域名服务器。</li>
-<li>Name Server域名服务器查询存储的域名和IP映射关系，正常情况下查询到目标IP记录，连同一个TTL值返回给DNS Server域名服务器。</li>
-<li>返回该域名对应的IP和TTL值，Local DNS Server会缓存该记录。</li>
-<li>解析结果返回给用户，用户根据TTL值缓存这个记录。</li>
-</ol>
-<p>实际过程中，可能不止这个10个步骤，如Name Server有多级或者有个GTM负载均衡控制，这都会影响域名解析的过程。</p>
-<h1 id="跟踪域名解析过程"><a href="#跟踪域名解析过程" class="headerlink" title="跟踪域名解析过程"></a>跟踪域名解析过程</h1><h2 id="dig"><a href="#dig" class="headerlink" title="dig"></a>dig</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line">--- ~ » dig www.google.com</span><br><span class="line"></span><br><span class="line">; &lt;&lt;&gt;&gt; DiG 9.8.3-P1 &lt;&lt;&gt;&gt; www.google.com</span><br><span class="line">;; global options: +cmd</span><br><span class="line">;; Got answer:</span><br><span class="line">;; -&gt;&gt;HEADER&lt;&lt;- opcode: QUERY, status: NOERROR, id: 50606</span><br><span class="line">;; flags: qr rd ra; QUERY: 1, ANSWER: 16, AUTHORITY: 0, ADDITIONAL: 0</span><br><span class="line"></span><br><span class="line">;; QUESTION SECTION:</span><br><span class="line">;www.google.com.			IN	A</span><br><span class="line"></span><br><span class="line">;; ANSWER SECTION:</span><br><span class="line">www.google.com.		299	IN	A	61.238.239.35</span><br><span class="line">www.google.com.		299	IN	A	61.238.239.20</span><br><span class="line">www.google.com.		299	IN	A	61.238.239.24</span><br><span class="line">www.google.com.		299	IN	A	61.238.239.59</span><br><span class="line">www.google.com.		299	IN	A	61.238.239.29</span><br><span class="line">www.google.com.		299	IN	A	61.238.239.30</span><br><span class="line">www.google.com.		299	IN	A	61.238.239.45</span><br><span class="line">www.google.com.		299	IN	A	61.238.239.40</span><br><span class="line">www.google.com.		299	IN	A	61.238.239.55</span><br><span class="line">www.google.com.		299	IN	A	61.238.239.34</span><br><span class="line">www.google.com.		299	IN	A	61.238.239.44</span><br><span class="line">www.google.com.		299	IN	A	61.238.239.49</span><br><span class="line">www.google.com.		299	IN	A	61.238.239.54</span><br><span class="line">www.google.com.		299	IN	A	61.238.239.25</span><br><span class="line">www.google.com.		299	IN	A	61.238.239.39</span><br><span class="line">www.google.com.		299	IN	A	61.238.239.50</span><br><span class="line"></span><br><span class="line">;; Query time: 61 msec</span><br><span class="line">;; SERVER: 8.8.8.8#53(8.8.8.8)</span><br><span class="line">;; WHEN: Wed May 11 21:04:56 2016</span><br><span class="line">;; MSG SIZE  rcvd: 288</span><br><span class="line"></span><br><span class="line">--- ~ »</span><br></pre></td></tr></table></figure>
-<h2 id="dig-cmd"><a href="#dig-cmd" class="headerlink" title="dig +cmd"></a>dig +cmd</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line">--- ~ » dig +printcmd www.taobao.com</span><br><span class="line">Invalid option: +printcmd</span><br><span class="line">Usage:  dig [@global-server] [domain] [q-type] [q-class] &#123;q-opt&#125;</span><br><span class="line">            &#123;global-d-opt&#125; host [@local-server] &#123;local-d-opt&#125;</span><br><span class="line">            [ host [@local-server] &#123;local-d-opt&#125; [...]]</span><br><span class="line"></span><br><span class="line">Use &quot;dig -h&quot; (or &quot;dig -h | more&quot;) for complete list of options</span><br><span class="line">--- ~ » dig +cmd www.taobao.com                                                                                                                                        1 ↵</span><br><span class="line"></span><br><span class="line">; &lt;&lt;&gt;&gt; DiG 9.8.3-P1 &lt;&lt;&gt;&gt; +cmd www.taobao.com</span><br><span class="line">;; global options: +cmd</span><br><span class="line">;; Got answer:</span><br><span class="line">;; -&gt;&gt;HEADER&lt;&lt;- opcode: QUERY, status: NOERROR, id: 62882</span><br><span class="line">;; flags: qr rd ra; QUERY: 1, ANSWER: 2, AUTHORITY: 0, ADDITIONAL: 0</span><br><span class="line"></span><br><span class="line">;; QUESTION SECTION:</span><br><span class="line">;www.taobao.com.			IN	A</span><br><span class="line"></span><br><span class="line">;; ANSWER SECTION:</span><br><span class="line">www.taobao.com.		71	IN	CNAME	www.taobao.com.danuoyi.tbcache.com.</span><br><span class="line">www.taobao.com.danuoyi.tbcache.com. 599	IN A	205.204.104.227</span><br><span class="line"></span><br><span class="line">;; Query time: 73 msec</span><br><span class="line">;; SERVER: 8.8.8.8#53(8.8.8.8)</span><br><span class="line">;; WHEN: Wed May 11 21:07:41 2016</span><br><span class="line">;; MSG SIZE  rcvd: 93</span><br><span class="line"></span><br><span class="line">--- ~ »</span><br></pre></td></tr></table></figure>
-<h2 id="dig-trace"><a href="#dig-trace" class="headerlink" title="dig +trace"></a>dig +trace</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line">--- ~ » dig www.google.com +trace                                                                                                                                      9 ↵</span><br><span class="line"></span><br><span class="line">; &lt;&lt;&gt;&gt; DiG 9.8.3-P1 &lt;&lt;&gt;&gt; www.google.com +trace</span><br><span class="line">;; global options: +cmd</span><br><span class="line">.			5236	IN	NS	a.root-servers.net.</span><br><span class="line">.			5236	IN	NS	b.root-servers.net.</span><br><span class="line">.			5236	IN	NS	c.root-servers.net.</span><br><span class="line">.			5236	IN	NS	d.root-servers.net.</span><br><span class="line">.			5236	IN	NS	e.root-servers.net.</span><br><span class="line">.			5236	IN	NS	f.root-servers.net.</span><br><span class="line">.			5236	IN	NS	g.root-servers.net.</span><br><span class="line">.			5236	IN	NS	h.root-servers.net.</span><br><span class="line">.			5236	IN	NS	i.root-servers.net.</span><br><span class="line">.			5236	IN	NS	j.root-servers.net.</span><br><span class="line">.			5236	IN	NS	k.root-servers.net.</span><br><span class="line">.			5236	IN	NS	l.root-servers.net.</span><br><span class="line">.			5236	IN	NS	m.root-servers.net.</span><br><span class="line">;; Received 228 bytes from 8.8.8.8#53(8.8.8.8) in 63 ms</span><br><span class="line"></span><br><span class="line">com.			172800	IN	NS	m.gtld-servers.net.</span><br><span class="line">com.			172800	IN	NS	e.gtld-servers.net.</span><br><span class="line">com.			172800	IN	NS	d.gtld-servers.net.</span><br><span class="line">com.			172800	IN	NS	b.gtld-servers.net.</span><br><span class="line">com.			172800	IN	NS	j.gtld-servers.net.</span><br><span class="line">com.			172800	IN	NS	f.gtld-servers.net.</span><br><span class="line">com.			172800	IN	NS	g.gtld-servers.net.</span><br><span class="line">com.			172800	IN	NS	l.gtld-servers.net.</span><br><span class="line">com.			172800	IN	NS	k.gtld-servers.net.</span><br><span class="line">com.			172800	IN	NS	h.gtld-servers.net.</span><br><span class="line">com.			172800	IN	NS	i.gtld-servers.net.</span><br><span class="line">com.			172800	IN	NS	a.gtld-servers.net.</span><br><span class="line">com.			172800	IN	NS	c.gtld-servers.net.</span><br><span class="line">;; Received 504 bytes from 192.5.5.241#53(192.5.5.241) in 38 ms</span><br><span class="line"></span><br><span class="line">;; connection timed out; no servers could be reached</span><br><span class="line">--- ~ »</span><br></pre></td></tr></table></figure>
-<h1 id="几种域名解析方式"><a href="#几种域名解析方式" class="headerlink" title="几种域名解析方式"></a>几种域名解析方式</h1><ul>
-<li>A记录，指定域名对应IP。</li>
-<li>MX记录，表示Mail Exchange，将某个域名下邮件服务器指向自己Mail Server。正常通过Web请求仍然解析A记录IP。</li>
-<li>CNAME记录，Canonical Name(别名解析)。</li>
-<li>NS记录，为某个域名指定DNS解析服务器。</li>
-<li>TXT记录，为某个主机名或域名设置说明。</li>
-</ul>
-
-          
-        
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
   </section>
 
   
@@ -547,7 +552,7 @@
         <nav class="site-state motion-element">
           <div class="site-state-item site-state-posts">
             <a href="/archives">
-              <span class="site-state-item-count">35</span>
+              <span class="site-state-item-count">36</span>
               <span class="site-state-item-name">日志</span>
             </a>
           </div>

@@ -243,6 +243,133 @@
             
               
                 
+                <a class="post-title-link" href="/2015/07/22/Redis设计与实现/Redis客户端/" itemprop="url">
+                  Redis客户端
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2015-07-22T00:00:00+08:00" content="2015-07-22">
+              2015-07-22
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/Redis设计与实现/" itemprop="url" rel="index">
+                    <span itemprop="name">Redis设计与实现</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+
+          
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>通过使用由I/O多路复用技术实现的文件事件处理器，Redis服务器使用单线程单进程的方式来处理命令请求，并与多个客户端进行网络通信。<br>redisClient结构保存客户端的数据结构：  </p>
+<ul>
+<li>套接字描述符  </li>
+<li>名字  </li>
+<li>标志位  </li>
+<li>正在使用的数据库指针，数据库号码    </li>
+<li>当前要执行的命令、参数、参数个数，以及指向命令实现函数的指针  </li>
+<li>输入缓冲和输出缓冲  </li>
+<li>复制状态信息和复制所需数据结构  </li>
+<li>执行BRPOP、BLPOP等列表阻塞命令时使用的数据结构  </li>
+<li>事物状态，执行WATCH命令用到的数据结构  </li>
+<li>执行发布和订阅用到的数据结构  </li>
+<li>身份验证标志  </li>
+<li>创建时间、最后一次通信时间，输出缓冲区大小超出软性限制的事件  </li>
+</ul>
+
+          
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
                 <a class="post-title-link" href="/2015/07/22/Redis设计与实现/Redis服务器单机数据库的实现/" itemprop="url">
                   Redis服务器单机数据库的实现
                 </a>
@@ -355,123 +482,6 @@
 
 
     
-      
-
-  
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-            
-            
-              
-                
-                <a class="post-title-link" href="/2015/07/12/Redis设计与实现/Redis时间事件/" itemprop="url">
-                  Redis时间事件
-                </a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            <span class="post-meta-item-icon">
-              <i class="fa fa-calendar-o"></i>
-            </span>
-            <span class="post-meta-item-text">发表于</span>
-            <time itemprop="dateCreated" datetime="2015-07-12T00:00:00+08:00" content="2015-07-12">
-              2015-07-12
-            </time>
-          </span>
-
-          
-            <span class="post-category" >
-              &nbsp; | &nbsp;
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-              
-                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
-                  <a href="/categories/Redis设计与实现/" itemprop="url" rel="index">
-                    <span itemprop="name">Redis设计与实现</span>
-                  </a>
-                </span>
-
-                
-                
-
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-
-          
-          
-
-          
-        </div>
-      </header>
-    
-
-
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>Redis时间事件分为以下两类：<br>1.定时事件：程序在指定时间执行一次。<br>2.周期性事件：程序每隔指定时间执行一次。  </p>
-<p>时间事件的属性：<br>1.id：服务器为时间事件创建的全局唯一ID，ID号从小到大递增。<br>2.when：毫秒精度的unix时间戳，记录时间事件的到达时间。<br>3.timeProc：时间事件处理器，一个函数。当时间事件到达时，执行此函数。  </p>
-<p>时间事件的返回值决定了时间事件类型，如返回ae.h/AE_NOMORE，表示事件为定时事件，到达一次后则删除；如返回一个非AE_NOMORE的整数，表示事件为周期性事件，当事件到达之后，服务器会根据返回值更新时间事件的when属性，并以这种方式一直更新下去。当前Redis版本中只有周期性事件，没有使用定时事件。  </p>
-<p>实现：<br>服务器将所有时间事件都存放在一个无序列表中，每当时间事件执行器执行时，它就遍历整个链表，找到所有已到达的时间事件并调用相应事件处理器。这里的的无序链表，指的是不按when属性大小排序，其实是按ID排序了，新的时间事件总是插入链表的表头。当前Redis版本中，服务器只使用serverCron一个时间事件，而在benchmark模式下，服务器也只使用2个时间事件，所以使用无序链表来保存时间事情，并不影响性能。  </p>
-<p>事件调度伪代码：<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">def aeProcessEvents():</span><br><span class="line">//获取到达时间离当前时间最接近的时间事件</span><br><span class="line">time_event = aeSearchNearestTimer()</span><br><span class="line">//计算最接近的时间事件距离到达还有多少毫秒</span><br><span class="line">remain_ms = time_event.when - unix_ts_now()</span><br><span class="line">//如果事件已到达，那么remain_ms 值可能为负数，置为0</span><br><span class="line"><span class="keyword">if</span> remain_ms &lt; 0:</span><br><span class="line">remain_ms = 0</span><br><span class="line">//根据remain_ms值，创建timeval结构</span><br><span class="line">timeval = create_timeval_with_ms(remain_ms)</span><br><span class="line">//阻塞并等待文件事件产生，最大阻塞时间由传入的timeval结构决定</span><br><span class="line">//如果remaind_ms值为0，那么aeApiPoll调用之后马上返回，不阻塞</span><br><span class="line">aeApiPoll(timeval)</span><br><span class="line">//处理所有已产生的文件事件</span><br><span class="line">processFileEvents()</span><br><span class="line">//处理所有已到达的时间事件</span><br><span class="line">processTimeEvents()</span><br></pre></td></tr></table></figure></p>
-
-          
-        
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
   </section>
 
   
@@ -517,7 +527,7 @@
         <nav class="site-state motion-element">
           <div class="site-state-item site-state-posts">
             <a href="/archives">
-              <span class="site-state-item-count">35</span>
+              <span class="site-state-item-count">36</span>
               <span class="site-state-item-name">日志</span>
             </a>
           </div>

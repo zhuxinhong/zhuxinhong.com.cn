@@ -243,6 +243,158 @@
             
               
                 
+                <a class="post-title-link" href="/2016/05/22/JavaWeb/Tomcat的系统架构/" itemprop="url">
+                  Tomcat系统架构
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2016-05-22T00:00:00+08:00" content="2016-05-22">
+              2016-05-22
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/Java-Web/" itemprop="url" rel="index">
+                    <span itemprop="name">Java Web</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+
+          
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h1 id="Tomcat总体结构"><a href="#Tomcat总体结构" class="headerlink" title="Tomcat总体结构"></a>Tomcat总体结构</h1><p>Tomcat有2个核心组件：  </p>
+<ul>
+<li>Connector  </li>
+<li>Container  </li>
+</ul>
+<p>其中Connector组件可以被替换，一个Container可以选择对用多个Connector。多个Connector和一个Container形成一个Service。有了Service就可以对外提供服务了。但Service需要一个生存环境，这时就非Server莫属了。所以整个Tomcat的生命周期由Server控制。</p>
+<p>Connector主要负责对外交流，Container主要处理Connector接受的请求，主要处理内部事务。其实，Service只是在Connector和Container外面多包一层，把它们组装在一起，对外提供服务。一个Service可以设置多个Connector，但只能有一个Container容器。</p>
+<h2 id="Service"><a href="#Service" class="headerlink" title="Service"></a>Service</h2><p><img src="http://o7s628cn2.bkt.clouddn.com/image/javaweb/Service.png" alt="Service"></p>
+<p>从org.apache.catalina.Service接口中定义方法可以看出，它主要是为了关联Connector和Container，同时会初始化其他组件。所有组件的生命周期在一个Lifecycle的接口中控制。</p>
+<p><img src="http://o7s628cn2.bkt.clouddn.com/image/javaweb/StandardService.png" alt="StandardService"></p>
+<p>从StandardService类结构方法可以看出，除了Service接口方法的实现以及控制组件生命周期的Lifecycle接口的实现，还有几个方法用于实现时间监听方法。不仅是这个Service组件，在Tomcat中其他组件也同样有这个几个方法，这也是一个典型设计模式。</p>
+<p>下面看一下StandardService中几个主要方法，setContainer方法如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setContainer</span><span class="params">(Container container)</span> </span>&#123;</div><div class="line"></div><div class="line">        Container oldContainer = <span class="keyword">this</span>.container;</div><div class="line">        <span class="keyword">if</span> ((oldContainer != <span class="keyword">null</span>) &amp;&amp; (oldContainer <span class="keyword">instanceof</span> Engine))</div><div class="line">            ((Engine) oldContainer).setService(<span class="keyword">null</span>);</div><div class="line">        <span class="keyword">this</span>.container = container;</div><div class="line">        <span class="keyword">if</span> ((<span class="keyword">this</span>.container != <span class="keyword">null</span>) &amp;&amp; (<span class="keyword">this</span>.container <span class="keyword">instanceof</span> Engine))</div><div class="line">            ((Engine) <span class="keyword">this</span>.container).setService(<span class="keyword">this</span>);</div><div class="line">        <span class="keyword">if</span> (getState().isAvailable() &amp;&amp; (<span class="keyword">this</span>.container != <span class="keyword">null</span>)) &#123;</div><div class="line">            <span class="keyword">try</span> &#123;</div><div class="line">                <span class="keyword">this</span>.container.start();</div><div class="line">            &#125; <span class="keyword">catch</span> (LifecycleException e) &#123;</div><div class="line">                <span class="comment">// Ignore</span></div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line">        <span class="keyword">if</span> (getState().isAvailable() &amp;&amp; (oldContainer != <span class="keyword">null</span>)) &#123;</div><div class="line">            <span class="keyword">try</span> &#123;</div><div class="line">                oldContainer.stop();</div><div class="line">            &#125; <span class="keyword">catch</span> (LifecycleException e) &#123;</div><div class="line">                <span class="comment">// Ignore</span></div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        <span class="comment">// Report this property change to interested listeners</span></div><div class="line">        support.firePropertyChange(<span class="string">"container"</span>, oldContainer, <span class="keyword">this</span>.container);</div><div class="line"></div><div class="line">    &#125;</div></pre></td></tr></table></figure>
+<p>这段代码很简单，首先判断当前Service有没有已经关联的Container，如果已经关联，去除这个关联关系—-((Engine) oldContainer).setService(null)。如果这个oldContainer已经启动了，结束它的生命周期，然后再替换新的。</p>
+<p>AddConnector方法如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">addConnector</span><span class="params">(Connector connector)</span> </span>&#123;</div><div class="line"></div><div class="line">        <span class="keyword">synchronized</span> (connectors) &#123;</div><div class="line">            connector.setService(<span class="keyword">this</span>);</div><div class="line">            Connector results[] = <span class="keyword">new</span> Connector[connectors.length + <span class="number">1</span>];</div><div class="line">            System.arraycopy(connectors, <span class="number">0</span>, results, <span class="number">0</span>, connectors.length);</div><div class="line">            results[connectors.length] = connector;</div><div class="line">            connectors = results;</div><div class="line"></div><div class="line">            <span class="keyword">if</span> (getState().isAvailable()) &#123;</div><div class="line">                <span class="keyword">try</span> &#123;</div><div class="line">                    connector.start();</div><div class="line">                &#125; <span class="keyword">catch</span> (LifecycleException e) &#123;</div><div class="line">                    log.error(sm.getString(</div><div class="line">                            <span class="string">"standardService.connector.startFailed"</span>,</div><div class="line">                            connector), e);</div><div class="line">                &#125;</div><div class="line">            &#125;</div><div class="line"></div><div class="line">            <span class="comment">// Report this property change to interested listeners</span></div><div class="line">            support.firePropertyChange(<span class="string">"connector"</span>, <span class="keyword">null</span>, connector);</div><div class="line">        &#125;</div><div class="line"></div><div class="line">    &#125;</div></pre></td></tr></table></figure>
+<p>首先设置关联关系，然后初始化，开始新的生命周期。Connector用的是数组，而不是List集合，从性能角度考虑可以理解。有趣的是这里用了数组但并没有一开始就分配一个固定大小的数组。</p>
+<h2 id="Server"><a href="#Server" class="headerlink" title="Server"></a>Server</h2><p>Server要完成的任务很简单，提供一个接口让其他程序能够访问到这个Service集合，同时要维护它所包含的所有Service生命周期，包括如何初始化、如何结束服务、如何找到别人要访问的Service。</p>
+<p>Server的类结构图如下：<br><img src="http://o7s628cn2.bkt.clouddn.com/image/javaweb/Server.png" alt="Server"></p>
+<p>它的标准实现类StandardServer实现了上面这些方法，同时也实现了Lifecycle、MbeanRegistration两个接口的所有方法。下面看一下StandardServer一个重要方法addService的实现：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">addService</span><span class="params">(Service service)</span> </span>&#123;</div><div class="line"></div><div class="line">    service.setServer(<span class="keyword">this</span>);</div><div class="line"></div><div class="line">    <span class="keyword">synchronized</span> (services) &#123;</div><div class="line">        Service results[] = <span class="keyword">new</span> Service[services.length + <span class="number">1</span>];</div><div class="line">        System.arraycopy(services, <span class="number">0</span>, results, <span class="number">0</span>, services.length);</div><div class="line">        results[services.length] = service;</div><div class="line">        services = results;</div><div class="line"></div><div class="line">        <span class="keyword">if</span> (getState().isAvailable()) &#123;</div><div class="line">            <span class="keyword">try</span> &#123;</div><div class="line">                service.start();</div><div class="line">            &#125; <span class="keyword">catch</span> (LifecycleException e) &#123;</div><div class="line">                <span class="comment">// Ignore</span></div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        <span class="comment">// Report this property change to interested listeners</span></div><div class="line">        support.firePropertyChange(<span class="string">"service"</span>, <span class="keyword">null</span>, service);</div><div class="line">    &#125;</div><div class="line"></div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>从第一行就知道了Service和Server是相互关联的，Server也是和Service管理Connector一样管理它，也是将Service放在一个数组中。</p>
+<h2 id="Lifecycle"><a href="#Lifecycle" class="headerlink" title="Lifecycle"></a>Lifecycle</h2><p>在Tomcat中组件的生命周期通过Lifecycle接口来控制，组件只要集成这个接口并实现其中方法就可以统一被拥有它的组件控制了。最高级的组件就是Server，而控制Server的是Startup，也就是启动和关闭Tomcat。Lifecycle接口方法的实现都在其他组件中，组件的生命周期由包含它的父组件控制，所以它的Start方法自然就是调用它下面组件的Start方法，Stop方法也是一样。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">startInternal</span><span class="params">()</span> <span class="keyword">throws</span> LifecycleException </span>&#123;</div><div class="line"></div><div class="line">    fireLifecycleEvent(CONFIGURE_START_EVENT, <span class="keyword">null</span>);</div><div class="line">    setState(LifecycleState.STARTING);</div><div class="line"></div><div class="line">    globalNamingResources.start();</div><div class="line">    </div><div class="line">    <span class="comment">// Start our defined Services</span></div><div class="line">    <span class="keyword">synchronized</span> (services) &#123;</div><div class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; services.length; i++) &#123;</div><div class="line">            services[i].start();</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">stopInternal</span><span class="params">()</span> <span class="keyword">throws</span> LifecycleException </span>&#123;</div><div class="line"></div><div class="line">    setState(LifecycleState.STOPPING);</div><div class="line">    fireLifecycleEvent(CONFIGURE_STOP_EVENT, <span class="keyword">null</span>);</div><div class="line">    </div><div class="line">    <span class="comment">// Stop our defined Services</span></div><div class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; services.length; i++) &#123;</div><div class="line">        services[i].stop();</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    globalNamingResources.stop();</div><div class="line">    </div><div class="line">    stopAwait();</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>监听的代码会包围Service组件的启动过程，但所有Service必须要实现Lifecycle接口，这样做会更加灵活。</p>
+<h2 id="Connector组件"><a href="#Connector组件" class="headerlink" title="Connector组件"></a>Connector组件</h2><p>它的主要任务数负责接收浏览器发过来的TCP连接请求，创建一个Request和Response对象分别用于和请求端交换数据。然后会产生一个线程来处理这个请求并把产生的Request和Response对象传给处理这个请求的线程，处理这个请求的线程就是Container要做的事了。</p>
+<p>在Tomcat7中，Connector有3种选择：    </p>
+<ul>
+<li>BIO–Http11Protocol</li>
+<li>NIO–Http11NioProtocol</li>
+<li>apr–Http11AprProtocol</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">public</span> <span class="title">Connector</span><span class="params">(String protocol)</span> </span>&#123;</div><div class="line">    setProtocol(protocol);</div><div class="line">    <span class="comment">// Instantiate protocol handler</span></div><div class="line">    <span class="keyword">try</span> &#123;</div><div class="line">        Class&lt;?&gt; clazz = Class.forName(protocolHandlerClassName);</div><div class="line">        <span class="keyword">this</span>.protocolHandler = (ProtocolHandler) clazz.newInstance();</div><div class="line">    &#125; <span class="keyword">catch</span> (Exception e) &#123;</div><div class="line">        log.error(sm.getString(</div><div class="line">                <span class="string">"coyoteConnector.protocolHandlerInstantiationFailed"</span>), e);</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>通过上述代码可以看出，Connector会根据我们在server.xml中配置的Connector类型来初始化。</p>
+<p>这里以常用的NIO来说明，找到Http11NioProtocol基类的start方法：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">start</span><span class="params">()</span> <span class="keyword">throws</span> Exception </span>&#123;</div><div class="line">    <span class="keyword">if</span> (getLog().isInfoEnabled())</div><div class="line">        getLog().info(sm.getString(<span class="string">"abstractProtocolHandler.start"</span>,</div><div class="line">                getNameInternal()));</div><div class="line">    <span class="keyword">try</span> &#123;</div><div class="line">        endpoint.start();</div><div class="line">    &#125; <span class="keyword">catch</span> (Exception ex) &#123;</div><div class="line">        getLog().error(sm.getString(<span class="string">"abstractProtocolHandler.startError"</span>,</div><div class="line">                getNameInternal()), ex);</div><div class="line">        <span class="keyword">throw</span> ex;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="comment">// Start async timeout thread</span></div><div class="line">    asyncTimeout = <span class="keyword">new</span> AsyncTimeout();</div><div class="line">    Thread timeoutThread = <span class="keyword">new</span> Thread(asyncTimeout, getNameInternal() + <span class="string">"-AsyncTimeout"</span>);</div><div class="line">    timeoutThread.setPriority(endpoint.getThreadPriority());</div><div class="line">    timeoutThread.setDaemon(<span class="keyword">true</span>);</div><div class="line">    timeoutThread.start();</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>start方法中调用endpoint.start()，找到对应方法，在NioEndpoint类中：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">startInternal</span><span class="params">()</span> <span class="keyword">throws</span> Exception </span>&#123;</div><div class="line"></div><div class="line">        <span class="keyword">if</span> (!running) &#123;</div><div class="line">            running = <span class="keyword">true</span>;</div><div class="line">            paused = <span class="keyword">false</span>;</div><div class="line"></div><div class="line">            processorCache = <span class="keyword">new</span> SynchronizedStack&lt;&gt;(SynchronizedStack.DEFAULT_SIZE,</div><div class="line">                    socketProperties.getProcessorCache());</div><div class="line">            eventCache = <span class="keyword">new</span> SynchronizedStack&lt;&gt;(SynchronizedStack.DEFAULT_SIZE,</div><div class="line">                            socketProperties.getEventCache());</div><div class="line">            nioChannels = <span class="keyword">new</span> SynchronizedStack&lt;&gt;(SynchronizedStack.DEFAULT_SIZE,</div><div class="line">                    socketProperties.getBufferPool());</div><div class="line"></div><div class="line">            <span class="comment">// Create worker collection</span></div><div class="line">            <span class="keyword">if</span> ( getExecutor() == <span class="keyword">null</span> ) &#123;</div><div class="line">                createExecutor();</div><div class="line">            &#125;</div><div class="line"></div><div class="line">            initializeConnectionLatch();</div><div class="line"></div><div class="line">            <span class="comment">// Start poller threads</span></div><div class="line">            pollers = <span class="keyword">new</span> Poller[getPollerThreadCount()];</div><div class="line">            <span class="keyword">for</span> (<span class="keyword">int</span> i=<span class="number">0</span>; i&lt;pollers.length; i++) &#123;</div><div class="line">                pollers[i] = <span class="keyword">new</span> Poller();</div><div class="line">                Thread pollerThread = <span class="keyword">new</span> Thread(pollers[i], getName() + <span class="string">"-ClientPoller-"</span>+i);</div><div class="line">                pollerThread.setPriority(threadPriority);</div><div class="line">                pollerThread.setDaemon(<span class="keyword">true</span>);</div><div class="line">                pollerThread.start();</div><div class="line">            &#125;</div><div class="line"></div><div class="line">            startAcceptorThreads();</div><div class="line">        &#125;</div><div class="line">    &#125;</div></pre></td></tr></table></figure>
+<p>当执行到startAcceptorThreads()时，就会进入等待请求的状态，知道一个新的请求到来才会激活它继续执行。</p>
+
+          
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
                 <a class="post-title-link" href="/2016/05/18/JavaWeb/NIO的工作机制/" itemprop="url">
                   NIO工作机制
                 </a>
@@ -308,7 +460,7 @@
           
             <h1 id="NIO的工作方式"><a href="#NIO的工作方式" class="headerlink" title="NIO的工作方式"></a>NIO的工作方式</h1><h2 id="NIO工作机制"><a href="#NIO工作机制" class="headerlink" title="NIO工作机制"></a>NIO工作机制</h2><p>NIO引入了Channel、Buffer和Selector，Channel是高速通道，Buffer是高速通道上的具体单位，Selector是调度器。当我们调用write()往SendQ写数据时，当一次写的数据超过SendQ长度时需要按照SendQ的长度进行分割，在这个过程中需要将用户空间数据和内核地址空间进行切换，而这个切换不是你可以控制的，但在Buffer中我们可以控制Buffer的容量、是否扩容以及如何扩容。</p>
 <p>调用Selector的静态工厂创建一个选择器，创建一个服务端的Channel，绑定到一个Socket对象，并把这个通信信道注册到选择器上，把这个通信信道设置为非阻塞模式。然后就可以调用Selector的selectedKeys方法来检查已经注册在这个选择器上的所有通信信道是否有需要的事件发生，如果与某个事件发生，将会返回所有的SelectionKey，通过这个对象的Channel方法就可以就可以取得这个通信信道对象，从而读取通信的数据，而这里读取的数据是Buffer，这个Buffer是我们可以控制的缓冲器。</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">selector</span><span class="params">()</span> <span class="keyword">throws</span> IOException </span>&#123;</span><br><span class="line">        ByteBuffer buffer = ByteBuffer.allocate(<span class="number">1024</span>);</span><br><span class="line">        Selector selector = Selector.open();</span><br><span class="line">        ServerSocketChannel ssc = ServerSocketChannel.open();</span><br><span class="line">        ssc.configureBlocking(<span class="keyword">false</span>); <span class="comment">//设置为非阻塞方式</span></span><br><span class="line">        ssc.register(selector, SelectionKey.OP_ACCEPT);</span><br><span class="line">        <span class="keyword">while</span> (<span class="keyword">true</span>) &#123;</span><br><span class="line">            Set selectedKeys = selector.selectedKeys();</span><br><span class="line">            Iterator it = selectedKeys.iterator();</span><br><span class="line">            <span class="keyword">while</span> (it.hasNext()) &#123;</span><br><span class="line">                SelectionKey key = (SelectionKey) it.next();</span><br><span class="line">                <span class="keyword">if</span> ((key.readyOps() &amp; SelectionKey.OP_ACCEPT) == SelectionKey.OP_ACCEPT) &#123;</span><br><span class="line">                    ServerSocketChannel ssChannel = (ServerSocketChannel) key.channel();</span><br><span class="line">                    SocketChannel sc = ssChannel.accept(); <span class="comment">//接受到服务端请求</span></span><br><span class="line">                    sc.configureBlocking(<span class="keyword">false</span>);</span><br><span class="line">                    sc.register(selector, SelectionKey.OP_READ);</span><br><span class="line">                    it.remove();</span><br><span class="line">                &#125; <span class="keyword">else</span> <span class="keyword">if</span> ((key.readyOps() &amp; SelectionKey.OP_READ) == SelectionKey.OP_READ) &#123;</span><br><span class="line">                    SocketChannel sc = (SocketChannel) key.channel();</span><br><span class="line">                    <span class="keyword">while</span> (<span class="keyword">true</span>) &#123;</span><br><span class="line">                        buffer.clear();</span><br><span class="line">                        <span class="keyword">int</span> n = sc.read(buffer);</span><br><span class="line">                        <span class="keyword">if</span> (n &lt;= <span class="number">0</span>) &#123;</span><br><span class="line">                            <span class="keyword">break</span>;</span><br><span class="line">                        &#125;</span><br><span class="line">                        buffer.flip();</span><br><span class="line">                    &#125;</span><br><span class="line">                    it.remove();</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">selector</span><span class="params">()</span> <span class="keyword">throws</span> IOException </span>&#123;</div><div class="line">        ByteBuffer buffer = ByteBuffer.allocate(<span class="number">1024</span>);</div><div class="line">        Selector selector = Selector.open();</div><div class="line">        ServerSocketChannel ssc = ServerSocketChannel.open();</div><div class="line">        ssc.configureBlocking(<span class="keyword">false</span>); <span class="comment">//设置为非阻塞方式</span></div><div class="line">        ssc.register(selector, SelectionKey.OP_ACCEPT);</div><div class="line">        <span class="keyword">while</span> (<span class="keyword">true</span>) &#123;</div><div class="line">            Set selectedKeys = selector.selectedKeys();</div><div class="line">            Iterator it = selectedKeys.iterator();</div><div class="line">            <span class="keyword">while</span> (it.hasNext()) &#123;</div><div class="line">                SelectionKey key = (SelectionKey) it.next();</div><div class="line">                <span class="keyword">if</span> ((key.readyOps() &amp; SelectionKey.OP_ACCEPT) == SelectionKey.OP_ACCEPT) &#123;</div><div class="line">                    ServerSocketChannel ssChannel = (ServerSocketChannel) key.channel();</div><div class="line">                    SocketChannel sc = ssChannel.accept(); <span class="comment">//接受到服务端请求</span></div><div class="line">                    sc.configureBlocking(<span class="keyword">false</span>);</div><div class="line">                    sc.register(selector, SelectionKey.OP_READ);</div><div class="line">                    it.remove();</div><div class="line">                &#125; <span class="keyword">else</span> <span class="keyword">if</span> ((key.readyOps() &amp; SelectionKey.OP_READ) == SelectionKey.OP_READ) &#123;</div><div class="line">                    SocketChannel sc = (SocketChannel) key.channel();</div><div class="line">                    <span class="keyword">while</span> (<span class="keyword">true</span>) &#123;</div><div class="line">                        buffer.clear();</div><div class="line">                        <span class="keyword">int</span> n = sc.read(buffer);</div><div class="line">                        <span class="keyword">if</span> (n &lt;= <span class="number">0</span>) &#123;</div><div class="line">                            <span class="keyword">break</span>;</div><div class="line">                        &#125;</div><div class="line">                        buffer.flip();</div><div class="line">                    &#125;</div><div class="line">                    it.remove();</div><div class="line">                &#125;</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line">    &#125;</div></pre></td></tr></table></figure>
 <p>在上面这段程序中，将Server端的监听连接请求的事件和处理请求的事件放在一个线程中，但是在事件应用中，我们通常会把它们放在两个线程中：一个线程专门负责监听客户端的连接请求，而且是以阻塞方式运行的；另外一个线程专门负责处理请求，这个专门处理请求的线程才会真正采用NIO的方式，像Web服务器Tomcat和Jetty都是使用这个处理方式。</p>
 <p>Selector可以同时监听一组通信信道(Channel)上的IO状态，前提是这个Selector已经注册到这些通信信道中。选择器Selector可以调用select()方法检查已经注册的通信信道上IO是否已经准备好，如果没有至少一个信道IO状态有变化，那么select方法会阻塞等待或在超时时间后返回0。如果有多个信道有数据，那么将会把这些数据分配到对应的数据Buffer中。所以关键的地方是，有一个线程来处理所有连接的数据交互，每个连接的数据交互都不是阻塞方式，所以可以同时处理大量的连续请求。</p>
 <h2 id="Buffer的工作方式"><a href="#Buffer的工作方式" class="headerlink" title="Buffer的工作方式"></a>Buffer的工作方式</h2><p>把Buffer简单理解为一组基本数据类型的元素列表，它通过几个变量来保存这个数据的当前位置状态，也就是有4个索引，如下所示：   </p>
@@ -378,151 +530,7 @@
 <li><p>FileChannel.map<br>将文件按照一定大小块映射为内存区域，当程序访问这个内存区域时将直接操作这个文件数据，这种方式省去了数据从内核空间向用户空间复制的损耗。这种方式适合对大文件的只读性操作，如大文件的MD5校验。这种方式是和OS的底层I/O实现相关的，代码如下：</p>
 </li>
 </ol>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">map</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">int</span> bufferSize = <span class="number">1024</span>;</span><br><span class="line">    String fileName = <span class="string">"test.db"</span>;</span><br><span class="line">    <span class="keyword">long</span> fileLength = <span class="keyword">new</span> File(fileName).length();</span><br><span class="line">    <span class="keyword">int</span> bufferCount = <span class="number">1</span> + (<span class="keyword">int</span>) (fileLength / bufferSize);</span><br><span class="line">    MappedByteBuffer[] buffers = <span class="keyword">new</span> MappedByteBuffer[bufferCount];</span><br><span class="line">    <span class="keyword">long</span> remaining = fileLength;</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; bufferCount; i++) &#123;</span><br><span class="line">        RandomAccessFile file;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            file = <span class="keyword">new</span> RandomAccessFile(fileName, <span class="string">"r"</span>);</span><br><span class="line">            buffers[i] = file.getChannel().map(FileChannel.MapMode.READ_ONLY, i * bufferSize, (<span class="keyword">int</span>) Math.min(remaining, bufferSize));</span><br><span class="line">        &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line"></span><br><span class="line">        &#125;</span><br><span class="line">        remaining -= bufferSize;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-          
-        
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
-      
-
-  
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-            
-            
-              
-                
-                <a class="post-title-link" href="/2016/05/17/JavaWeb/深入分析IO工作机制/" itemprop="url">
-                  深入分析I/O工作机制
-                </a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            <span class="post-meta-item-icon">
-              <i class="fa fa-calendar-o"></i>
-            </span>
-            <span class="post-meta-item-text">发表于</span>
-            <time itemprop="dateCreated" datetime="2016-05-17T00:00:00+08:00" content="2016-05-17">
-              2016-05-17
-            </time>
-          </span>
-
-          
-            <span class="post-category" >
-              &nbsp; | &nbsp;
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-              
-                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
-                  <a href="/categories/Java-Web/" itemprop="url" rel="index">
-                    <span itemprop="name">Java Web</span>
-                  </a>
-                </span>
-
-                
-                
-
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-
-          
-          
-
-          
-        </div>
-      </header>
-    
-
-
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h1 id="Java的I-O基本架构"><a href="#Java的I-O基本架构" class="headerlink" title="Java的I/O基本架构"></a>Java的I/O基本架构</h1><p>Java的I/O操作类在java.io下，大概有将近80个类，大概可以分为以下4类：  </p>
-<ul>
-<li>基于字节操作的IO接口：InputStream和OutputStream  </li>
-<li>基于字符操作的IO接口：Writer和Reader  </li>
-<li>基于磁盘操作的IO接口：File  </li>
-<li>基于网络操作的IO接口：Socket</li>
-</ul>
-<p>前2组主要是传输数据的数据格式，后两组主要是传输数据的方式，虽然Socket不在java.io下，在此仍然放在一起，因为IO核心问题要么是数据格式影响IO操作，要么是传输方式影响IO操作，也就是将什么样的数据写到什么地方的问题。</p>
-<h2 id="字节与字符的转化接口"><a href="#字节与字符的转化接口" class="headerlink" title="字节与字符的转化接口"></a>字节与字符的转化接口</h2><p>数据持久化或网络传输都是以字节进行的，所以必须要有从字符到字节或者字节到字符的转化。<br>InputStreamReader类是从字节到字符的转化桥梁，从InputStream到Reader的过程要指定编码字符集，否则将采用操作系统默认的字符集，很可能会出现乱码问题。StreamDecoder正是完成从字节到字符的解码的实现类。  </p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">try</span> &#123;</span><br><span class="line">	StringBuffer str = <span class="keyword">new</span> StringBuffer();</span><br><span class="line">	<span class="keyword">char</span>[] buf = <span class="keyword">new</span> <span class="keyword">char</span>[<span class="number">1024</span>];</span><br><span class="line">	FileReader f = <span class="keyword">new</span> FileReader(<span class="string">"file"</span>);</span><br><span class="line">	<span class="keyword">while</span>(f.read(buf) &gt; <span class="number">0</span>)&#123;</span><br><span class="line">		str.append(buf);</span><br><span class="line">	&#125;</span><br><span class="line">	str.toString();</span><br><span class="line">&#125; <span class="keyword">catch</span> (IOException e)&#123;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>FileReader就是按照上述方式读取文件，FileReader继承了InputStreamReader，实际上是读取文件流，然后通过StreamDecoder解码成char。<br>写入也是类似过程，通过OutputStreamWriter类完成从字符到字节的过程，有StreamEncoder完成解码过程。</p>
-<hr>
-<h1 id="磁盘I-O工作机制"><a href="#磁盘I-O工作机制" class="headerlink" title="磁盘I/O工作机制"></a>磁盘I/O工作机制</h1><p>读取和写入文件I/O操作都调用操作系统提供的接口，因为磁盘设备是操作系统管理的，应用程序要访问物理设备只能通过系统调用的方式。只要是操作系统调用，就存在内核空间地址和用户空间地址切换的问题，这是操作系统本身安全机制，而将内核程序运行使用的内存空间和用户程序运行的内存空间进行隔离造成的。这样虽然保证了内核程旭运行安全，但必然存在数据可能需要从内核空间向用户空间复制的问题。</p>
-<p>如果遇到非常耗时的操作，如磁盘I/O，数据从磁盘复制到内存空间，然后又从内核空间复制到用户空间，将会非常缓慢。这时OS为了加速I/O访问，在内核空间使用缓存机制，也就是从磁盘读取的文件按照一定的组织方式进行缓存，如果用户访问的是同一段磁盘地址的空间数据，那么OS将从内核缓存中直接取出返回给用户程序，这样可以减少I/O响应时间。</p>
-<h2 id="标准访问文件方式"><a href="#标准访问文件方式" class="headerlink" title="标准访问文件方式"></a>标准访问文件方式</h2><p>当程序调用read()接口时，操作系统检查在内核告诉缓存中有没有需要的数据，如果已经缓存了，那么直接从缓存中返回，如果没有，从磁盘中读取，然后缓存在操作系统缓存中。</p>
-<p>写入方式是，程序调用write()接口将数据从用户地址空间复制到内核地址空间的缓存中。这时对用户程序来说写已经完成，至于什么时候再写到磁盘中由OS决定，除非显示调用了sync同步命令。</p>
-<h2 id="直接I-O方式"><a href="#直接I-O方式" class="headerlink" title="直接I/O方式"></a>直接I/O方式</h2><p>程序直接访问磁盘，不经过OS内核数据缓冲区，这样做的目的是减少一次从内核缓冲区到用户程序缓存的数据复制。这种方式通常是在对数据的缓存管理由应用程序实现的数据库管理系统中。如在数据库管理系统中，系统明确知道应该缓存哪些数据，应该失效哪些数据，还可以对一些热点数据做预加载，提前将热点数据加载到内存，可以加速数据的访问效率。</p>
-<p>但直接I/O也有负面影响，如果访问的数据不在应用程序缓存中，那么每次数据都会从磁盘直接加载，这种加载会非常缓慢。通过直接I/O与异步I/O结合使用，会得到比较好的性能。</p>
-<h2 id="同步访问文件的方式"><a href="#同步访问文件的方式" class="headerlink" title="同步访问文件的方式"></a>同步访问文件的方式</h2><p>数据的读取和写入都是同步操作的，它与标准访问文件不同的是，只有当数据被成功写到磁盘时才返回给应用程序成功的标志。</p>
-<p>这种访问文件的方式性能比较差，只有在一些对数据安全性要求比较高的场景中才会使用，而且通常这种操作方式的硬件都是定制的。</p>
-<h2 id="异步访问文件的方式"><a href="#异步访问文件的方式" class="headerlink" title="异步访问文件的方式"></a>异步访问文件的方式</h2><p>当访问数据的线程发出请求之后，线程会接着去处理其他事情，而不是阻塞等待，当请求的数据返回后继续处理下面的操作。这种访问文件的方式可明显提供应用程序效率，但不会改变访问文件的效率。</p>
-<h2 id="内存映射方式"><a href="#内存映射方式" class="headerlink" title="内存映射方式"></a>内存映射方式</h2><p>OS将内存中某一块区域与磁盘中的文件关联起来，当腰访问内存中一段数据时，转换为访问文件的某一段数据。这种方式目的同样是减少数据从内核空间缓存到用户空间缓存的数据复制操作，因为这2个数据是共享的。</p>
-<h2 id="Java访问磁盘文件"><a href="#Java访问磁盘文件" class="headerlink" title="Java访问磁盘文件"></a>Java访问磁盘文件</h2><p>在Java中通常的File并不代表一个真实存在的文件对象，当指定一个路径描述符时，它会返回一个代表这个路径的虚拟对象，这个可能是一个真实存在的文件或者是一个包含多个文件的目录。大多数情况下，我们并不关心这个文件是否真的存在，而是关心对这个文件到底如何操作。</p>
-<p>何时会真正检查一个文件存不存在？要是在真正要读取这个文件时。例如，FileInputStream类都是操作一个文件的接口，注意到在创建一个FileInputStream对象时会创建一个FileDescriptor对象，其实这个对象就是真正代表一个存在的文件对象的描述。当操作一个文件对象时可以通过getFD()方法获取真正操作的与底层OS相关联的文件描述。例如，可以调用FileDescriptor.sync()方法将操作系统缓存中的数据强制刷新到物理磁盘中。</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="title">FileInputStream</span><span class="params">(File file)</span> <span class="keyword">throws</span> FileNotFoundException </span>&#123;</span><br><span class="line">        String name = (file != <span class="keyword">null</span> ? file.getPath() : <span class="keyword">null</span>);</span><br><span class="line">        SecurityManager security = System.getSecurityManager();</span><br><span class="line">        <span class="keyword">if</span> (security != <span class="keyword">null</span>) &#123;</span><br><span class="line">            security.checkRead(name);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> (name == <span class="keyword">null</span>) &#123;</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> NullPointerException();</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> (file.isInvalid()) &#123;</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> FileNotFoundException(<span class="string">"Invalid file path"</span>);</span><br><span class="line">        &#125;</span><br><span class="line">        fd = <span class="keyword">new</span> FileDescriptor();</span><br><span class="line">        fd.incrementAndGetUseCount();</span><br><span class="line">        <span class="keyword">this</span>.path = name;</span><br><span class="line">        open(name);</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
-<p>当传入一个文件路径时，将会根据这个路径创建一个File对象来标识这个文件，然后根据这个File对象创建真正读取文件的操作对象，这时将会真正创建一个关联真实存在的磁盘文件的描述符FileDescriptor，通过这个对象可以直接控制这个磁盘文件。</p>
-<hr>
-<h1 id="Java-Socket工作机制"><a href="#Java-Socket工作机制" class="headerlink" title="Java Socket工作机制"></a>Java Socket工作机制</h1><h2 id="建立通信链路"><a href="#建立通信链路" class="headerlink" title="建立通信链路"></a>建立通信链路</h2><p>当客户端要与服务端通信时，客户端首先要创建一个Socket实例，OS将为这个Socket实例分配一个没有被使用的本地端口号，并创建一个包含本地地址、远程地址和端口号的套接字数据结构，这个数据结构将一直保存在系统中直到这个连接关闭。在创建Socket实例的构造函数正确返回之前，将要进行TCP的3次握手协议，TCP握手协议完成后，Socket实例对象将创建完成，否则抛出IOException错误。</p>
-<p>与之对应的服务端将创建一个ServerSocket实例，创建ServerSocket比较简单，只要指定的端口号未被占用，一般实例都会创建成功。同时OS也会为ServerSocket实例创建一个底层数据结构，这个数据结构包含指定监听的端口号和包含监听地址的通配符，通常情况下都是“*”，即监听所有地址。之后当调用accept()方法时，将进入阻塞状态，等待客户端的请求。</p>
-<p>当一个新的请求到来时，将为这个连接创建一个新的套接字数据结构，该套接字数据的信息包含的地址和端口信息正是请求源地址和端口。这个新创建的数据结构将会关联到ServerSocket实例的一个未完成的连接数据结构列表中。注意，这时服务端的与之对应的Socket实例并没有完成创建，而要等到与客户端的3次握手完成后，这个服务端的Socket实例才会返回，并将这个Socket实例对应的数据结构从未完成列表中移到已完成列表中。所以与ServerSocket所关联的列表中每个数据结构都代表与一个客户端建立的TCP连接。</p>
-<h2 id="数据传输"><a href="#数据传输" class="headerlink" title="数据传输"></a>数据传输</h2><p>当连接建立成功，服务端和客户端都会拥有一个Socket实例，每个Socket实例都有一个InputStream和一个OutputStream，并通过这两个对象交换数据。同时我们知道网络I/O都是以字节流传输的，当创建Socket对象时，OS将会为InputStream和OutputStream分别分配一定大小的缓存区，数据的写入和读取都是通过这个缓存区完成。</p>
-<p>写入端将数据写到OutputStream的SendQ队列中，当队列填满时，数据将被转移到另一端InputStream的RecvQ队列中，如果这时RecvQ已经满了，那么OutputStream的write方法将会阻塞，直到RecvQ队列有足够的空间容纳SendQ发送的数据。这个缓存区的大小及写入端的速度和读取端的速度非常影响这个连接的数据传输效率，由于可能会发生阻塞，所有网络I/O与磁盘I/O不同的是数据的写入和读取还要有一个协调的过程，如果两边同时传送数据可能会产生死锁。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">map</span><span class="params">()</span> </span>&#123;</div><div class="line">    <span class="keyword">int</span> bufferSize = <span class="number">1024</span>;</div><div class="line">    String fileName = <span class="string">"test.db"</span>;</div><div class="line">    <span class="keyword">long</span> fileLength = <span class="keyword">new</span> File(fileName).length();</div><div class="line">    <span class="keyword">int</span> bufferCount = <span class="number">1</span> + (<span class="keyword">int</span>) (fileLength / bufferSize);</div><div class="line">    MappedByteBuffer[] buffers = <span class="keyword">new</span> MappedByteBuffer[bufferCount];</div><div class="line">    <span class="keyword">long</span> remaining = fileLength;</div><div class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; bufferCount; i++) &#123;</div><div class="line">        RandomAccessFile file;</div><div class="line">        <span class="keyword">try</span> &#123;</div><div class="line">            file = <span class="keyword">new</span> RandomAccessFile(fileName, <span class="string">"r"</span>);</div><div class="line">            buffers[i] = file.getChannel().map(FileChannel.MapMode.READ_ONLY, i * bufferSize, (<span class="keyword">int</span>) Math.min(remaining, bufferSize));</div><div class="line">        &#125; <span class="keyword">catch</span> (Exception e) &#123;</div><div class="line"></div><div class="line">        &#125;</div><div class="line">        remaining -= bufferSize;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
 
           
         
@@ -596,7 +604,7 @@
         <nav class="site-state motion-element">
           <div class="site-state-item site-state-posts">
             <a href="/archives">
-              <span class="site-state-item-count">35</span>
+              <span class="site-state-item-count">36</span>
               <span class="site-state-item-name">日志</span>
             </a>
           </div>

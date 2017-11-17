@@ -305,7 +305,7 @@
 <p>时间事件的属性：<br>1.id：服务器为时间事件创建的全局唯一ID，ID号从小到大递增。<br>2.when：毫秒精度的unix时间戳，记录时间事件的到达时间。<br>3.timeProc：时间事件处理器，一个函数。当时间事件到达时，执行此函数。  </p>
 <p>时间事件的返回值决定了时间事件类型，如返回ae.h/AE_NOMORE，表示事件为定时事件，到达一次后则删除；如返回一个非AE_NOMORE的整数，表示事件为周期性事件，当事件到达之后，服务器会根据返回值更新时间事件的when属性，并以这种方式一直更新下去。当前Redis版本中只有周期性事件，没有使用定时事件。  </p>
 <p>实现：<br>服务器将所有时间事件都存放在一个无序列表中，每当时间事件执行器执行时，它就遍历整个链表，找到所有已到达的时间事件并调用相应事件处理器。这里的的无序链表，指的是不按when属性大小排序，其实是按ID排序了，新的时间事件总是插入链表的表头。当前Redis版本中，服务器只使用serverCron一个时间事件，而在benchmark模式下，服务器也只使用2个时间事件，所以使用无序链表来保存时间事情，并不影响性能。  </p>
-<p>事件调度伪代码：<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">def aeProcessEvents():</span><br><span class="line">//获取到达时间离当前时间最接近的时间事件</span><br><span class="line">time_event = aeSearchNearestTimer()</span><br><span class="line">//计算最接近的时间事件距离到达还有多少毫秒</span><br><span class="line">remain_ms = time_event.when - unix_ts_now()</span><br><span class="line">//如果事件已到达，那么remain_ms 值可能为负数，置为0</span><br><span class="line"><span class="keyword">if</span> remain_ms &lt; 0:</span><br><span class="line">remain_ms = 0</span><br><span class="line">//根据remain_ms值，创建timeval结构</span><br><span class="line">timeval = create_timeval_with_ms(remain_ms)</span><br><span class="line">//阻塞并等待文件事件产生，最大阻塞时间由传入的timeval结构决定</span><br><span class="line">//如果remaind_ms值为0，那么aeApiPoll调用之后马上返回，不阻塞</span><br><span class="line">aeApiPoll(timeval)</span><br><span class="line">//处理所有已产生的文件事件</span><br><span class="line">processFileEvents()</span><br><span class="line">//处理所有已到达的时间事件</span><br><span class="line">processTimeEvents()</span><br></pre></td></tr></table></figure></p>
+<p>事件调度伪代码：<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div></pre></td><td class="code"><pre><div class="line">def aeProcessEvents():</div><div class="line">//获取到达时间离当前时间最接近的时间事件</div><div class="line">time_event = aeSearchNearestTimer()</div><div class="line">//计算最接近的时间事件距离到达还有多少毫秒</div><div class="line">remain_ms = time_event.when - unix_ts_now()</div><div class="line">//如果事件已到达，那么remain_ms 值可能为负数，置为0</div><div class="line"><span class="keyword">if</span> remain_ms &lt; 0:</div><div class="line">remain_ms = 0</div><div class="line">//根据remain_ms值，创建timeval结构</div><div class="line">timeval = create_timeval_with_ms(remain_ms)</div><div class="line">//阻塞并等待文件事件产生，最大阻塞时间由传入的timeval结构决定</div><div class="line">//如果remaind_ms值为0，那么aeApiPoll调用之后马上返回，不阻塞</div><div class="line">aeApiPoll(timeval)</div><div class="line">//处理所有已产生的文件事件</div><div class="line">processFileEvents()</div><div class="line">//处理所有已到达的时间事件</div><div class="line">processTimeEvents()</div></pre></td></tr></table></figure></p>
 
       
     </div>
@@ -337,8 +337,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2015/07/11/Redis设计与实现/Redis文件事件/" rel="next" title="Redis文件事件">
-                <i class="fa fa-chevron-left"></i> Redis文件事件
+              <a href="/2015/07/11/Redis设计与实现/Redis持久化-AOF/" rel="next" title="Redis持久化-AOF">
+                <i class="fa fa-chevron-left"></i> Redis持久化-AOF
               </a>
             
           </div>
@@ -415,7 +415,7 @@
         <nav class="site-state motion-element">
           <div class="site-state-item site-state-posts">
             <a href="/archives">
-              <span class="site-state-item-count">35</span>
+              <span class="site-state-item-count">36</span>
               <span class="site-state-item-name">日志</span>
             </a>
           </div>

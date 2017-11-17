@@ -243,6 +243,145 @@
             
               
                 
+                <a class="post-title-link" href="/2016/05/11/JavaWeb/DNS域名解析过程/" itemprop="url">
+                  DNS域名解析过程
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2016-05-11T00:00:00+08:00" content="2016-05-11">
+              2016-05-11
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/Java-Web/" itemprop="url" rel="index">
+                    <span itemprop="name">Java Web</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+
+          
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>当用户在浏览器输入www.abc.com，DNS解析将会有将近10个步骤。</p>
+<ol>
+<li>浏览器检查缓存有没有该域名对应的IP。如果有，这个解析过程就结束。浏览器缓存域名是有限制的，不仅大小有限制，时间也有限制，通过TTL属性设置域名缓存时间。</li>
+<li>浏览器缓存中没有，检查操作系统缓存中是否有解析结果。如果有，解析结束。没有的话，请求域名服务器解析该域名。</li>
+<li><p>网络配置有配置DNS服务器地址，操作系统把域名发送给这里的LDNS。Linux下通过以下命令查看。  </p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">cat /etc/resolv.conf</div></pre></td></tr></table></figure>
+</li>
+<li><p>LDNS未命中，直接到Root Server域名服务器请求解析。</p>
+</li>
+<li>根域名服务器返回本地域名服务器一个服务器地址(gTLD Server)。gTLD是国际顶级域名服务器，如.com、.cn、.org等，全球只有13台左右。</li>
+<li>本地域名服务器再向上一步返回的gTLD服务器发送请求。</li>
+<li>gTLD服务器查找并返回此域名对应的Name Server域名服务器地址，这个Name Server通常就是你注册的域名服务器。</li>
+<li>Name Server域名服务器查询存储的域名和IP映射关系，正常情况下查询到目标IP记录，连同一个TTL值返回给DNS Server域名服务器。</li>
+<li>返回该域名对应的IP和TTL值，Local DNS Server会缓存该记录。</li>
+<li>解析结果返回给用户，用户根据TTL值缓存这个记录。</li>
+</ol>
+<p>实际过程中，可能不止这个10个步骤，如Name Server有多级或者有个GTM负载均衡控制，这都会影响域名解析的过程。</p>
+<h1 id="跟踪域名解析过程"><a href="#跟踪域名解析过程" class="headerlink" title="跟踪域名解析过程"></a>跟踪域名解析过程</h1><h2 id="dig"><a href="#dig" class="headerlink" title="dig"></a>dig</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div></pre></td><td class="code"><pre><div class="line">--- ~ » dig www.google.com</div><div class="line"></div><div class="line">; &lt;&lt;&gt;&gt; DiG 9.8.3-P1 &lt;&lt;&gt;&gt; www.google.com</div><div class="line">;; global options: +cmd</div><div class="line">;; Got answer:</div><div class="line">;; -&gt;&gt;HEADER&lt;&lt;- opcode: QUERY, status: NOERROR, id: 50606</div><div class="line">;; flags: qr rd ra; QUERY: 1, ANSWER: 16, AUTHORITY: 0, ADDITIONAL: 0</div><div class="line"></div><div class="line">;; QUESTION SECTION:</div><div class="line">;www.google.com.			IN	A</div><div class="line"></div><div class="line">;; ANSWER SECTION:</div><div class="line">www.google.com.		299	IN	A	61.238.239.35</div><div class="line">www.google.com.		299	IN	A	61.238.239.20</div><div class="line">www.google.com.		299	IN	A	61.238.239.24</div><div class="line">www.google.com.		299	IN	A	61.238.239.59</div><div class="line">www.google.com.		299	IN	A	61.238.239.29</div><div class="line">www.google.com.		299	IN	A	61.238.239.30</div><div class="line">www.google.com.		299	IN	A	61.238.239.45</div><div class="line">www.google.com.		299	IN	A	61.238.239.40</div><div class="line">www.google.com.		299	IN	A	61.238.239.55</div><div class="line">www.google.com.		299	IN	A	61.238.239.34</div><div class="line">www.google.com.		299	IN	A	61.238.239.44</div><div class="line">www.google.com.		299	IN	A	61.238.239.49</div><div class="line">www.google.com.		299	IN	A	61.238.239.54</div><div class="line">www.google.com.		299	IN	A	61.238.239.25</div><div class="line">www.google.com.		299	IN	A	61.238.239.39</div><div class="line">www.google.com.		299	IN	A	61.238.239.50</div><div class="line"></div><div class="line">;; Query time: 61 msec</div><div class="line">;; SERVER: 8.8.8.8#53(8.8.8.8)</div><div class="line">;; WHEN: Wed May 11 21:04:56 2016</div><div class="line">;; MSG SIZE  rcvd: 288</div><div class="line"></div><div class="line">--- ~ »</div></pre></td></tr></table></figure>
+<h2 id="dig-cmd"><a href="#dig-cmd" class="headerlink" title="dig +cmd"></a>dig +cmd</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div></pre></td><td class="code"><pre><div class="line">--- ~ » dig +printcmd www.taobao.com</div><div class="line">Invalid option: +printcmd</div><div class="line">Usage:  dig [@global-server] [domain] [q-type] [q-class] &#123;q-opt&#125;</div><div class="line">            &#123;global-d-opt&#125; host [@local-server] &#123;local-d-opt&#125;</div><div class="line">            [ host [@local-server] &#123;local-d-opt&#125; [...]]</div><div class="line"></div><div class="line">Use &quot;dig -h&quot; (or &quot;dig -h | more&quot;) for complete list of options</div><div class="line">--- ~ » dig +cmd www.taobao.com                                                                                                                                        1 ↵</div><div class="line"></div><div class="line">; &lt;&lt;&gt;&gt; DiG 9.8.3-P1 &lt;&lt;&gt;&gt; +cmd www.taobao.com</div><div class="line">;; global options: +cmd</div><div class="line">;; Got answer:</div><div class="line">;; -&gt;&gt;HEADER&lt;&lt;- opcode: QUERY, status: NOERROR, id: 62882</div><div class="line">;; flags: qr rd ra; QUERY: 1, ANSWER: 2, AUTHORITY: 0, ADDITIONAL: 0</div><div class="line"></div><div class="line">;; QUESTION SECTION:</div><div class="line">;www.taobao.com.			IN	A</div><div class="line"></div><div class="line">;; ANSWER SECTION:</div><div class="line">www.taobao.com.		71	IN	CNAME	www.taobao.com.danuoyi.tbcache.com.</div><div class="line">www.taobao.com.danuoyi.tbcache.com. 599	IN A	205.204.104.227</div><div class="line"></div><div class="line">;; Query time: 73 msec</div><div class="line">;; SERVER: 8.8.8.8#53(8.8.8.8)</div><div class="line">;; WHEN: Wed May 11 21:07:41 2016</div><div class="line">;; MSG SIZE  rcvd: 93</div><div class="line"></div><div class="line">--- ~ »</div></pre></td></tr></table></figure>
+<h2 id="dig-trace"><a href="#dig-trace" class="headerlink" title="dig +trace"></a>dig +trace</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div></pre></td><td class="code"><pre><div class="line">--- ~ » dig www.google.com +trace                                                                                                                                      9 ↵</div><div class="line"></div><div class="line">; &lt;&lt;&gt;&gt; DiG 9.8.3-P1 &lt;&lt;&gt;&gt; www.google.com +trace</div><div class="line">;; global options: +cmd</div><div class="line">.			5236	IN	NS	a.root-servers.net.</div><div class="line">.			5236	IN	NS	b.root-servers.net.</div><div class="line">.			5236	IN	NS	c.root-servers.net.</div><div class="line">.			5236	IN	NS	d.root-servers.net.</div><div class="line">.			5236	IN	NS	e.root-servers.net.</div><div class="line">.			5236	IN	NS	f.root-servers.net.</div><div class="line">.			5236	IN	NS	g.root-servers.net.</div><div class="line">.			5236	IN	NS	h.root-servers.net.</div><div class="line">.			5236	IN	NS	i.root-servers.net.</div><div class="line">.			5236	IN	NS	j.root-servers.net.</div><div class="line">.			5236	IN	NS	k.root-servers.net.</div><div class="line">.			5236	IN	NS	l.root-servers.net.</div><div class="line">.			5236	IN	NS	m.root-servers.net.</div><div class="line">;; Received 228 bytes from 8.8.8.8#53(8.8.8.8) in 63 ms</div><div class="line"></div><div class="line">com.			172800	IN	NS	m.gtld-servers.net.</div><div class="line">com.			172800	IN	NS	e.gtld-servers.net.</div><div class="line">com.			172800	IN	NS	d.gtld-servers.net.</div><div class="line">com.			172800	IN	NS	b.gtld-servers.net.</div><div class="line">com.			172800	IN	NS	j.gtld-servers.net.</div><div class="line">com.			172800	IN	NS	f.gtld-servers.net.</div><div class="line">com.			172800	IN	NS	g.gtld-servers.net.</div><div class="line">com.			172800	IN	NS	l.gtld-servers.net.</div><div class="line">com.			172800	IN	NS	k.gtld-servers.net.</div><div class="line">com.			172800	IN	NS	h.gtld-servers.net.</div><div class="line">com.			172800	IN	NS	i.gtld-servers.net.</div><div class="line">com.			172800	IN	NS	a.gtld-servers.net.</div><div class="line">com.			172800	IN	NS	c.gtld-servers.net.</div><div class="line">;; Received 504 bytes from 192.5.5.241#53(192.5.5.241) in 38 ms</div><div class="line"></div><div class="line">;; connection timed out; no servers could be reached</div><div class="line">--- ~ »</div></pre></td></tr></table></figure>
+<h1 id="几种域名解析方式"><a href="#几种域名解析方式" class="headerlink" title="几种域名解析方式"></a>几种域名解析方式</h1><ul>
+<li>A记录，指定域名对应IP。</li>
+<li>MX记录，表示Mail Exchange，将某个域名下邮件服务器指向自己Mail Server。正常通过Web请求仍然解析A记录IP。</li>
+<li>CNAME记录，Canonical Name(别名解析)。</li>
+<li>NS记录，为某个域名指定DNS解析服务器。</li>
+<li>TXT记录，为某个主机名或域名设置说明。</li>
+</ul>
+
+          
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
                 <a class="post-title-link" href="/2016/05/07/深入理解Java虚拟机/运行时数据区域/" itemprop="url">
                   Java内存区域与内存溢出异常
                 </a>
@@ -354,137 +493,10 @@
 <li>-XX:PermSize和-XX:MaxPermSize 方法区最小、最大值。</li>
 <li>-XX: MaxDirectMemorySize，如不指定默认与-Xmx一样。</li>
 </ul>
-<h2 id="方法区溢出"><a href="#方法区溢出" class="headerlink" title="方法区溢出"></a>方法区溢出</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span><br><span class="line"> * VM args: -XX:PermSize=10M -XX:MaxPermSize=10M</span><br><span class="line"> */</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span></span>&#123;</span><br><span class="line">	List&lt;String&gt; list = <span class="keyword">new</span> ArrayList&lt;String&gt;();</span><br><span class="line">	<span class="keyword">int</span> i = <span class="number">0</span>;</span><br><span class="line">	<span class="keyword">while</span>(<span class="keyword">true</span>)&#123;</span><br><span class="line">		list.add(String.valueOf(i++).intern());</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="方法区溢出"><a href="#方法区溢出" class="headerlink" title="方法区溢出"></a>方法区溢出</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line"><span class="comment">/**</span></div><div class="line"> * VM args: -XX:PermSize=10M -XX:MaxPermSize=10M</div><div class="line"> */</div><div class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span></span>&#123;</div><div class="line">	List&lt;String&gt; list = <span class="keyword">new</span> ArrayList&lt;String&gt;();</div><div class="line">	<span class="keyword">int</span> i = <span class="number">0</span>;</div><div class="line">	<span class="keyword">while</span>(<span class="keyword">true</span>)&#123;</div><div class="line">		list.add(String.valueOf(i++).intern());</div><div class="line">	&#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
 <p>上述代码在JDK1.7之前方法区内存不足时提示信息为”PermGen space”，说明运行时常量池属于方法区（HotSpot JVM中永久代）。而在JDK1.7运行时while将一直进行下去，不受PermSize限制，因为1.7开始逐步“去永久代”。</p>
-<h2 id="String-intern"><a href="#String-intern" class="headerlink" title="String.intern()"></a>String.intern()</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span></span>&#123;</span><br><span class="line">	String str1 = <span class="keyword">new</span> StringBuilder(<span class="string">"abc"</span>).append(<span class="string">"xyz"</span>).toString();</span><br><span class="line">	System.out.println(str1.intern() == str1);</span><br><span class="line">	String str2 = <span class="keyword">new</span> StringBuilder(<span class="string">"ja"</span>).append(<span class="string">"va"</span>).toString();</span><br><span class="line">	System.out.println(str2.intern() == str2);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="String-intern"><a href="#String-intern" class="headerlink" title="String.intern()"></a>String.intern()</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span></span>&#123;</div><div class="line">	String str1 = <span class="keyword">new</span> StringBuilder(<span class="string">"abc"</span>).append(<span class="string">"xyz"</span>).toString();</div><div class="line">	System.out.println(str1.intern() == str1);</div><div class="line">	String str2 = <span class="keyword">new</span> StringBuilder(<span class="string">"ja"</span>).append(<span class="string">"va"</span>).toString();</div><div class="line">	System.out.println(str2.intern() == str2);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
 <p>上述代码在JDK1.6中执行，会得到2个false。而在JDK1.7中执行，会得到一个true和一个false。<br>在JDK1.6中，intern()方法会把首次遇到的字符串实例复制到永久代中。返回的也是永久代中这个字符串实例的引用，而有StringBuilder创建的字符串实例在Java堆上，所以必然不是同一个引用，将返回false。<br>在JDK1.7中，intern()的实现将不会再复制实例，只是在常量池中记录首次出现的实例引用，因此intern()返回的引用和由StringBuilder创建的那个字符串实例是同一个。对str2返回false是因为”java”这个字符串在执行StringBuilder.toString()之前已经出现过，字符串常量池中已经有它的引用了，不符合”首次出现”的原则。</p>
-
-          
-        
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
-      
-
-  
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-            
-            
-              
-                
-                <a class="post-title-link" href="/2015/07/22/Redis设计与实现/Redis客户端/" itemprop="url">
-                  Redis客户端
-                </a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            <span class="post-meta-item-icon">
-              <i class="fa fa-calendar-o"></i>
-            </span>
-            <span class="post-meta-item-text">发表于</span>
-            <time itemprop="dateCreated" datetime="2015-07-22T00:00:00+08:00" content="2015-07-22">
-              2015-07-22
-            </time>
-          </span>
-
-          
-            <span class="post-category" >
-              &nbsp; | &nbsp;
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-              
-                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
-                  <a href="/categories/Redis设计与实现/" itemprop="url" rel="index">
-                    <span itemprop="name">Redis设计与实现</span>
-                  </a>
-                </span>
-
-                
-                
-
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-
-          
-          
-
-          
-        </div>
-      </header>
-    
-
-
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>通过使用由I/O多路复用技术实现的文件事件处理器，Redis服务器使用单线程单进程的方式来处理命令请求，并与多个客户端进行网络通信。<br>redisClient结构保存客户端的数据结构：  </p>
-<ul>
-<li>套接字描述符  </li>
-<li>名字  </li>
-<li>标志位  </li>
-<li>正在使用的数据库指针，数据库号码    </li>
-<li>当前要执行的命令、参数、参数个数，以及指向命令实现函数的指针  </li>
-<li>输入缓冲和输出缓冲  </li>
-<li>复制状态信息和复制所需数据结构  </li>
-<li>执行BRPOP、BLPOP等列表阻塞命令时使用的数据结构  </li>
-<li>事物状态，执行WATCH命令用到的数据结构  </li>
-<li>执行发布和订阅用到的数据结构  </li>
-<li>身份验证标志  </li>
-<li>创建时间、最后一次通信时间，输出缓冲区大小超出软性限制的事件  </li>
-</ul>
 
           
         
@@ -558,7 +570,7 @@
         <nav class="site-state motion-element">
           <div class="site-state-item site-state-posts">
             <a href="/archives">
-              <span class="site-state-item-count">35</span>
+              <span class="site-state-item-count">36</span>
               <span class="site-state-item-name">日志</span>
             </a>
           </div>

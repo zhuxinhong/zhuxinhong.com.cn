@@ -302,7 +302,7 @@
 
       
         <p>Redis使用SDS(simple dynamic string)用作字符串默认实现。</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">struct sdshdr&#123;</span><br><span class="line">	//已使用buf数组的字节数量，也就是字符串长度</span><br><span class="line">	int len;</span><br><span class="line">	//未使用的长度</span><br><span class="line">	int free;</span><br><span class="line">	//保存字符串</span><br><span class="line">	char buf[];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">struct sdshdr&#123;</div><div class="line">	//已使用buf数组的字节数量，也就是字符串长度</div><div class="line">	int len;</div><div class="line">	//未使用的长度</div><div class="line">	int free;</div><div class="line">	//保存字符串</div><div class="line">	char buf[];</div><div class="line">&#125;</div></pre></td></tr></table></figure>
 <ul>
 <li><p>SDS遵循C语言字符串以空字符串结尾，保留1个字节的空字符串’\0’，该空串不记入len中。</p>
 </li>
@@ -427,7 +427,7 @@
         <nav class="site-state motion-element">
           <div class="site-state-item site-state-posts">
             <a href="/archives">
-              <span class="site-state-item-count">35</span>
+              <span class="site-state-item-count">36</span>
               <span class="site-state-item-name">日志</span>
             </a>
           </div>

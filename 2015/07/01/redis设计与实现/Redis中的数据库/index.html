@@ -302,9 +302,9 @@
 
       
         <p>Redis服务器的所有数据库都保存在服务器状态 redis.h/redisServer结构的db数组中，db数组中每项都是一个 redis.h/redisDb结构，代表一个数据库实例。</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">struct redisServer &#123;</span><br><span class="line">	//...</span><br><span class="line">	int dbnum;</span><br><span class="line">	//...</span><br><span class="line">	redisDb *db;</span><br><span class="line">	//...</span><br><span class="line">&#125; ;</span><br></pre></td></tr></table></figure>
-<p>初始化数据库实例默认是16个，可以用过select 0~15 来切换。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">typeof struct redisClient &#123;</span><br><span class="line">	//...</span><br><span class="line">	//记录客户端当前正在使用的数据库</span><br><span class="line">	redisDb *db;</span><br><span class="line">	//...</span><br><span class="line">&#125; redisClient;</span><br></pre></td></tr></table></figure></p>
-<p>redisDb 结构中的dict字典保存了数据库中的所有键值对，这个字典称之为键空间。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">typeof struct redisDb &#123;</span><br><span class="line">	//...</span><br><span class="line">	dict *dict</span><br><span class="line">	//...</span><br><span class="line">&#125; redisDb;</span><br></pre></td></tr></table></figure></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">struct redisServer &#123;</div><div class="line">	//...</div><div class="line">	int dbnum;</div><div class="line">	//...</div><div class="line">	redisDb *db;</div><div class="line">	//...</div><div class="line">&#125; ;</div></pre></td></tr></table></figure>
+<p>初始化数据库实例默认是16个，可以用过select 0~15 来切换。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">typeof struct redisClient &#123;</div><div class="line">	//...</div><div class="line">	//记录客户端当前正在使用的数据库</div><div class="line">	redisDb *db;</div><div class="line">	//...</div><div class="line">&#125; redisClient;</div></pre></td></tr></table></figure></p>
+<p>redisDb 结构中的dict字典保存了数据库中的所有键值对，这个字典称之为键空间。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">typeof struct redisDb &#123;</div><div class="line">	//...</div><div class="line">	dict *dict</div><div class="line">	//...</div><div class="line">&#125; redisDb;</div></pre></td></tr></table></figure></p>
 <p>我们在对键进行增删改查操作时候，其实就是在对dict的字典结构进行对应操作。</p>
 <p>读写键的维护操作：<br>1.读取一个key后(读和写都要先读)，服务器会更新键空间命中次数和不命中次数。这2个值可以在INFO命令的status属性 keyspace_hit和keyspace_misses查看。<br>2.读取一个key后，服务器会更新key的LRU(最后一次使用)时间，这个值可以用于计算key的闲置时间，使用Object idletime $key 命令可以查看。<br>3.读取一个key时，发现该key已过期，会先删除。<br>4.如果有watch命令监视了某个key，服务器在对该key进行修改后，会将这个键标记为脏(dirty)，从而让此key暴露给事物。<br>5.服务器每修改一个key后，会对脏键计数器+1，这个计数器会触发redis的持久化以及复制操作。<br>6.如果服务器开启了数据库通知功能，那么在key被修改后，redis会按配置发送相应的通知。</p>
 <p>Redis有4个命令可以设置键的过期时间：</p>
@@ -350,16 +350,16 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2015/07/01/Redis设计与实现/Redis持久化-RDB/" rel="next" title="Redis持久化-RDB">
-                <i class="fa fa-chevron-left"></i> Redis持久化-RDB
+              <a href="/2015/07/01/Redis设计与实现/Redis类型检查和命令多态/" rel="next" title="Redis类型检查和命令多态">
+                <i class="fa fa-chevron-left"></i> Redis类型检查和命令多态
               </a>
             
           </div>
 
           <div class="post-nav-prev post-nav-item">
             
-              <a href="/2015/07/01/Redis设计与实现/Redis类型检查和命令多态/" rel="prev" title="Redis类型检查和命令多态">
-                Redis类型检查和命令多态 <i class="fa fa-chevron-right"></i>
+              <a href="/2015/07/04/Redis设计与实现/RedisRDB文件结构/" rel="prev" title="RedisRDB文件结构">
+                RedisRDB文件结构 <i class="fa fa-chevron-right"></i>
               </a>
             
           </div>
@@ -428,7 +428,7 @@
         <nav class="site-state motion-element">
           <div class="site-state-item site-state-posts">
             <a href="/archives">
-              <span class="site-state-item-count">35</span>
+              <span class="site-state-item-count">36</span>
               <span class="site-state-item-name">日志</span>
             </a>
           </div>

@@ -86,7 +86,7 @@
 <meta property="og:site_name" content="zhuxinhong blog">
 <meta property="og:description" content="并发编程的挑战与实现挑战并发编程是为了让程序更快，与此同时会面临非常多的挑战，接下来会介绍几种问题的解决方法。 上下文切换单核处理器也支持多线程执行代码，CPU通过给每个线程分配CPU时间片来实现这个机制。时间片是CPU分配给各个线程的时间，因为时间片非常短，所以CPU通过不停地切换线程执行，让我们感觉多个线程是同时执行。 CPU通过时间片分配算法来循环执行任务，在切换前会保存上一个任务的状态，以">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2017-07-15T09:17:47.000Z">
+<meta property="og:updated_time" content="2017-07-29T09:40:03.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="并发编程的挑战与底层实现原理">
 <meta name="twitter:description" content="并发编程的挑战与实现挑战并发编程是为了让程序更快，与此同时会面临非常多的挑战，接下来会介绍几种问题的解决方法。 上下文切换单核处理器也支持多线程执行代码，CPU通过给每个线程分配CPU时间片来实现这个机制。时间片是CPU分配给各个线程的时间，因为时间片非常短，所以CPU通过不停地切换线程执行，让我们感觉多个线程是同时执行。 CPU通过时间片分配算法来循环执行任务，在切换前会保存上一个任务的状态，以">
@@ -348,7 +348,7 @@
 <tr>
 <td style="text-align:center">缓冲行</td>
 <td style="text-align:center">cache line</td>
-<td style="text-align:center">缓冲中可以分配的最小存储单位。处理器填写缓存线时会加载整个缓存线，需要使用多个主内存读周期</td>
+<td style="text-align:center">缓冲中可以分配的最小存储单位。处理器填写缓存行时会加载整个缓存行，需要使用多个主内存读周期</td>
 </tr>
 <tr>
 <td style="text-align:center">原子操作</td>
@@ -373,9 +373,9 @@
 </tbody>
 </table>
 <p>我们在X86处理器下通过工具获取JIT编译器生成的汇编指令来查看对volatile进行写操作时，CPU会做什么事情。</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">volatile</span> instance = <span class="keyword">new</span> Singleton();</span><br></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">volatile</span> instance = <span class="keyword">new</span> Singleton();</div></pre></td></tr></table></figure>
 <p>转变成汇编代码</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">0x01a3de1d: movb $0x0,0x1104800(%esi); 0x01a3de24: lock add1 $0x0,(%esp);</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">0x01a3de1d: movb $0x0,0x1104800(%esi); 0x01a3de24: lock add1 $0x0,(%esp);</div></pre></td></tr></table></figure>
 <p>通过查IA-32架构软件开发者手册可知，Lock前缀的指令在多核处理器下引发两件事情。</p>
 <p>1)    将当前处理器缓存行的数据写回到系统内存。</p>
 <p>2)    这个写回内存的操作会使在其他CPU里缓存了该内存地址的数据无效。</p>
@@ -542,7 +542,7 @@
         <nav class="site-state motion-element">
           <div class="site-state-item site-state-posts">
             <a href="/archives">
-              <span class="site-state-item-count">35</span>
+              <span class="site-state-item-count">36</span>
               <span class="site-state-item-name">日志</span>
             </a>
           </div>

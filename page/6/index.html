@@ -243,6 +243,154 @@
             
               
                 
+                <a class="post-title-link" href="/2016/08/09/编写高质量代码/基本类型/" itemprop="url">
+                  基本类型
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2016-08-09T00:00:00+08:00" content="2016-08-09">
+              2016-08-09
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/编写高质量代码/" itemprop="url" rel="index">
+                    <span itemprop="name">编写高质量代码</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+
+          
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <ul>
+<li><a href="#用偶判断，不用奇判断">用偶判断，不用奇判断</a></li>
+<li><a href="#用整型处理货币">用整型处理货币</a></li>
+<li><a href="#不要让类型默默转换">不要让类型默默转换</a></li>
+<li><a href="#边界">边界</a></li>
+</ul>
+<h3 id="用偶判断，不用奇判断"><a href="#用偶判断，不用奇判断" class="headerlink" title="用偶判断，不用奇判断"></a>用偶判断，不用奇判断</h3><p>这是判断奇偶数的代码，能被2整除就是偶数，否则是奇数。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</div><div class="line">    Scanner input = <span class="keyword">new</span> Scanner(System.in);</div><div class="line">    System.out.println(<span class="string">"输入数字判断奇偶"</span>);</div><div class="line">    <span class="keyword">while</span> (input.hasNextInt()) &#123;</div><div class="line">        <span class="keyword">int</span> i = input.nextInt();</div><div class="line">        String str = i + <span class="string">" --&gt; "</span> + (i % <span class="number">2</span> == <span class="number">1</span> ? <span class="string">"奇数"</span> : <span class="string">"偶数"</span>);</div><div class="line">        System.out.println(str);</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>我们看下运行结果：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">输入数字判断奇偶</div><div class="line">1</div><div class="line">1 --&gt; 奇数</div><div class="line">-1</div><div class="line">-1 --&gt; 偶数</div><div class="line">2</div><div class="line">2 --&gt; 偶数</div><div class="line">-2</div><div class="line">-2 --&gt; 偶数</div><div class="line">-3</div><div class="line">-3 --&gt; 偶数</div></pre></td></tr></table></figure>
+<p>-1被认作偶数了，O.M.G，Java真菜。慢着，看下Java取余的代码：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"><span class="comment">//模拟取余，divident 被除数，divisor 除数</span></div><div class="line">   <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">int</span> <span class="title">remainder</span><span class="params">(<span class="keyword">int</span> dividend, <span class="keyword">int</span> divisor)</span> </span>&#123;</div><div class="line">       <span class="keyword">return</span> dividend - dividend / divisor * divisor;</div><div class="line">   &#125;</div></pre></td></tr></table></figure>
+<p>输入-1的时候，运算结果是-1，所以被判定为偶数。so，把判断修改成判断偶数即可：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">i % <span class="number">2</span> == <span class="number">0</span> ? <span class="string">"偶数"</span> : <span class="string">"奇数"</span></div></pre></td></tr></table></figure>
+<hr>
+<h3 id="用整型处理货币"><a href="#用整型处理货币" class="headerlink" title="用整型处理货币"></a>用整型处理货币</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">T</span> </span>&#123;</div><div class="line"></div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</div><div class="line">        System.out.println(<span class="number">10.00</span> - <span class="number">9.60</span>);</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>期望结果是0.4，但打印出来的却是0.40000000000000036。</p>
+<p>在计算机浮点数可能不准确，只能无限接近准确值。这是由浮点数的存储规则决定的，0.4不能用二进制准确的表示，在二进制数世界中它是一个无限循环的小数。</p>
+<p>解决办法：    </p>
+<ol>
+<li>BigDecimal    </li>
+<li>使用整型</li>
+</ol>
+<hr>
+<h3 id="不要让类型默默转换"><a href="#不要让类型默默转换" class="headerlink" title="不要让类型默默转换"></a>不要让类型默默转换</h3><p>光速每秒30万公里，根据光速计算距离，月光照射到地球需1s，阳光照射到地球需8m。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Sample3</span> </span>&#123;</div><div class="line"></div><div class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> LIGHT_SPEED = <span class="number">30</span> * <span class="number">10000</span> * <span class="number">1000</span>;</div><div class="line"></div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</div><div class="line">        <span class="keyword">long</span> dis1 = LIGHT_SPEED * <span class="number">1</span>;</div><div class="line"></div><div class="line">        System.out.println(<span class="string">"光1秒的距离:"</span> + dis1);</div><div class="line"></div><div class="line">        <span class="keyword">long</span> dis2 = LIGHT_SPEED * <span class="number">60</span> * <span class="number">8</span>;</div><div class="line"></div><div class="line">        System.out.println(<span class="string">"光8分钟的距离:"</span> + dis2);</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>输出结果</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">光1秒的距离:300000000</div><div class="line">光8分钟的距离:-2028888064</div></pre></td></tr></table></figure>
+<p>Java是先运算再进行类型转换，dis2的三个运算参数都是int类型，结果也是int类型，已经超越int最大值，变成负值，转换成long型仍是负值。</p>
+<p>解决办法：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">long</span> dis2 = LIGHT_SPEED * <span class="number">60</span> * <span class="number">8l</span>;</div></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">Long dis2 = LIGHT_SPEED * <span class="number">60</span> * <span class="number">8L</span>;</div></pre></td></tr></table></figure>
+<hr>
+<h3 id="边界"><a href="#边界" class="headerlink" title="边界"></a>边界</h3><p>产品预定场景，cur表示当前会员已拥有产品数，LIMIT是最多拥有预定数。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Sample4</span> </span>&#123;</div><div class="line"></div><div class="line">    <span class="keyword">public</span> <span class="keyword">final</span> <span class="keyword">static</span> <span class="keyword">int</span> LIMIT = <span class="number">2000</span>;</div><div class="line"></div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</div><div class="line">        <span class="keyword">int</span> cur = <span class="number">1000</span>;</div><div class="line">        Scanner input = <span class="keyword">new</span> Scanner(System.in);</div><div class="line">        System.out.println(<span class="string">"请输入需要预定的数量:"</span>);</div><div class="line">        <span class="keyword">while</span> (input.hasNextInt()) &#123;</div><div class="line">            <span class="keyword">int</span> order = input.nextInt();</div><div class="line">            <span class="keyword">if</span> (order &gt; <span class="number">0</span> &amp;&amp; order + cur &lt;= LIMIT) &#123;</div><div class="line">                System.out.println(<span class="string">"成功预定:"</span> + order + <span class="string">"个产品"</span>);</div><div class="line">            &#125; <span class="keyword">else</span> &#123;</div><div class="line">                System.out.println(<span class="string">"超额，预定失败"</span>);</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>输出结果</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">请输入需要预定的数量:</div><div class="line">800</div><div class="line">成功预定:800个产品</div><div class="line">2147483647</div><div class="line">成功预定:2147483647个产品</div></pre></td></tr></table></figure>
+          
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
                 <a class="post-title-link" href="/2016/07/05/HBase/初识HBase/" itemprop="url">
                   初识HBase
                 </a>
@@ -390,171 +538,6 @@
 
 
     
-      
-
-  
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-            
-            
-              
-                
-                <a class="post-title-link" href="/2016/06/07/Scala/Scala基础/" itemprop="url">
-                  Scala基础
-                </a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            <span class="post-meta-item-icon">
-              <i class="fa fa-calendar-o"></i>
-            </span>
-            <span class="post-meta-item-text">发表于</span>
-            <time itemprop="dateCreated" datetime="2016-06-07T00:00:00+08:00" content="2016-06-07">
-              2016-06-07
-            </time>
-          </span>
-
-          
-            <span class="post-category" >
-              &nbsp; | &nbsp;
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-              
-                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
-                  <a href="/categories/Scala/" itemprop="url" rel="index">
-                    <span itemprop="name">Scala</span>
-                  </a>
-                </span>
-
-                
-                
-
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-
-          
-          
-
-          
-        </div>
-      </header>
-    
-
-
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h2 id="变量"><a href="#变量" class="headerlink" title="变量"></a>变量</h2><ul>
-<li>val，定义immutable variable，不可变        </li>
-<li>var，定义mutable variable，可变</li>
-<li>lazy val，惰性常量    </li>
-</ul>
-<h2 id="数据类型"><a href="#数据类型" class="headerlink" title="数据类型"></a>数据类型</h2><p>超级父类 Any</p>
-<p>Byte, Short, Int, Long, Char, String, Float, Double, Boolean</p>
-<p>null表示对象引用类型为空，nothing表示程序异常终止。</p>
-<figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">scala&gt; <span class="function"><span class="keyword">def</span> <span class="title">foo</span></span>()=<span class="keyword">throw</span> <span class="keyword">new</span> <span class="type">Exception</span>(<span class="string">"error"</span>)</span><br><span class="line">foo: ()<span class="type">Nothing</span></span><br></pre></td></tr></table></figure>
-<p>String构建与Java的String之上，新增字符串插值特性。</p>
-<figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> name = <span class="string">"Hello"</span>	</span><br><span class="line"><span class="string">s"new name is <span class="subst">$&#123;name&#125;</span>"</span></span><br></pre></td></tr></table></figure>
-<p>可以不显示指定变量类型，Scala会自动进行类型推导。</p>
-<h2 id="代码块"><a href="#代码块" class="headerlink" title="代码块"></a>代码块</h2><figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">&#123;exp1 ;exp2&#125;</span><br><span class="line"></span><br><span class="line">&#123;</span><br><span class="line">exp1</span><br><span class="line">exp2</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>表达式可以写在一行，分号分隔。也可以写多行。</p>
-<h2 id="函数"><a href="#函数" class="headerlink" title="函数"></a>函数</h2><figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">functionName</span></span>( param: <span class="type">ParamType</span>): <span class="type">ReturnType</span> = &#123;</span><br><span class="line">	<span class="comment">//function body: expressions</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">scala&gt; <span class="function"><span class="keyword">def</span> <span class="title">add</span></span>(x:<span class="type">Int</span>, y:<span class="type">Int</span>)= &#123;x+y&#125;</span><br><span class="line">add: (x: <span class="type">Int</span>, y: <span class="type">Int</span>)<span class="type">Int</span></span><br><span class="line"></span><br><span class="line">scala&gt; add(<span class="number">1</span>,<span class="number">1</span>)</span><br><span class="line">res4: <span class="type">Int</span> = <span class="number">2</span></span><br><span class="line"></span><br><span class="line">scala&gt; <span class="function"><span class="keyword">def</span> <span class="title">add</span></span>(x:<span class="type">Int</span>, y:<span class="type">Int</span>):<span class="type">Int</span>= &#123;x+y&#125;</span><br><span class="line">add: (x: <span class="type">Int</span>, y: <span class="type">Int</span>)<span class="type">Int</span></span><br><span class="line"></span><br><span class="line">scala&gt; add(<span class="number">1</span>,<span class="number">1</span>)</span><br><span class="line">res5: <span class="type">Int</span> = <span class="number">2</span></span><br></pre></td></tr></table></figure>
-<p>多个参数用逗号分隔。</p>
-<h2 id="if表达式"><a href="#if表达式" class="headerlink" title="if表达式"></a>if表达式</h2><figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (logical_exp) valA <span class="keyword">else</span> valB</span><br></pre></td></tr></table></figure>
-<p>和Java类似。</p>
-<h2 id="for表达式"><a href="#for表达式" class="headerlink" title="for表达式"></a>for表达式</h2><figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">scala&gt; <span class="keyword">val</span> l = <span class="type">List</span>(<span class="string">"a"</span>, <span class="string">"b"</span>, <span class="string">"c"</span>)</span><br><span class="line">l: <span class="type">List</span>[<span class="type">String</span>] = <span class="type">List</span>(a, b, c)</span><br><span class="line"></span><br><span class="line">scala&gt; <span class="keyword">for</span> (</span><br><span class="line">s &lt;- l</span><br><span class="line">) println(s)</span><br><span class="line">a</span><br><span class="line">b</span><br><span class="line">c</span><br></pre></td></tr></table></figure>
-<h2 id="try表达式"><a href="#try表达式" class="headerlink" title="try表达式"></a>try表达式</h2><figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">try</span>&#123; &#125;</span><br><span class="line"><span class="keyword">catch</span>&#123; &#125;</span><br><span class="line"><span class="keyword">finally</span>&#123; &#125;</span><br></pre></td></tr></table></figure>
-<p>与Java不同，try是表达式，不是关键字。</p>
-<figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">try</span>&#123;</span><br><span class="line">	<span class="type">Integer</span>.parseInt(<span class="string">"abc"</span>)</span><br><span class="line">&#125; <span class="keyword">catch</span> &#123;</span><br><span class="line">	<span class="keyword">case</span> _ =&gt; <span class="number">0</span></span><br><span class="line">&#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">	println(<span class="string">"always be printed"</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h2 id="match表达式"><a href="#match表达式" class="headerlink" title="match表达式"></a>match表达式</h2><figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">exp <span class="keyword">match</span> &#123;</span><br><span class="line">	<span class="keyword">case</span> p1 =&gt; val1</span><br><span class="line">	<span class="keyword">case</span> p2 =&gt; val2</span><br><span class="line">	...</span><br><span class="line">	<span class="keyword">case</span> _ =&gt; valn</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> code = <span class="number">1</span></span><br><span class="line"><span class="keyword">val</span> result_match = code <span class="keyword">match</span> &#123;</span><br><span class="line">	<span class="keyword">case</span> <span class="number">1</span> =&gt; <span class="string">"ONE"</span></span><br><span class="line">	<span class="keyword">case</span> <span class="number">2</span> =&gt; <span class="string">"TWO"</span></span><br><span class="line">	<span class="keyword">case</span> _ =&gt; <span class="string">"OTHERS"</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>_ 表示通配，相当于Java中switch语句的default关键字。</p>
-<h2 id="求值策略"><a href="#求值策略" class="headerlink" title="求值策略"></a>求值策略</h2><ul>
-<li>Call By Value 对函数实参求值，且仅求值一次</li>
-<li>Call By Name    函数实参每次在函数体内被用到时都会求值</li>
-</ul>
-<p>Scala默认使用Call By Value<br>如果函数形参类型以 =&gt; 开头，那么会使用Call By Name        </p>
-<p>def foo(x: Int) = x //call by value<br>def foo(x: =&gt; Int) = x //call by name    </p>
-<p>call by name在调用时不会解析入参中的表达式，call by value则相反。</p>
-<h2 id="函数-1"><a href="#函数-1" class="headerlink" title="函数"></a>函数</h2><p>Scala函数特性：    </p>
-<ol>
-<li>把函数作为实参传递给另一个函数。    </li>
-<li>把函数作为返回值。    </li>
-<li>把函数赋值给变量。    </li>
-<li>把函数存储在数据结构里。    </li>
-<li>函数和普通变量一样，具有函数的类型。</li>
-</ol>
-<h2 id="函数类型"><a href="#函数类型" class="headerlink" title="函数类型"></a>函数类型</h2><p>函数类型格式为 A =&gt; B ，表示一个接受类型A的参数，并返回类型B的函数。</p>
-<p>例子： Int =&gt; String 是把整型映射为字符串的函数类型。</p>
-<h2 id="高阶函数"><a href="#高阶函数" class="headerlink" title="高阶函数"></a>高阶函数</h2><p>用函数作为形参或返回值的函数，称为高阶函数。</p>
-<figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">operate</span></span>(f: (<span class="type">Int</span>, <span class="type">Int</span>) =&gt; <span class="type">Int</span>) = &#123;</span><br><span class="line">	f(<span class="number">4</span>, <span class="number">4</span>)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">greeting</span></span>() = (name: <span class="type">String</span>) =&gt; &#123;<span class="string">"hello"</span> + <span class="string">" "</span> + name&#125;	<span class="comment">//匿名函数</span></span><br></pre></td></tr></table></figure>
-<h2 id="柯里化"><a href="#柯里化" class="headerlink" title="柯里化"></a>柯里化</h2><p>柯里化函数，把具有多个参数的函数转换为一条函数链，每个节点上是单一参数。</p>
-<p>例子：以下2个add函数定义是等价的</p>
-<figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">add</span></span>(x: <span class="type">Int</span>, y: <span class="type">Int</span>) = x + y	</span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">add</span></span>(x: <span class="type">Int</span>)(y: <span class="type">Int</span>) = x + y <span class="comment">//Scala柯里化语法</span></span><br></pre></td></tr></table></figure>
-<h2 id="尾递归函数"><a href="#尾递归函数" class="headerlink" title="尾递归函数"></a>尾递归函数</h2><p>尾递归函数中所有递归形式的调用都出现在函数的末尾。</p>
-<p>当编译器检测到一个函数调用是尾递归的时候，它就覆盖当前的活动记录而不是在栈中去创建一个新的。（避免堆栈内存溢出）</p>
-<p>例子：</p>
-<figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@annotation</span>.tailrec</span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">factorial</span></span>(n: <span class="type">Int</span>, m: <span class="type">Int</span>): <span class="type">Int</span> =</span><br><span class="line">	<span class="keyword">if</span> (n &lt;= <span class="number">0</span>) m</span><br><span class="line">	<span class="keyword">else</span> factoria(n<span class="number">-1</span>, m*n)</span><br><span class="line">factorial(<span class="number">5</span>, <span class="number">1</span>)</span><br></pre></td></tr></table></figure>
-<figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">sum</span></span>(f: <span class="type">Int</span> =&gt; <span class="type">Int</span>)(a: <span class="type">Int</span>)(b: <span class="type">Int</span>): <span class="type">Int</span> = &#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@annotation</span>.tailrec</span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">loop</span></span>(n: <span class="type">Int</span>, acc: <span class="type">Int</span>): <span class="type">Int</span> = &#123;</span><br><span class="line">      <span class="keyword">if</span> (n &gt; b) &#123;</span><br><span class="line">        println(<span class="string">s"n=<span class="subst">$&#123;n&#125;</span>, acc=<span class="subst">$&#123;acc&#125;</span>"</span>)</span><br><span class="line">        acc</span><br><span class="line">      &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        println(<span class="string">s"n=<span class="subst">$&#123;n&#125;</span>, acc=<span class="subst">$&#123;acc&#125;</span>"</span>)</span><br><span class="line">        loop(n + <span class="number">1</span>, acc + f(n))</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    loop(a, <span class="number">0</span>)</span><br><span class="line">&#125;</span><br><span class="line">  </span><br><span class="line">  sum(x =&gt; x)(<span class="number">1</span>)(<span class="number">5</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment">//输出</span></span><br><span class="line">n=<span class="number">1</span>, acc=<span class="number">0</span></span><br><span class="line">n=<span class="number">2</span>, acc=<span class="number">1</span></span><br><span class="line">n=<span class="number">3</span>, acc=<span class="number">3</span></span><br><span class="line">n=<span class="number">4</span>, acc=<span class="number">6</span></span><br><span class="line">n=<span class="number">5</span>, acc=<span class="number">10</span></span><br><span class="line">n=<span class="number">6</span>, acc=<span class="number">15</span></span><br></pre></td></tr></table></figure>
-
-          
-        
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
   </section>
 
   
@@ -600,7 +583,7 @@
         <nav class="site-state motion-element">
           <div class="site-state-item site-state-posts">
             <a href="/archives">
-              <span class="site-state-item-count">35</span>
+              <span class="site-state-item-count">36</span>
               <span class="site-state-item-name">日志</span>
             </a>
           </div>
