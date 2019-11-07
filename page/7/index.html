@@ -1,15 +1,22 @@
-<!doctype html>
+<!DOCTYPE html>
 
 
 
   
 
 
-<html class="theme-next pisces use-motion">
+<html class="theme-next muse use-motion" lang="zh-Hans">
 <head>
   <meta charset="UTF-8"/>
-<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
 
 
 
@@ -27,42 +34,13 @@
 
 
 
-  
-  
-  <link href="/vendors/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
 
 
 
 
   
   
-  
-  
-
-  
-    
-    
-  
-
-  
-
-  
-
-  
-
-  
-
- 
-
-
-
-
-<link href="/vendors/font-awesome/css/font-awesome.min.css?v=4.4.0" rel="stylesheet" type="text/css" />
-
-<link href="/css/main.css?v=5.0.1" rel="stylesheet" type="text/css" />
-
-
-  <meta name="keywords" content="zhuxinhong java" />
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
 
 
 
@@ -70,8 +48,31 @@
 
 
 
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
 
-  <link rel="shortcut icon" type="image/x-icon" href="http://static.hdslb.com/images/favicon.ico?v=5.0.1" />
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Hexo, NexT" />
+
+
+
+
 
 
 
@@ -84,37 +85,45 @@
 <meta property="og:url" content="http://zhuxinhong.github.io/page/7/index.html">
 <meta property="og:site_name" content="zhuxinhong blog">
 <meta property="og:description" content="时光如白马，稍纵即逝。术业有专攻，一生做好一件事真的很重要。">
-<meta property="og:locale" content="zh-Hans">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="zhuxinhong blog">
 <meta name="twitter:description" content="时光如白马，稍纵即逝。术业有专攻，一生做好一件事真的很重要。">
 
 
 
-<script type="text/javascript" id="hexo.configuration">
+<script type="text/javascript" id="hexo.configurations">
   var NexT = window.NexT || {};
   var CONFIG = {
-    scheme: 'Pisces',
-    sidebar: {"position":"left","display":"post"},
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
     fancybox: true,
-    motion: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
     duoshuo: {
-      userId: undefined,
+      userId: '0',
       author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
     }
   };
 </script>
 
 
 
-
   <link rel="canonical" href="http://zhuxinhong.github.io/page/7/"/>
 
-  <title> zhuxinhong blog </title>
-</head>
 
-<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
 
+
+
+  <title>zhuxinhong blog</title>
   
 
 
@@ -124,38 +133,43 @@
 
 
 
+</head>
 
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
 
   
   
     
   
 
-  <div class="container one-collumn sidebar-position-left 
-   page-home 
- ">
+  <div class="container sidebar-position-left 
+  page-home">
     <div class="headband"></div>
 
     <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
-      <div class="header-inner"><div class="site-meta ">
-  
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
 
-  <div class="custom-logo-site-title">
-    <a href="/"  class="brand" rel="start">
-      <span class="logo-line-before"><i></i></span>
-      <span class="site-title">zhuxinhong blog</span>
-      <span class="logo-line-after"><i></i></span>
-    </a>
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">zhuxinhong blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">java coder</p>
+      
   </div>
-  <p class="site-subtitle">java coder</p>
-</div>
 
-<div class="site-nav-toggle">
-  <button>
-    <span class="btn-bar"></span>
-    <span class="btn-bar"></span>
-    <span class="btn-bar"></span>
-  </button>
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
 </div>
 
 <nav class="site-nav">
@@ -176,31 +190,11 @@
       
         
         <li class="menu-item menu-item-archives">
-          <a href="/archives" rel="section">
+          <a href="/archives/" rel="section">
             
               <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
             
             归档
-          </a>
-        </li>
-      
-        
-        <li class="menu-item menu-item-categories">
-          <a href="/categories" rel="section">
-            
-              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
-            
-            分类
-          </a>
-        </li>
-      
-        
-        <li class="menu-item menu-item-tags">
-          <a href="/tags" rel="section">
-            
-              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
-            
-            标签
           </a>
         </li>
       
@@ -211,6 +205,8 @@
 
   
 </nav>
+
+
 
  </div>
     </header>
@@ -225,13 +221,27 @@
       
 
   
-  
 
   
   
   
 
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://zhuxinhong.github.io/2015/06/27/redis设计与实现/Redis跳跃表/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="祝欣鸿">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/Wechat.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="zhuxinhong blog">
+    </span>
 
     
       <header class="post-header">
@@ -239,46 +249,49 @@
         
         
           <h1 class="post-title" itemprop="name headline">
-            
-            
-              
                 
-                <a class="post-title-link" href="/2016/06/07/Scala/Scala基础/" itemprop="url">
-                  Scala基础
-                </a>
-              
-            
-          </h1>
+                <a class="post-title-link" href="/2015/06/27/redis设计与实现/Redis跳跃表/" itemprop="url">Redis跳跃表</a></h1>
         
 
         <div class="post-meta">
           <span class="post-time">
-            <span class="post-meta-item-icon">
-              <i class="fa fa-calendar-o"></i>
-            </span>
-            <span class="post-meta-item-text">发表于</span>
-            <time itemprop="dateCreated" datetime="2016-06-07T00:00:00+08:00" content="2016-06-07">
-              2016-06-07
-            </time>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2015-06-27T00:00:00+08:00">
+                2015-06-27
+              </time>
+            
+
+            
+
+            
           </span>
 
           
             <span class="post-category" >
-              &nbsp; | &nbsp;
+            
+              <span class="post-meta-divider">|</span>
+            
               <span class="post-meta-item-icon">
                 <i class="fa fa-folder-o"></i>
               </span>
-              <span class="post-meta-item-text">分类于</span>
               
-                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
-                  <a href="/categories/Scala/" itemprop="url" rel="index">
-                    <span itemprop="name">Scala</span>
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Redis设计与实现/" itemprop="url" rel="index">
+                    <span itemprop="name">Redis设计与实现</span>
                   </a>
                 </span>
 
                 
                 
-
               
             </span>
           
@@ -288,16 +301,21 @@
           
 
           
-
-          
           
 
           
+
+          
+
+          
+
         </div>
       </header>
     
 
-
+    
+    
+    
     <div class="post-body" itemprop="articleBody">
 
       
@@ -306,74 +324,27 @@
       
         
           
-            <h2 id="变量"><a href="#变量" class="headerlink" title="变量"></a>变量</h2><ul>
-<li>val，定义immutable variable，不可变        </li>
-<li>var，定义mutable variable，可变</li>
-<li>lazy val，惰性常量    </li>
-</ul>
-<h2 id="数据类型"><a href="#数据类型" class="headerlink" title="数据类型"></a>数据类型</h2><p>超级父类 Any</p>
-<p>Byte, Short, Int, Long, Char, String, Float, Double, Boolean</p>
-<p>null表示对象引用类型为空，nothing表示程序异常终止。</p>
-<figure class="highlight scala"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">scala&gt; <span class="function"><span class="keyword">def</span> <span class="title">foo</span></span>()=<span class="keyword">throw</span> <span class="keyword">new</span> <span class="type">Exception</span>(<span class="string">"error"</span>)</div><div class="line">foo: ()<span class="type">Nothing</span></div></pre></td></tr></table></figure>
-<p>String构建与Java的String之上，新增字符串插值特性。</p>
-<figure class="highlight scala"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">val</span> name = <span class="string">"Hello"</span>	</div><div class="line"><span class="string">s"new name is <span class="subst">$&#123;name&#125;</span>"</span></div></pre></td></tr></table></figure>
-<p>可以不显示指定变量类型，Scala会自动进行类型推导。</p>
-<h2 id="代码块"><a href="#代码块" class="headerlink" title="代码块"></a>代码块</h2><figure class="highlight scala"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">&#123;exp1 ;exp2&#125;</div><div class="line"></div><div class="line">&#123;</div><div class="line">exp1</div><div class="line">exp2</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<p>表达式可以写在一行，分号分隔。也可以写多行。</p>
-<h2 id="函数"><a href="#函数" class="headerlink" title="函数"></a>函数</h2><figure class="highlight scala"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">functionName</span></span>( param: <span class="type">ParamType</span>): <span class="type">ReturnType</span> = &#123;</div><div class="line">	<span class="comment">//function body: expressions</span></div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<figure class="highlight scala"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">scala&gt; <span class="function"><span class="keyword">def</span> <span class="title">add</span></span>(x:<span class="type">Int</span>, y:<span class="type">Int</span>)= &#123;x+y&#125;</div><div class="line">add: (x: <span class="type">Int</span>, y: <span class="type">Int</span>)<span class="type">Int</span></div><div class="line"></div><div class="line">scala&gt; add(<span class="number">1</span>,<span class="number">1</span>)</div><div class="line">res4: <span class="type">Int</span> = <span class="number">2</span></div><div class="line"></div><div class="line">scala&gt; <span class="function"><span class="keyword">def</span> <span class="title">add</span></span>(x:<span class="type">Int</span>, y:<span class="type">Int</span>):<span class="type">Int</span>= &#123;x+y&#125;</div><div class="line">add: (x: <span class="type">Int</span>, y: <span class="type">Int</span>)<span class="type">Int</span></div><div class="line"></div><div class="line">scala&gt; add(<span class="number">1</span>,<span class="number">1</span>)</div><div class="line">res5: <span class="type">Int</span> = <span class="number">2</span></div></pre></td></tr></table></figure>
-<p>多个参数用逗号分隔。</p>
-<h2 id="if表达式"><a href="#if表达式" class="headerlink" title="if表达式"></a>if表达式</h2><figure class="highlight scala"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">if</span> (logical_exp) valA <span class="keyword">else</span> valB</div></pre></td></tr></table></figure>
-<p>和Java类似。</p>
-<h2 id="for表达式"><a href="#for表达式" class="headerlink" title="for表达式"></a>for表达式</h2><figure class="highlight scala"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">scala&gt; <span class="keyword">val</span> l = <span class="type">List</span>(<span class="string">"a"</span>, <span class="string">"b"</span>, <span class="string">"c"</span>)</div><div class="line">l: <span class="type">List</span>[<span class="type">String</span>] = <span class="type">List</span>(a, b, c)</div><div class="line"></div><div class="line">scala&gt; <span class="keyword">for</span> (</div><div class="line">s &lt;- l</div><div class="line">) println(s)</div><div class="line">a</div><div class="line">b</div><div class="line">c</div></pre></td></tr></table></figure>
-<h2 id="try表达式"><a href="#try表达式" class="headerlink" title="try表达式"></a>try表达式</h2><figure class="highlight scala"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">try</span>&#123; &#125;</div><div class="line"><span class="keyword">catch</span>&#123; &#125;</div><div class="line"><span class="keyword">finally</span>&#123; &#125;</div></pre></td></tr></table></figure>
-<p>与Java不同，try是表达式，不是关键字。</p>
-<figure class="highlight scala"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">try</span>&#123;</div><div class="line">	<span class="type">Integer</span>.parseInt(<span class="string">"abc"</span>)</div><div class="line">&#125; <span class="keyword">catch</span> &#123;</div><div class="line">	<span class="keyword">case</span> _ =&gt; <span class="number">0</span></div><div class="line">&#125; <span class="keyword">finally</span> &#123;</div><div class="line">	println(<span class="string">"always be printed"</span>)</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<h2 id="match表达式"><a href="#match表达式" class="headerlink" title="match表达式"></a>match表达式</h2><figure class="highlight scala"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">exp <span class="keyword">match</span> &#123;</div><div class="line">	<span class="keyword">case</span> p1 =&gt; val1</div><div class="line">	<span class="keyword">case</span> p2 =&gt; val2</div><div class="line">	...</div><div class="line">	<span class="keyword">case</span> _ =&gt; valn</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<figure class="highlight scala"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">val</span> code = <span class="number">1</span></div><div class="line"><span class="keyword">val</span> result_match = code <span class="keyword">match</span> &#123;</div><div class="line">	<span class="keyword">case</span> <span class="number">1</span> =&gt; <span class="string">"ONE"</span></div><div class="line">	<span class="keyword">case</span> <span class="number">2</span> =&gt; <span class="string">"TWO"</span></div><div class="line">	<span class="keyword">case</span> _ =&gt; <span class="string">"OTHERS"</span></div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<p>_ 表示通配，相当于Java中switch语句的default关键字。</p>
-<h2 id="求值策略"><a href="#求值策略" class="headerlink" title="求值策略"></a>求值策略</h2><ul>
-<li>Call By Value 对函数实参求值，且仅求值一次</li>
-<li>Call By Name    函数实参每次在函数体内被用到时都会求值</li>
-</ul>
-<p>Scala默认使用Call By Value<br>如果函数形参类型以 =&gt; 开头，那么会使用Call By Name        </p>
-<p>def foo(x: Int) = x //call by value<br>def foo(x: =&gt; Int) = x //call by name    </p>
-<p>call by name在调用时不会解析入参中的表达式，call by value则相反。</p>
-<h2 id="函数-1"><a href="#函数-1" class="headerlink" title="函数"></a>函数</h2><p>Scala函数特性：    </p>
-<ol>
-<li>把函数作为实参传递给另一个函数。    </li>
-<li>把函数作为返回值。    </li>
-<li>把函数赋值给变量。    </li>
-<li>把函数存储在数据结构里。    </li>
-<li>函数和普通变量一样，具有函数的类型。</li>
-</ol>
-<h2 id="函数类型"><a href="#函数类型" class="headerlink" title="函数类型"></a>函数类型</h2><p>函数类型格式为 A =&gt; B ，表示一个接受类型A的参数，并返回类型B的函数。</p>
-<p>例子： Int =&gt; String 是把整型映射为字符串的函数类型。</p>
-<h2 id="高阶函数"><a href="#高阶函数" class="headerlink" title="高阶函数"></a>高阶函数</h2><p>用函数作为形参或返回值的函数，称为高阶函数。</p>
-<figure class="highlight scala"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">operate</span></span>(f: (<span class="type">Int</span>, <span class="type">Int</span>) =&gt; <span class="type">Int</span>) = &#123;</div><div class="line">	f(<span class="number">4</span>, <span class="number">4</span>)</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">greeting</span></span>() = (name: <span class="type">String</span>) =&gt; &#123;<span class="string">"hello"</span> + <span class="string">" "</span> + name&#125;	<span class="comment">//匿名函数</span></div></pre></td></tr></table></figure>
-<h2 id="柯里化"><a href="#柯里化" class="headerlink" title="柯里化"></a>柯里化</h2><p>柯里化函数，把具有多个参数的函数转换为一条函数链，每个节点上是单一参数。</p>
-<p>例子：以下2个add函数定义是等价的</p>
-<figure class="highlight scala"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">add</span></span>(x: <span class="type">Int</span>, y: <span class="type">Int</span>) = x + y	</div><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">add</span></span>(x: <span class="type">Int</span>)(y: <span class="type">Int</span>) = x + y <span class="comment">//Scala柯里化语法</span></div></pre></td></tr></table></figure>
-<h2 id="尾递归函数"><a href="#尾递归函数" class="headerlink" title="尾递归函数"></a>尾递归函数</h2><p>尾递归函数中所有递归形式的调用都出现在函数的末尾。</p>
-<p>当编译器检测到一个函数调用是尾递归的时候，它就覆盖当前的活动记录而不是在栈中去创建一个新的。（避免堆栈内存溢出）</p>
-<p>例子：</p>
-<figure class="highlight scala"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"><span class="meta">@annotation</span>.tailrec</div><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">factorial</span></span>(n: <span class="type">Int</span>, m: <span class="type">Int</span>): <span class="type">Int</span> =</div><div class="line">	<span class="keyword">if</span> (n &lt;= <span class="number">0</span>) m</div><div class="line">	<span class="keyword">else</span> factoria(n<span class="number">-1</span>, m*n)</div><div class="line">factorial(<span class="number">5</span>, <span class="number">1</span>)</div></pre></td></tr></table></figure>
-<figure class="highlight scala"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">sum</span></span>(f: <span class="type">Int</span> =&gt; <span class="type">Int</span>)(a: <span class="type">Int</span>)(b: <span class="type">Int</span>): <span class="type">Int</span> = &#123;</div><div class="line"></div><div class="line">    <span class="meta">@annotation</span>.tailrec</div><div class="line">    <span class="function"><span class="keyword">def</span> <span class="title">loop</span></span>(n: <span class="type">Int</span>, acc: <span class="type">Int</span>): <span class="type">Int</span> = &#123;</div><div class="line">      <span class="keyword">if</span> (n &gt; b) &#123;</div><div class="line">        println(<span class="string">s"n=<span class="subst">$&#123;n&#125;</span>, acc=<span class="subst">$&#123;acc&#125;</span>"</span>)</div><div class="line">        acc</div><div class="line">      &#125; <span class="keyword">else</span> &#123;</div><div class="line">        println(<span class="string">s"n=<span class="subst">$&#123;n&#125;</span>, acc=<span class="subst">$&#123;acc&#125;</span>"</span>)</div><div class="line">        loop(n + <span class="number">1</span>, acc + f(n))</div><div class="line">      &#125;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    loop(a, <span class="number">0</span>)</div><div class="line">&#125;</div><div class="line">  </div><div class="line">  sum(x =&gt; x)(<span class="number">1</span>)(<span class="number">5</span>)</div><div class="line"></div><div class="line"><span class="comment">//输出</span></div><div class="line">n=<span class="number">1</span>, acc=<span class="number">0</span></div><div class="line">n=<span class="number">2</span>, acc=<span class="number">1</span></div><div class="line">n=<span class="number">3</span>, acc=<span class="number">3</span></div><div class="line">n=<span class="number">4</span>, acc=<span class="number">6</span></div><div class="line">n=<span class="number">5</span>, acc=<span class="number">10</span></div><div class="line">n=<span class="number">6</span>, acc=<span class="number">15</span></div></pre></td></tr></table></figure>
+            <p>Redis使用跳跃表作为有序集合键的底层实现之一，如果一个有序集合包含的元素数量较多，或者有序集合中成员是较长的字符串时，Redis就会使用跳跃表来作为有序集合键的底层实现。<br>和链表、字典等数据结构在Redis内部的广泛应用不同，Redis只在实现有序集合键和集群节点中用到跳跃表。</p>
+<p>跳跃表节点 zskiplistNode<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">typeof struct zskiplistNode &#123;</span><br><span class="line">	//层</span><br><span class="line">	struct zskipzlistLevel&#123;</span><br><span class="line">	//前进指针</span><br><span class="line">	struct zskiplistNode *forward;</span><br><span class="line">	//跨度</span><br><span class="line">	unsigned int span;</span><br><span class="line">	&#125; level[];</span><br><span class="line">	</span><br><span class="line">	//后退指针</span><br><span class="line">	struct zskiplistNode *backward;</span><br><span class="line">	//分值</span><br><span class="line">	double score;</span><br><span class="line">	//成员对象</span><br><span class="line">	rojb *obj;</span><br><span class="line">&#125; zskiplistNode;</span><br></pre></td></tr></table></figure></p>
+<p>跳跃表 zskiplist<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">typeof struct zskiplist &#123;</span><br><span class="line">	//表头节点和表尾节点</span><br><span class="line">	structz skiplistNode *header, *tail;</span><br><span class="line">	//表中节点数量</span><br><span class="line">	unsigned long length;</span><br><span class="line">	//表中层数最大节点的层数</span><br><span class="line">	int level;</span><br><span class="line">&#125; zskiplist;</span><br></pre></td></tr></table></figure></p>
 
           
         
       
     </div>
+    
+    
+    
 
-    <div>
-      
-    </div>
+    
 
-    <div>
-      
-    </div>
+    
+
+    
 
     <footer class="post-footer">
+      
+
       
 
       
@@ -383,6 +354,10 @@
         <div class="post-eof"></div>
       
     </footer>
+  </div>
+  
+  
+  
   </article>
 
 
@@ -390,13 +365,27 @@
       
 
   
-  
 
   
   
   
 
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://zhuxinhong.github.io/2015/06/25/redis设计与实现/Redis字典的实现/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="祝欣鸿">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/Wechat.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="zhuxinhong blog">
+    </span>
 
     
       <header class="post-header">
@@ -404,46 +393,49 @@
         
         
           <h1 class="post-title" itemprop="name headline">
-            
-            
-              
                 
-                <a class="post-title-link" href="/2016/05/28/JavaWeb/深入分析ClassLoader/" itemprop="url">
-                  深入分析ClassLoader
-                </a>
-              
-            
-          </h1>
+                <a class="post-title-link" href="/2015/06/25/redis设计与实现/Redis字典的实现/" itemprop="url">Redis字典</a></h1>
         
 
         <div class="post-meta">
           <span class="post-time">
-            <span class="post-meta-item-icon">
-              <i class="fa fa-calendar-o"></i>
-            </span>
-            <span class="post-meta-item-text">发表于</span>
-            <time itemprop="dateCreated" datetime="2016-05-28T00:00:00+08:00" content="2016-05-28">
-              2016-05-28
-            </time>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2015-06-25T00:00:00+08:00">
+                2015-06-25
+              </time>
+            
+
+            
+
+            
           </span>
 
           
             <span class="post-category" >
-              &nbsp; | &nbsp;
+            
+              <span class="post-meta-divider">|</span>
+            
               <span class="post-meta-item-icon">
                 <i class="fa fa-folder-o"></i>
               </span>
-              <span class="post-meta-item-text">分类于</span>
               
-                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
-                  <a href="/categories/Java-Web/" itemprop="url" rel="index">
-                    <span itemprop="name">Java Web</span>
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Redis设计与实现/" itemprop="url" rel="index">
+                    <span itemprop="name">Redis设计与实现</span>
                   </a>
                 </span>
 
                 
                 
-
               
             </span>
           
@@ -453,16 +445,21 @@
           
 
           
-
-          
           
 
           
+
+          
+
+          
+
         </div>
       </header>
     
 
-
+    
+    
+    
     <div class="post-body" itemprop="articleBody">
 
       
@@ -471,53 +468,36 @@
       
         
           
-            <p>ClassLoader除了能将Class加载到JVM中之外，还能审查每个类该由谁加载。它是一种父优先的等级加载机制。</p>
-<h2 id="ClassLoader等级加载机制"><a href="#ClassLoader等级加载机制" class="headerlink" title="ClassLoader等级加载机制"></a>ClassLoader等级加载机制</h2><ol>
-<li>Bootstrap ClassLoader，主要加载JVM自身工作需要的类，完全由JVM自己控制，外部无法访问，这个ClassLoader不遵守等级加载规则。</li>
-<li>ExtClassLoader，不是JVM亲自实现。服务目标在System.getProperties(“java.ext.dirs”)目录下。</li>
-<li>AppClassLoader，父类是ExtClassLoader，所有在System.getProperties(“java.class.path”)目录下的类都可以被这个类加载器加载，这就是我们常用到的classpath。</li>
-</ol>
-<p>如果我们要实现自己的类加载器，不管是直接实现抽象类ClassLoader，还是继承URLClassLoader或其他子类，它的父加载器都是AppClassLoader，不管调用哪个父类构造器，创建对象都必须最终调用getSystemCLassLoader()作为父加载器，而getSystemClassLoader()方法获取到的正是AppClassLoader。</p>
-<p>Bootstrap ClassLoader并不属于JVM的类层次结构，因为BootstrapClassLoader并没有遵守ClassLoader的加载规则。Bootstrap ClassLoader并没有子类，ExtClassLoader父类也不是Bootstrap ClassLoader，ExtClassLoader并没有父类，应用中能提取到的顶层父类是ExtClassLoader。</p>
-<p>ExtClassLoader和AppClassLoader都位于sun.misc.Launcher类中，它们是Launcher类的内部类，都继承了URLClassLoader类，URLClassLoader实现了抽象类ClassLoader。</p>
-<h2 id="如何加载class文件"><a href="#如何加载class文件" class="headerlink" title="如何加载class文件"></a>如何加载class文件</h2><p>抽象类ClassLoader中并没有定义如何加载，需要子类实现findClass()方法。看一下URLClassLoader实现findClass()过程：    </p>
-<ol>
-<li>通过URLClassPath类取得加载的class文件字节流，找到后读取它的byte字节流。    </li>
-<li>调用defineClass()创建类对象。</li>
-</ol>
-<p>创建URLClassLoader对象会根据传过来的URL数组中路径来判断是文件还是jar包，根据路径的不同分别创建FileLoader和JarLoader，或者使用默认的加载器。</p>
-<h3 id="验证与解析"><a href="#验证与解析" class="headerlink" title="验证与解析"></a>验证与解析</h3><ol>
-<li>字节码验证，确保格式正确，行为正确。</li>
-<li>类准备，准备字段、方法和实现接口所必须的数据结构。</li>
-<li>解析，类装入器装入类引用的其他所有类。    </li>
-<li>初始化对象，该阶段末尾静态字段被初始化默认值。</li>
-</ol>
-<h2 id="实现自己的ClassLoader"><a href="#实现自己的ClassLoader" class="headerlink" title="实现自己的ClassLoader"></a>实现自己的ClassLoader</h2><p>应用场景：    </p>
-<ul>
-<li>在自定义路径下查找自定义的class类文件，也许我们需要的class文件并不总是在classPath下面。    </li>
-<li>对我们自己要加载的类做特殊处理，如保证通过网络传输的安全性，可以将类经过加密后传输，在加载到JVM之前需要对类的字节码再解密。        </li>
-<li>可以定义类的实现机制，例如实现热部署：检查已经加载的class文件是否被修改，如修改可重新加载。    </li>
-</ul>
-<p>JVM表示一个类是否是同一个类有两个条件：    </p>
-<ol>
-<li>检查完整类名是否一致。        </li>
-<li>检查加载这个类的ClassLoader是否是同一个，这里指的是ClassLoader实例是否是同一个。</li>
-</ol>
+            <p>字典就是我们熟悉的map，键值对(key-value pair)的抽象数据结构。Redis数据库就是使用字典来作为底层实现的。<br>先介绍下数据结构：<br>1.哈希表<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">typeof struct dictht &#123;</span><br><span class="line">	//哈希表数组</span><br><span class="line">	dictEntry   **table;</span><br><span class="line">	//哈希表大小</span><br><span class="line">	unsigned long size;</span><br><span class="line">	//哈希表大小掩码，用于计算索引</span><br><span class="line">	//总是等于size-1</span><br><span class="line">	unsigned long sizemask;</span><br><span class="line">	//已有节点数量</span><br><span class="line">	unsigned long used;</span><br><span class="line">&#125; dictht;</span><br></pre></td></tr></table></figure></p>
+<p>这种数据结构很好理解，和Java里面HashMap实现差不多。哈希表里面每个节点都是一个entry对象。</p>
+<p>2.哈希表节点<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">typeof struct dictEntry &#123;</span><br><span class="line">	//键</span><br><span class="line">	void *key;</span><br><span class="line">	//值</span><br><span class="line">	union &#123;</span><br><span class="line">	void *val;</span><br><span class="line">	unit64_t u64;</span><br><span class="line">	int64_t s64;</span><br><span class="line">&#125; v;</span><br><span class="line"></span><br><span class="line">//指向下个哈希表节点，形成链表</span><br><span class="line">struct dictEntry *next;</span><br><span class="line">&#125; dictEntry;</span><br></pre></td></tr></table></figure></p>
+<p>key属性存着键值对中的键，v属性存值。键可以是一个指针，也可以是一个unit64_t整数，或是一个int^4_t整数。C语言没了解过，这种奇怪的整数也不知道什么意思，姑且理解为Java里面的hashCode吧。<br>next属性指向链表中的下一个节点，这点和Java一样，当多个对象哈希值相同时，就造成hash冲突，多个对象的索引值都落在同一索引下标上，该节点的数据结构为链表，需要遍历该链表才能找到对应元素。</p>
+<p>3.字典数据结构<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">typeof struct dict &#123;</span><br><span class="line">	//类型特定函数</span><br><span class="line">	dictType *<span class="built_in">type</span>;</span><br><span class="line">	//私有数据</span><br><span class="line">	void *privdata;</span><br><span class="line">	//哈希表</span><br><span class="line">	dictht ht[2];</span><br><span class="line">	//<span class="built_in">rehash</span>索引</span><br><span class="line">	//当<span class="built_in">rehash</span>不再进行时，值为-1</span><br><span class="line">	int rehashidx;</span><br><span class="line">&#125; dict;</span><br></pre></td></tr></table></figure></p>
+<p>type属性和privdata属性针对不同类型的键值对，为创建多态字典设置的。<br>type属性是一个指向dictType结构的指针，每个dictType保存了一簇用于操作特定类型键值对的函数，Redis会为用途不同的字典设置不同的类型特定函数。<br>privdata属性保存了需要传给那些类型特定函数的可选参数。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">typeof struct dictType &#123;</span><br><span class="line">	//计算哈希值的函数</span><br><span class="line">	unsigned int (*hashFunction) (const void *key);</span><br><span class="line">	//复制键的函数</span><br><span class="line">	void *(*keyDup) (void *privdata, const void *key);</span><br><span class="line">	//复制值的函数</span><br><span class="line">	void *(*valDup)(void *privdata, const void *obj);</span><br><span class="line">	//对比键的函数</span><br><span class="line">	int (*keyCompare) (void *privdata, const void *key1, const void *key2);</span><br><span class="line">	//销毁键的函数</span><br><span class="line">	void (*keyDestructor) (void *privdata, void *key);</span><br><span class="line">	//销毁值的函数</span><br><span class="line">	void (*valDestructor) (void *privdata, void *obj);</span><br><span class="line">&#125; dictType;</span><br></pre></td></tr></table></figure>
+<p>ht属性是一个包含2个索引的数组，每个位置都是一个dictht哈希表，一般使用ht[0]，ht[1]用于存放对ht[0]哈希表进行rehash的结果。<br>rehashidx记录目前rehash进度，当前没有执行rehash，值为-1。</p>
+<p>1.Redis 字典 Hash算法<br>根据key计算hash值<br>hash = dict -&gt; type -&gt; hashFunction(key);<br>根据sizemask属性和哈希值,计算出索引,ht[x]可以是ht[0]或ht[1]<br>index = hash &amp; dict -&gt; ht[x].sizemask;<br>Redis使用MurmurHash2算法计算键的哈希值，优点在于即使输入的键是有规律的，算法仍能给出一个很好的随机分布性。</p>
+<p>2.解决Hash冲突<br>当2个或多个不同对象的Hash值相同时，会被分配到哈希表的同一个索引上，此时就称之为哈希冲突。<br>Redis采用链地址法解决键冲突，每个哈希节点都有一个next指针，由此指针构成一个单向链表，新添加的元素在链表表头。</p>
+<p>3.rehash<br>负载因子 = 哈希表节点数量/哈希表大小<br>load_factor = ht[0].used / ht[0].size<br>当哈希表的操作不断进行，需要把哈希表的负载因子保持在一个合理范围内，需要对哈希表进行扩容或缩容操作，2种操作都通过执行再散列操作来执行(rehash)：<br>a.为字典的ht[1]分配空间，如果是扩容操作，ht[1]的空间为ht[0]的节点数量2倍;如果是缩容,ht[1]的空间为ht[0]节点数量的一半。<br>b.将ht[0]中的所有键值对rehash到ht[1]上面：rehash需要重新计算键的哈希值和索引值，然后放在ht[1]的指定位置上。<br>c.当ht[0]所有键值对都迁移到ht[1]上之后，释放ht[0]，就是将ht[0]表置为空表，再将ht[1]置为ht[0],并将ht[1]新建一个大小为0的空哈希表。</p>
+<p>4.渐进式rehash<br>上面讲到rehash过程中，需要将ht[0]上的键值对迁移到ht[1]上，但这个过程并不是一次性操作完成的。如果需要一次性完成，就必须对当前哈希表进行锁表操作，锁表期间会导致服务的不可用，所以rehash操作需要分多次、渐进式的完成。<br>a.为ht[1]分配空间，字典同时持有ht[0]和ht[1]两个哈希表<br>b.将rehashidx值置为0，表示rehash工作开始。<br>c.rehash期间，所有对字典执行的读写操作，都会在ht[0]和ht[1]两个表上操作，读操作如果在ht[0]上找到，会把结果rehash到ht[1]上，如果未找到会到ht[1]上去找，保存操作只会存在ht[1]上，当rehash工作完成之后,rehashidx++;<br>d.随着字典操作的不断执行，最终ht[0]上所有节点会全部rehash到ht[1]上，这时将rehashidx值置为-1，表示rehash完成。</p>
 
           
         
       
     </div>
+    
+    
+    
 
-    <div>
-      
-    </div>
+    
 
-    <div>
-      
-    </div>
+    
+
+    
 
     <footer class="post-footer">
+      
+
       
 
       
@@ -527,6 +507,314 @@
         <div class="post-eof"></div>
       
     </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://zhuxinhong.github.io/2015/06/24/redis设计与实现/Redis链表数据结构/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="祝欣鸿">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/Wechat.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="zhuxinhong blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2015/06/24/redis设计与实现/Redis链表数据结构/" itemprop="url">Redis链表数据结构</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2015-06-24T00:00:00+08:00">
+                2015-06-24
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Redis设计与实现/" itemprop="url" rel="index">
+                    <span itemprop="name">Redis设计与实现</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">typeof struct listNode &#123;</span><br><span class="line">	//前置节点</span><br><span class="line">	struct listNode *prev;</span><br><span class="line">	//后置节点</span><br><span class="line">	struct listNode *next;</span><br><span class="line">	//节点的值</span><br><span class="line">	void *value；</span><br><span class="line">	&#125; listNode;</span><br><span class="line">	链接的数据结构：</span><br><span class="line">	typeof struct list &#123;</span><br><span class="line">	//表头节点</span><br><span class="line">	listNode *head;</span><br><span class="line">	//表尾节点</span><br><span class="line">	listNode *tail;</span><br><span class="line">	//节点数量</span><br><span class="line">	unsiged long len;</span><br><span class="line">	//节点复制函数</span><br><span class="line">	void *(*dup) (void *ptr);</span><br><span class="line">	//节点释放函数</span><br><span class="line">	void (*free) (void *ptr);</span><br><span class="line">	//节点对比函数</span><br><span class="line">	int (*match) (void *ptr, void *key);</span><br><span class="line">&#125; list;</span><br></pre></td></tr></table></figure>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://zhuxinhong.github.io/2015/06/23/redis设计与实现/Redis简单动态字符串/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="祝欣鸿">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/Wechat.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="zhuxinhong blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2015/06/23/redis设计与实现/Redis简单动态字符串/" itemprop="url">Redis简单动态字符串</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2015-06-23T00:00:00+08:00">
+                2015-06-23
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Redis设计与实现/" itemprop="url" rel="index">
+                    <span itemprop="name">Redis设计与实现</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>Redis使用SDS(simple dynamic string)用作字符串默认实现。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">struct sdshdr&#123;</span><br><span class="line">	//已使用buf数组的字节数量，也就是字符串长度</span><br><span class="line">	int len;</span><br><span class="line">	//未使用的长度</span><br><span class="line">	int free;</span><br><span class="line">	//保存字符串</span><br><span class="line">	char buf[];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<ul>
+<li><p>SDS遵循C语言字符串以空字符串结尾，保留1个字节的空字符串’\0’，该空串不记入len中。</p>
+</li>
+<li><p>C语言中，获取字符串长度需要遍历整个字符串，时间复杂度为O(n)，SDS中有len属性维护长度，时间复杂度为O(1)，Java里面String不可变，初始化的时候就记录了长度，时间复杂度啊也是O(n)。</p>
+</li>
+<li><p>SDS空间分配策略杜绝缓冲区溢出的可能。当需要对SDS进行修改时，API会先检查SDS剩余空间是否满足需求，如不满足会自动扩容。</p>
+</li>
+<li><p>SDS内存分配策略：  </p>
+</li>
+</ul>
+<ol>
+<li><p>空间预分配:  当SDS长度(len)小于1MB，程序会分配和len同样大小的未使用空间，这是len===free。例如修改后字符串长度为13字节，就会分配13字节的未使用空间，此时buf=len+free+1=13+13+1=27字节，其中1是’\0’。当SDS被修改后长度大于1MB，程序会分配1MB的未使用空间。即使len=50MB，也还是分配1MB的未使用空间。通过空间预分配策略，Redis可以有效减少连续修改字符串操作引起的内存分配次数。</p>
+</li>
+<li><p>惰性空间释放:    当SDS字符串进行缩短操作时，程序不会立即重新分配内存来回收多的字节，而是用free记录，等待将来使用。例如SDS：abcxyz，修改成abc，SDS并不会释放多余出来的3个字节，而是将free=free+3，以备将来字符串增长操作时使用。</p>
+</li>
+</ol>
+<ul>
+<li>SDS是二进制安全的。</li>
+</ul>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
   </article>
 
 
@@ -535,7 +823,7 @@
 
   
   <nav class="pagination">
-    <a class="extend prev" rel="prev" href="/page/6/"><i class="fa fa-angle-left"></i></a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/6/">6</a><span class="page-number current">7</span><a class="page-number" href="/page/8/">8</a><span class="space">&hellip;</span><a class="page-number" href="/page/18/">18</a><a class="extend next" rel="next" href="/page/8/"><i class="fa fa-angle-right"></i></a>
+    <a class="extend prev" rel="prev" href="/page/6/"><i class="fa fa-angle-left"></i></a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/6/">6</a><span class="page-number current">7</span>
   </nav>
 
 
@@ -559,61 +847,78 @@
   </div>
 
   <aside id="sidebar" class="sidebar">
+    
     <div class="sidebar-inner">
 
       
 
       
 
-      <section class="site-overview sidebar-panel  sidebar-panel-active ">
-        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
-          <img class="site-author-image" itemprop="image"
-               src="http://o7s628cn2.bkt.clouddn.com/image/avatar.png"
-               alt="祝欣鸿" />
-          <p class="site-author-name" itemprop="name">祝欣鸿</p>
-          <p class="site-description motion-element" itemprop="description">时光如白马，稍纵即逝。术业有专攻，一生做好一件事真的很重要。</p>
-        </div>
-        <nav class="site-state motion-element">
-          <div class="site-state-item site-state-posts">
-            <a href="/archives">
-              <span class="site-state-item-count">36</span>
-              <span class="site-state-item-name">日志</span>
-            </a>
+      <section class="site-overview-wrap sidebar-panel sidebar-panel-active">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/Wechat.jpeg"
+                alt="祝欣鸿" />
+            
+              <p class="site-author-name" itemprop="name">祝欣鸿</p>
+              <p class="site-description motion-element" itemprop="description">时光如白马，稍纵即逝。术业有专攻，一生做好一件事真的很重要。</p>
           </div>
 
-          
-            <div class="site-state-item site-state-categories">
-              <a href="/categories">
-                <span class="site-state-item-count">9</span>
-                <span class="site-state-item-name">分类</span>
-              </a>
-            </div>
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">34</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">8</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">15</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
           
 
           
-            <div class="site-state-item site-state-tags">
-              <a href="/tags">
-                <span class="site-state-item-count">16</span>
-                <span class="site-state-item-name">标签</span>
-              </a>
-            </div>
+
+          
           
 
-        </nav>
-
-        
-
-        <div class="links-of-author motion-element">
           
+          
+
+          
+
         </div>
-
-        
-        
-
-        
-        
-
       </section>
+
+      
 
       
 
@@ -627,36 +932,50 @@
 
     <footer id="footer" class="footer">
       <div class="footer-inner">
-        <div class="copyright" >
-  
-  &copy; 
-  <span itemprop="copyrightYear">2017</span>
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
   <span class="with-love">
-    <i class="fa fa-heart"></i>
+    <i class="fa fa-user"></i>
   </span>
   <span class="author" itemprop="copyrightHolder">祝欣鸿</span>
+
+  
 </div>
 
-<div class="powered-by">
-  由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
-</div>
 
-<div class="theme-info">
-  主题 -
-  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
-    NexT.Pisces
-  </a>
-</div>
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
 
         
+
+
+
+
+
+
 
         
       </div>
     </footer>
 
-    <div class="back-to-top">
-      <i class="fa fa-arrow-up"></i>
-    </div>
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
   </div>
 
   
@@ -679,41 +998,103 @@
 
 
 
-  
-  <script type="text/javascript" src="/vendors/jquery/index.js?v=2.1.3"></script>
-
-  
-  <script type="text/javascript" src="/vendors/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
-
-  
-  <script type="text/javascript" src="/vendors/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
-
-  
-  <script type="text/javascript" src="/vendors/velocity/velocity.min.js?v=1.2.1"></script>
-
-  
-  <script type="text/javascript" src="/vendors/velocity/velocity.ui.min.js?v=1.2.1"></script>
-
-  
-  <script type="text/javascript" src="/vendors/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
 
 
-  
 
 
-  <script type="text/javascript" src="/js/src/utils.js?v=5.0.1"></script>
 
-  <script type="text/javascript" src="/js/src/motion.js?v=5.0.1"></script>
+
 
 
 
   
   
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
 
 
-  <script type="text/javascript" src="/js/src/affix.js?v=5.0.1"></script>
+  
 
-  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.0.1"></script>
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
 
 
 
@@ -721,19 +1102,7 @@
 
   
 
-
-  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.0.1"></script>
-
-
-
   
-
-
-
-  
-
-
-
 
   
   

@@ -1,15 +1,22 @@
-<!doctype html>
+<!DOCTYPE html>
 
 
 
   
 
 
-<html class="theme-next pisces use-motion">
+<html class="theme-next muse use-motion" lang="zh-Hans">
 <head>
   <meta charset="UTF-8"/>
-<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
 
 
 
@@ -27,42 +34,13 @@
 
 
 
-  
-  
-  <link href="/vendors/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
 
 
 
 
   
   
-  
-  
-
-  
-    
-    
-  
-
-  
-
-  
-
-  
-
-  
-
- 
-
-
-
-
-<link href="/vendors/font-awesome/css/font-awesome.min.css?v=4.4.0" rel="stylesheet" type="text/css" />
-
-<link href="/css/main.css?v=5.0.1" rel="stylesheet" type="text/css" />
-
-
-  <meta name="keywords" content="zhuxinhong java" />
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
 
 
 
@@ -70,8 +48,31 @@
 
 
 
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
 
-  <link rel="shortcut icon" type="image/x-icon" href="http://static.hdslb.com/images/favicon.ico?v=5.0.1" />
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Hexo, NexT" />
+
+
+
+
 
 
 
@@ -84,37 +85,45 @@
 <meta property="og:url" content="http://zhuxinhong.github.io/page/6/index.html">
 <meta property="og:site_name" content="zhuxinhong blog">
 <meta property="og:description" content="时光如白马，稍纵即逝。术业有专攻，一生做好一件事真的很重要。">
-<meta property="og:locale" content="zh-Hans">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="zhuxinhong blog">
 <meta name="twitter:description" content="时光如白马，稍纵即逝。术业有专攻，一生做好一件事真的很重要。">
 
 
 
-<script type="text/javascript" id="hexo.configuration">
+<script type="text/javascript" id="hexo.configurations">
   var NexT = window.NexT || {};
   var CONFIG = {
-    scheme: 'Pisces',
-    sidebar: {"position":"left","display":"post"},
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
     fancybox: true,
-    motion: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
     duoshuo: {
-      userId: undefined,
+      userId: '0',
       author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
     }
   };
 </script>
 
 
 
-
   <link rel="canonical" href="http://zhuxinhong.github.io/page/6/"/>
 
-  <title> zhuxinhong blog </title>
-</head>
 
-<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
 
+
+
+  <title>zhuxinhong blog</title>
   
 
 
@@ -124,38 +133,43 @@
 
 
 
+</head>
 
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
 
   
   
     
   
 
-  <div class="container one-collumn sidebar-position-left 
-   page-home 
- ">
+  <div class="container sidebar-position-left 
+  page-home">
     <div class="headband"></div>
 
     <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
-      <div class="header-inner"><div class="site-meta ">
-  
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
 
-  <div class="custom-logo-site-title">
-    <a href="/"  class="brand" rel="start">
-      <span class="logo-line-before"><i></i></span>
-      <span class="site-title">zhuxinhong blog</span>
-      <span class="logo-line-after"><i></i></span>
-    </a>
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">zhuxinhong blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">java coder</p>
+      
   </div>
-  <p class="site-subtitle">java coder</p>
-</div>
 
-<div class="site-nav-toggle">
-  <button>
-    <span class="btn-bar"></span>
-    <span class="btn-bar"></span>
-    <span class="btn-bar"></span>
-  </button>
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
 </div>
 
 <nav class="site-nav">
@@ -176,31 +190,11 @@
       
         
         <li class="menu-item menu-item-archives">
-          <a href="/archives" rel="section">
+          <a href="/archives/" rel="section">
             
               <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
             
             归档
-          </a>
-        </li>
-      
-        
-        <li class="menu-item menu-item-categories">
-          <a href="/categories" rel="section">
-            
-              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
-            
-            分类
-          </a>
-        </li>
-      
-        
-        <li class="menu-item menu-item-tags">
-          <a href="/tags" rel="section">
-            
-              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
-            
-            标签
           </a>
         </li>
       
@@ -211,6 +205,8 @@
 
   
 </nav>
+
+
 
  </div>
     </header>
@@ -225,13 +221,27 @@
       
 
   
-  
 
   
   
   
 
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://zhuxinhong.github.io/2015/07/01/redis设计与实现/Redis持久化-RDB/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="祝欣鸿">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/Wechat.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="zhuxinhong blog">
+    </span>
 
     
       <header class="post-header">
@@ -239,46 +249,49 @@
         
         
           <h1 class="post-title" itemprop="name headline">
-            
-            
-              
                 
-                <a class="post-title-link" href="/2016/08/09/编写高质量代码/基本类型/" itemprop="url">
-                  基本类型
-                </a>
-              
-            
-          </h1>
+                <a class="post-title-link" href="/2015/07/01/redis设计与实现/Redis持久化-RDB/" itemprop="url">Redis持久化-RDB</a></h1>
         
 
         <div class="post-meta">
           <span class="post-time">
-            <span class="post-meta-item-icon">
-              <i class="fa fa-calendar-o"></i>
-            </span>
-            <span class="post-meta-item-text">发表于</span>
-            <time itemprop="dateCreated" datetime="2016-08-09T00:00:00+08:00" content="2016-08-09">
-              2016-08-09
-            </time>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2015-07-01T00:00:00+08:00">
+                2015-07-01
+              </time>
+            
+
+            
+
+            
           </span>
 
           
             <span class="post-category" >
-              &nbsp; | &nbsp;
+            
+              <span class="post-meta-divider">|</span>
+            
               <span class="post-meta-item-icon">
                 <i class="fa fa-folder-o"></i>
               </span>
-              <span class="post-meta-item-text">分类于</span>
               
-                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
-                  <a href="/categories/编写高质量代码/" itemprop="url" rel="index">
-                    <span itemprop="name">编写高质量代码</span>
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Redis设计与实现/" itemprop="url" rel="index">
+                    <span itemprop="name">Redis设计与实现</span>
                   </a>
                 </span>
 
                 
                 
-
               
             </span>
           
@@ -288,16 +301,21 @@
           
 
           
-
-          
           
 
           
+
+          
+
+          
+
         </div>
       </header>
     
 
-
+    
+    
+    
     <div class="post-body" itemprop="articleBody">
 
       
@@ -306,57 +324,27 @@
       
         
           
-            <ul>
-<li><a href="#用偶判断，不用奇判断">用偶判断，不用奇判断</a></li>
-<li><a href="#用整型处理货币">用整型处理货币</a></li>
-<li><a href="#不要让类型默默转换">不要让类型默默转换</a></li>
-<li><a href="#边界">边界</a></li>
-</ul>
-<h3 id="用偶判断，不用奇判断"><a href="#用偶判断，不用奇判断" class="headerlink" title="用偶判断，不用奇判断"></a>用偶判断，不用奇判断</h3><p>这是判断奇偶数的代码，能被2整除就是偶数，否则是奇数。</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</div><div class="line">    Scanner input = <span class="keyword">new</span> Scanner(System.in);</div><div class="line">    System.out.println(<span class="string">"输入数字判断奇偶"</span>);</div><div class="line">    <span class="keyword">while</span> (input.hasNextInt()) &#123;</div><div class="line">        <span class="keyword">int</span> i = input.nextInt();</div><div class="line">        String str = i + <span class="string">" --&gt; "</span> + (i % <span class="number">2</span> == <span class="number">1</span> ? <span class="string">"奇数"</span> : <span class="string">"偶数"</span>);</div><div class="line">        System.out.println(str);</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<p>我们看下运行结果：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">输入数字判断奇偶</div><div class="line">1</div><div class="line">1 --&gt; 奇数</div><div class="line">-1</div><div class="line">-1 --&gt; 偶数</div><div class="line">2</div><div class="line">2 --&gt; 偶数</div><div class="line">-2</div><div class="line">-2 --&gt; 偶数</div><div class="line">-3</div><div class="line">-3 --&gt; 偶数</div></pre></td></tr></table></figure>
-<p>-1被认作偶数了，O.M.G，Java真菜。慢着，看下Java取余的代码：</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"><span class="comment">//模拟取余，divident 被除数，divisor 除数</span></div><div class="line">   <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">int</span> <span class="title">remainder</span><span class="params">(<span class="keyword">int</span> dividend, <span class="keyword">int</span> divisor)</span> </span>&#123;</div><div class="line">       <span class="keyword">return</span> dividend - dividend / divisor * divisor;</div><div class="line">   &#125;</div></pre></td></tr></table></figure>
-<p>输入-1的时候，运算结果是-1，所以被判定为偶数。so，把判断修改成判断偶数即可：</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">i % <span class="number">2</span> == <span class="number">0</span> ? <span class="string">"偶数"</span> : <span class="string">"奇数"</span></div></pre></td></tr></table></figure>
-<hr>
-<h3 id="用整型处理货币"><a href="#用整型处理货币" class="headerlink" title="用整型处理货币"></a>用整型处理货币</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">T</span> </span>&#123;</div><div class="line"></div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</div><div class="line">        System.out.println(<span class="number">10.00</span> - <span class="number">9.60</span>);</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<p>期望结果是0.4，但打印出来的却是0.40000000000000036。</p>
-<p>在计算机浮点数可能不准确，只能无限接近准确值。这是由浮点数的存储规则决定的，0.4不能用二进制准确的表示，在二进制数世界中它是一个无限循环的小数。</p>
-<p>解决办法：    </p>
-<ol>
-<li>BigDecimal    </li>
-<li>使用整型</li>
-</ol>
-<hr>
-<h3 id="不要让类型默默转换"><a href="#不要让类型默默转换" class="headerlink" title="不要让类型默默转换"></a>不要让类型默默转换</h3><p>光速每秒30万公里，根据光速计算距离，月光照射到地球需1s，阳光照射到地球需8m。</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Sample3</span> </span>&#123;</div><div class="line"></div><div class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> LIGHT_SPEED = <span class="number">30</span> * <span class="number">10000</span> * <span class="number">1000</span>;</div><div class="line"></div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</div><div class="line">        <span class="keyword">long</span> dis1 = LIGHT_SPEED * <span class="number">1</span>;</div><div class="line"></div><div class="line">        System.out.println(<span class="string">"光1秒的距离:"</span> + dis1);</div><div class="line"></div><div class="line">        <span class="keyword">long</span> dis2 = LIGHT_SPEED * <span class="number">60</span> * <span class="number">8</span>;</div><div class="line"></div><div class="line">        System.out.println(<span class="string">"光8分钟的距离:"</span> + dis2);</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<p>输出结果</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">光1秒的距离:300000000</div><div class="line">光8分钟的距离:-2028888064</div></pre></td></tr></table></figure>
-<p>Java是先运算再进行类型转换，dis2的三个运算参数都是int类型，结果也是int类型，已经超越int最大值，变成负值，转换成long型仍是负值。</p>
-<p>解决办法：</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">long</span> dis2 = LIGHT_SPEED * <span class="number">60</span> * <span class="number">8l</span>;</div></pre></td></tr></table></figure>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">Long dis2 = LIGHT_SPEED * <span class="number">60</span> * <span class="number">8L</span>;</div></pre></td></tr></table></figure>
-<hr>
-<h3 id="边界"><a href="#边界" class="headerlink" title="边界"></a>边界</h3><p>产品预定场景，cur表示当前会员已拥有产品数，LIMIT是最多拥有预定数。</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Sample4</span> </span>&#123;</div><div class="line"></div><div class="line">    <span class="keyword">public</span> <span class="keyword">final</span> <span class="keyword">static</span> <span class="keyword">int</span> LIMIT = <span class="number">2000</span>;</div><div class="line"></div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</div><div class="line">        <span class="keyword">int</span> cur = <span class="number">1000</span>;</div><div class="line">        Scanner input = <span class="keyword">new</span> Scanner(System.in);</div><div class="line">        System.out.println(<span class="string">"请输入需要预定的数量:"</span>);</div><div class="line">        <span class="keyword">while</span> (input.hasNextInt()) &#123;</div><div class="line">            <span class="keyword">int</span> order = input.nextInt();</div><div class="line">            <span class="keyword">if</span> (order &gt; <span class="number">0</span> &amp;&amp; order + cur &lt;= LIMIT) &#123;</div><div class="line">                System.out.println(<span class="string">"成功预定:"</span> + order + <span class="string">"个产品"</span>);</div><div class="line">            &#125; <span class="keyword">else</span> &#123;</div><div class="line">                System.out.println(<span class="string">"超额，预定失败"</span>);</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<p>输出结果</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">请输入需要预定的数量:</div><div class="line">800</div><div class="line">成功预定:800个产品</div><div class="line">2147483647</div><div class="line">成功预定:2147483647个产品</div></pre></td></tr></table></figure>
+            <p>RDB持久化可以自动，也可以手动，这个功能将某个时间点上的数据库状态保存到一个经过压缩的二进制文件中。</p>
+<p>SAVE命令会阻塞服务，执行完成前客户端的所有请求都会拒绝。<br>BGSAVE命令会新建一个子进程执行持久化操作，不阻塞服务。</p>
+<p>服务器状态维护了一个dirty计数器以及一个lastsave属性，供RDB持久化策略使用。<br>dirty计数器记录距离上一次成功执行SAVE或BGSAVE操作后，服务器中所有数据库进行了多少次修改操作（增删改）；<br>lastsave属性是一个unix时间戳，记录上一次RDB持久化的时间。</p>
+
           
         
       
     </div>
+    
+    
+    
 
-    <div>
-      
-    </div>
+    
 
-    <div>
-      
-    </div>
+    
+
+    
 
     <footer class="post-footer">
+      
+
       
 
       
@@ -366,6 +354,10 @@
         <div class="post-eof"></div>
       
     </footer>
+  </div>
+  
+  
+  
   </article>
 
 
@@ -373,13 +365,27 @@
       
 
   
-  
 
   
   
   
 
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://zhuxinhong.github.io/2015/07/01/redis设计与实现/Redis类型检查和命令多态/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="祝欣鸿">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/Wechat.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="zhuxinhong blog">
+    </span>
 
     
       <header class="post-header">
@@ -387,46 +393,49 @@
         
         
           <h1 class="post-title" itemprop="name headline">
-            
-            
-              
                 
-                <a class="post-title-link" href="/2016/07/05/HBase/初识HBase/" itemprop="url">
-                  初识HBase
-                </a>
-              
-            
-          </h1>
+                <a class="post-title-link" href="/2015/07/01/redis设计与实现/Redis类型检查和命令多态/" itemprop="url">Redis类型检查和命令多态</a></h1>
         
 
         <div class="post-meta">
           <span class="post-time">
-            <span class="post-meta-item-icon">
-              <i class="fa fa-calendar-o"></i>
-            </span>
-            <span class="post-meta-item-text">发表于</span>
-            <time itemprop="dateCreated" datetime="2016-07-05T00:00:00+08:00" content="2016-07-05">
-              2016-07-05
-            </time>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2015-07-01T00:00:00+08:00">
+                2015-07-01
+              </time>
+            
+
+            
+
+            
           </span>
 
           
             <span class="post-category" >
-              &nbsp; | &nbsp;
+            
+              <span class="post-meta-divider">|</span>
+            
               <span class="post-meta-item-icon">
                 <i class="fa fa-folder-o"></i>
               </span>
-              <span class="post-meta-item-text">分类于</span>
               
-                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
-                  <a href="/categories/HBase/" itemprop="url" rel="index">
-                    <span itemprop="name">HBase</span>
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Redis设计与实现/" itemprop="url" rel="index">
+                    <span itemprop="name">Redis设计与实现</span>
                   </a>
                 </span>
 
                 
                 
-
               
             </span>
           
@@ -436,16 +445,21 @@
           
 
           
-
-          
           
 
           
+
+          
+
+          
+
         </div>
       </header>
     
 
-
+    
+    
+    
     <div class="post-body" itemprop="articleBody">
 
       
@@ -454,77 +468,29 @@
       
         
           
-            <h2 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h2><p>HBase是一个构建在HDFS之上、分布式、面向列的开源数据库，由Google BigTable的开源实现，它主要用于存储海量数据，是Hadoop生态系统中的重要一员。</p>
-<h2 id="HBase优势"><a href="#HBase优势" class="headerlink" title="HBase优势"></a>HBase优势</h2><h3 id="1-成熟"><a href="#1-成熟" class="headerlink" title="1.成熟"></a>1.成熟</h3><ul>
-<li>社区成熟    </li>
-<li>理论充分经过实践</li>
-<li>丰富的工具支持, hbck、phoenix、solr</li>
-</ul>
-<h3 id="2-高效"><a href="#2-高效" class="headerlink" title="2.高效"></a>2.高效</h3><ul>
-<li>将随机嘟列转化为顺序读写，适应高并发写入</li>
-<li>均衡效果好读写性能和机器数保持线性关系</li>
-<li>行中没有保存数据的列不占存储空间</li>
-</ul>
-<h3 id="3-分布式特性"><a href="#3-分布式特性" class="headerlink" title="3.分布式特性"></a>3.分布式特性</h3><ul>
-<li>基于HDFS、Zookeeper</li>
-<li>一致性、可用性、分区容忍性</li>
-<li>大数据存储</li>
-<li>易扩展</li>
-</ul>
-<h2 id="HBase表特点"><a href="#HBase表特点" class="headerlink" title="HBase表特点"></a>HBase表特点</h2><ul>
-<li>大：一个表可以有数十亿行，上百万列</li>
-<li>面向列：面向列（族）的存储和权限访问，列（族）独立索引</li>
-<li>稀疏：对于为空（null）的列，并不占用存储空间，因此，表可以设计的非常稀疏</li>
-<li>数据类型单一：HBase中的数据类型都是字符串(string)</li>
-<li>无模式：每行都有一个可排序的主键和任意多的列，列可以根据需要动态增加，同一张表中不同的行可以有截然不同的列</li>
-</ul>
-<h2 id="HBase-VS-RDBMS"><a href="#HBase-VS-RDBMS" class="headerlink" title="HBase VS RDBMS"></a>HBase VS RDBMS</h2><ul>
-<li>数据类型<br>HBase中的数据都是字符串类型</li>
-<li>数据操作<br>HBase只有普通的增删改查等操作，没有表之间的关联查询</li>
-<li>存储模式<br>HBase是基于列式存储的，而RDBMS是基于行式存储的</li>
-<li>应用场景<br>HBase适合存储大量数据，查询效率极高</li>
-</ul>
-<hr>
-<h2 id="HBase概念"><a href="#HBase概念" class="headerlink" title="HBase概念"></a>HBase概念</h2><h3 id="1-主键"><a href="#1-主键" class="headerlink" title="1.主键"></a>1.主键</h3><ul>
-<li>用来检索记录的主键</li>
-<li>访问HBase表中的行，只有三种方式：<ol>
-<li>通过单个Row Key访问</li>
-<li>通过Row Key的range</li>
-<li>全表扫描</li>
-</ol>
-</li>
-<li>主键为任意字符串，最大长度为64kb，按字典顺序存储，在HBase内部保存为字节数组</li>
-</ul>
-<h3 id="2-列族"><a href="#2-列族" class="headerlink" title="2.列族"></a>2.列族</h3><ul>
-<li>列族在创建表的时候声明，一个列族可以包含多个列，列中的数据都是以二进制形式存在，没有数据类型</li>
-<li>列族是一些列的集合</li>
-<li>一个列族所有列成员是有着相同的前缀。比如，列courses:histor和courses:math都是列族courses的成员，冒号是列族的分隔符，用来区分前缀和列名</li>
-</ul>
-<h3 id="3-时间戳与存储单元"><a href="#3-时间戳与存储单元" class="headerlink" title="3.时间戳与存储单元"></a>3.时间戳与存储单元</h3><ul>
-<li>HBase中通过row和columns确定的为一个存贮单元称为cell。每个cell都保存着同一份数据的多个版本。</li>
-<li>在写入数据时，时间戳可以由HBase自动赋值（当前系统时间精确到毫秒），也可以显示赋值。</li>
-<li>每个cell中，不用版本的数据按照时间的倒序排序。</li>
-</ul>
-<h2 id="HBase数据模型"><a href="#HBase数据模型" class="headerlink" title="HBase数据模型"></a>HBase数据模型</h2><h3 id="HBase存储细节"><a href="#HBase存储细节" class="headerlink" title="HBase存储细节"></a>HBase存储细节</h3><ul>
-<li>每个列族存储在HDFS上的一个单独文件夹中</li>
-<li>Key和Version number会在每个列族中存储一份</li>
-<li>空值不会被保存</li>
-</ul>
+            <p>Redis中用于操作键的命令基本可以分为2类。</p>
+<p>其中一种是可以对任何类型的键执行，比如DEL,EXPIRE,RENAME,TYPE,OBJECT,TTL等命令。</p>
+<p>另一种只能对特定的键执行，比如：<br>SET,GET,APPEND,STRLEN 等仅限用于字符串的键类型；<br>HDEL,HSET,HGET,HLEN 等仅限用于哈希键类型；<br>RPUSH,LPOP,LINSERT,LLEN 等仅限用于列表键类型；<br>SADD,SPOP,SINTER,SCARD 等仅限用于集合键类型；<br>ZADD,ZCARD,ZRANK,ZSCORE 等仅限用于有序集合键类型；</p>
+<p>在执行一个类型特定命令之前，Redis会先检查输入键类型是否正确，然后再决定是否执行命令。<br>如果键名称正确，再检查键对象是否是执行命令所需的类型，不是的话就返回一个类型错误。</p>
+<p>多态命令的实现除了检查键类型和命令是否匹配外，还会检查键的至对象所使用的编码。例如，LLEN命令。<br>如果列表对象编码为ziplist,，说明对象为压缩列表，程序使用ziplistlen作为底层实现返回列表长度。<br>如果列表对象编码为linkedlist，说明对象为双端链表，程序使用listLength作为底层实现返回链表长度。</p>
 
           
         
       
     </div>
+    
+    
+    
 
-    <div>
-      
-    </div>
+    
 
-    <div>
-      
-    </div>
+    
+
+    
 
     <footer class="post-footer">
+      
+
       
 
       
@@ -534,6 +500,448 @@
         <div class="post-eof"></div>
       
     </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://zhuxinhong.github.io/2015/06/28/redis设计与实现/Redis哈希对象/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="祝欣鸿">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/Wechat.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="zhuxinhong blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2015/06/28/redis设计与实现/Redis哈希对象/" itemprop="url">Redis哈希对象</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2015-06-28T00:00:00+08:00">
+                2015-06-28
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Redis设计与实现/" itemprop="url" rel="index">
+                    <span itemprop="name">Redis设计与实现</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>哈希对象编码可以是ziplist或者hashtable。</p>
+<p>ziplist编码的哈希对象使用压缩列表作为底层实现。有新的键值对要保存时，程序会先将键值对的键推到列表表尾，再将键值对的值推到列表表尾。</p>
+<p>hashtable编码的哈希对象使用字典作为底层实现，哈希对象中的每个键值对都是用一个字典键值对来保存。</p>
+<p>当哈希对象满足下面2个条件时，哈希对象使用ziplist编码，其余都使用hashtable编码：<br>a.哈希对象保存所有键值对的键和值字符长度都小于64字节；<br>b.哈希对象保存的键值对数量小于512个；</p>
+<p>上述2个条件的阀值是可以修改的，在配置文件中的 hash-max-ziplist-value 和 hash-max-ziplist-entries 选项中。</p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://zhuxinhong.github.io/2015/06/28/redis设计与实现/Redis对象/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="祝欣鸿">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/Wechat.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="zhuxinhong blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2015/06/28/redis设计与实现/Redis对象/" itemprop="url">Redis对象</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2015-06-28T00:00:00+08:00">
+                2015-06-28
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Redis设计与实现/" itemprop="url" rel="index">
+                    <span itemprop="name">Redis设计与实现</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>Redis中每个对象都由一个redisObject结构表示：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">typeof struct redisObject &#123;</span><br><span class="line">	//类型</span><br><span class="line">	unsigned <span class="built_in">type</span> : 4;</span><br><span class="line">	//编码</span><br><span class="line">	unsigned encoding : 4;</span><br><span class="line">	//指向底层数据结构的指针</span><br><span class="line">	void *ptr;</span><br><span class="line">	// . . .</span><br><span class="line">&#125; robj;</span><br></pre></td></tr></table></figure>
+<p>type  对象的类型<br>REDIS_STRING 字符串对象<br>REDIS_LIST 列表对象<br>REDIS_HASH 哈希对象<br>REDIS_SET 集合对象<br>REDIS_ZSET 有序集合对象</p>
+<p>对于Redis保存的键值对来说，键总是一个字符串对象，而值可以是上述对象中的任意对象。使用TYPE命令返回的结果是数据库对应键的值对象类型。</p>
+<p>encoding 记录对象底层数据结构的实现。使用OBJECT ENCODING 可查看一个数据库键的值对象编码。</p>
+<p>Redis对象的内存回收采用的是类似JVM垃圾回收的方法之一  引用计数法。</p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://zhuxinhong.github.io/2015/06/27/redis设计与实现/Redis压缩列表/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="祝欣鸿">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/Wechat.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="zhuxinhong blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2015/06/27/redis设计与实现/Redis压缩列表/" itemprop="url">Redis压缩列表</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2015-06-27T00:00:00+08:00">
+                2015-06-27
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Redis设计与实现/" itemprop="url" rel="index">
+                    <span itemprop="name">Redis设计与实现</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>压缩列表（ziplist）是列表键和哈希键的底层实现之一。当一个列表键只包含少量列表项，并且每项都是小整数或短字符串时，Redis就会使用压缩列表作为列表键的底层实现。</p>
+<p>ziplis组成：<br>zlbytes : 记录列表占用内存字节数：在重新分配内存或计算zlend时使用<br>zltail : 记录压缩列表表尾节点距离列表的起始地址有多少字节<br>zllen : 记录压缩列表包含节点数量<br>entryX : 各个节点<br>zlend : 标记压缩列表末端</p>
+<p>压缩列表节点构成 entryX :<br>previous_entry_length : 记录前1个节点长度，单位为字节，程序可通过指针运算，根据当前节点的起始地址计算出前一个节点的起始地址。如前一节点长度小于254字节，则值为1个字节；反之若前一节点长度大于等于254字节，值为5字节，其中第一字节为0xFE(十进制254)，之后4个字节用于保存前1节点长度。<br>encoding : 记录节点的content属性所保存数据的类型及长度<br>content : 节点值</p>
+<p>连锁更新<br>例如在一个压缩列表中，有多个连续的长度为250-253的节点e1至eN，现在在表头插入一个长度大于254的节点。<br>想像一下，新节点插入后，e1需要修改previous_entry_length的值从1个字节扩展到5个字节，并且该变化会递归到eN。<br>因此连锁更新在最坏的情况下需要对压缩列表执行N次空间重分配，每次空间重分配的最坏复杂度为O(N)，所以连锁更新的最坏复杂度为O(N平方)。<br>但尽管该操作复杂度较高，但实际环境中，存在多个连续的250-253字节长度之间的节点并不多，所以我们可以不必担心连锁更新对性能的影响。</p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
   </article>
 
 
@@ -542,7 +950,7 @@
 
   
   <nav class="pagination">
-    <a class="extend prev" rel="prev" href="/page/5/"><i class="fa fa-angle-left"></i></a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/5/">5</a><span class="page-number current">6</span><a class="page-number" href="/page/7/">7</a><span class="space">&hellip;</span><a class="page-number" href="/page/18/">18</a><a class="extend next" rel="next" href="/page/7/"><i class="fa fa-angle-right"></i></a>
+    <a class="extend prev" rel="prev" href="/page/5/"><i class="fa fa-angle-left"></i></a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/5/">5</a><span class="page-number current">6</span><a class="page-number" href="/page/7/">7</a><a class="extend next" rel="next" href="/page/7/"><i class="fa fa-angle-right"></i></a>
   </nav>
 
 
@@ -566,61 +974,78 @@
   </div>
 
   <aside id="sidebar" class="sidebar">
+    
     <div class="sidebar-inner">
 
       
 
       
 
-      <section class="site-overview sidebar-panel  sidebar-panel-active ">
-        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
-          <img class="site-author-image" itemprop="image"
-               src="http://o7s628cn2.bkt.clouddn.com/image/avatar.png"
-               alt="祝欣鸿" />
-          <p class="site-author-name" itemprop="name">祝欣鸿</p>
-          <p class="site-description motion-element" itemprop="description">时光如白马，稍纵即逝。术业有专攻，一生做好一件事真的很重要。</p>
-        </div>
-        <nav class="site-state motion-element">
-          <div class="site-state-item site-state-posts">
-            <a href="/archives">
-              <span class="site-state-item-count">36</span>
-              <span class="site-state-item-name">日志</span>
-            </a>
+      <section class="site-overview-wrap sidebar-panel sidebar-panel-active">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/Wechat.jpeg"
+                alt="祝欣鸿" />
+            
+              <p class="site-author-name" itemprop="name">祝欣鸿</p>
+              <p class="site-description motion-element" itemprop="description">时光如白马，稍纵即逝。术业有专攻，一生做好一件事真的很重要。</p>
           </div>
 
-          
-            <div class="site-state-item site-state-categories">
-              <a href="/categories">
-                <span class="site-state-item-count">9</span>
-                <span class="site-state-item-name">分类</span>
-              </a>
-            </div>
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">34</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">8</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">15</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
           
 
           
-            <div class="site-state-item site-state-tags">
-              <a href="/tags">
-                <span class="site-state-item-count">16</span>
-                <span class="site-state-item-name">标签</span>
-              </a>
-            </div>
+
+          
           
 
-        </nav>
-
-        
-
-        <div class="links-of-author motion-element">
           
+          
+
+          
+
         </div>
-
-        
-        
-
-        
-        
-
       </section>
+
+      
 
       
 
@@ -634,36 +1059,50 @@
 
     <footer id="footer" class="footer">
       <div class="footer-inner">
-        <div class="copyright" >
-  
-  &copy; 
-  <span itemprop="copyrightYear">2017</span>
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
   <span class="with-love">
-    <i class="fa fa-heart"></i>
+    <i class="fa fa-user"></i>
   </span>
   <span class="author" itemprop="copyrightHolder">祝欣鸿</span>
+
+  
 </div>
 
-<div class="powered-by">
-  由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
-</div>
 
-<div class="theme-info">
-  主题 -
-  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
-    NexT.Pisces
-  </a>
-</div>
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
 
         
+
+
+
+
+
+
 
         
       </div>
     </footer>
 
-    <div class="back-to-top">
-      <i class="fa fa-arrow-up"></i>
-    </div>
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
   </div>
 
   
@@ -686,41 +1125,103 @@
 
 
 
-  
-  <script type="text/javascript" src="/vendors/jquery/index.js?v=2.1.3"></script>
-
-  
-  <script type="text/javascript" src="/vendors/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
-
-  
-  <script type="text/javascript" src="/vendors/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
-
-  
-  <script type="text/javascript" src="/vendors/velocity/velocity.min.js?v=1.2.1"></script>
-
-  
-  <script type="text/javascript" src="/vendors/velocity/velocity.ui.min.js?v=1.2.1"></script>
-
-  
-  <script type="text/javascript" src="/vendors/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
 
 
-  
 
 
-  <script type="text/javascript" src="/js/src/utils.js?v=5.0.1"></script>
 
-  <script type="text/javascript" src="/js/src/motion.js?v=5.0.1"></script>
+
 
 
 
   
   
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
 
 
-  <script type="text/javascript" src="/js/src/affix.js?v=5.0.1"></script>
+  
 
-  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.0.1"></script>
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
 
 
 
@@ -728,19 +1229,7 @@
 
   
 
-
-  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.0.1"></script>
-
-
-
   
-
-
-
-  
-
-
-
 
   
   

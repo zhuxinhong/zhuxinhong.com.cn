@@ -1,15 +1,22 @@
-<!doctype html>
+<!DOCTYPE html>
 
 
 
   
 
 
-<html class="theme-next pisces use-motion">
+<html class="theme-next muse use-motion" lang="zh-Hans">
 <head>
   <meta charset="UTF-8"/>
-<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
 
 
 
@@ -27,39 +34,38 @@
 
 
 
-  
-  
-  <link href="/vendors/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
 
 
 
 
   
   
-  
-  
-
-  
-    
-    
-  
-
-  
-
-  
-
-  
-
-  
-
- 
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
 
 
 
 
-<link href="/vendors/font-awesome/css/font-awesome.min.css?v=4.4.0" rel="stylesheet" type="text/css" />
 
-<link href="/css/main.css?v=5.0.1" rel="stylesheet" type="text/css" />
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
 
 
   <meta name="keywords" content="Hystrix,SpringCloud," />
@@ -71,52 +77,63 @@
 
 
 
-  <link rel="shortcut icon" type="image/x-icon" href="http://static.hdslb.com/images/favicon.ico?v=5.0.1" />
 
 
+<meta name="description" content="什么是 Hystrix？在分布式环境中，不可避免地会有一些服务依赖项会失败。Hystrix是一个库，它通过添加延迟容忍和容错逻辑来帮助控制这些分布式服务之间的交互。Hystrix通过隔离服务之间的访问点、阻止它们之间的级联故障，并提供备用选项，从而提高系统的整体弹性。
+Hystrix 解决什么问题？对于每个具有99.99％正常运行时间的30个服务。
 
-
-
-
-<meta name="description" content="什么是 Hystrix？在分布式环境中，不可避免地会有一些服务依赖项会失败。Hystrix是一个库，它通过添加延迟容忍和容错逻辑来帮助控制这些分布式服务之间的交互。Hystrix通过隔离服务之间的访问点、阻止它们之间的级联故障，并提供备用选项，从而提高系统的整体弹性。 Hystrix 解决什么问题？对于每个具有99.99％正常运行时间的30个服务。  99.99^30 = 99.7％正常运行时间">
-<meta name="keywords" content="Hystrix,SpringCloud">
+99.99^30 = 99.7％正常运行时间">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Hystrix之hystrix-javanica">
 <meta property="og:url" content="http://zhuxinhong.github.io/2017/07/16/SpringCloud/Hystrix/index.html">
 <meta property="og:site_name" content="zhuxinhong blog">
-<meta property="og:description" content="什么是 Hystrix？在分布式环境中，不可避免地会有一些服务依赖项会失败。Hystrix是一个库，它通过添加延迟容忍和容错逻辑来帮助控制这些分布式服务之间的交互。Hystrix通过隔离服务之间的访问点、阻止它们之间的级联故障，并提供备用选项，从而提高系统的整体弹性。 Hystrix 解决什么问题？对于每个具有99.99％正常运行时间的30个服务。  99.99^30 = 99.7％正常运行时间">
-<meta property="og:locale" content="zh-Hans">
+<meta property="og:description" content="什么是 Hystrix？在分布式环境中，不可避免地会有一些服务依赖项会失败。Hystrix是一个库，它通过添加延迟容忍和容错逻辑来帮助控制这些分布式服务之间的交互。Hystrix通过隔离服务之间的访问点、阻止它们之间的级联故障，并提供备用选项，从而提高系统的整体弹性。
+Hystrix 解决什么问题？对于每个具有99.99％正常运行时间的30个服务。
+
+99.99^30 = 99.7％正常运行时间">
 <meta property="og:updated_time" content="2017-07-19T09:12:51.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Hystrix之hystrix-javanica">
-<meta name="twitter:description" content="什么是 Hystrix？在分布式环境中，不可避免地会有一些服务依赖项会失败。Hystrix是一个库，它通过添加延迟容忍和容错逻辑来帮助控制这些分布式服务之间的交互。Hystrix通过隔离服务之间的访问点、阻止它们之间的级联故障，并提供备用选项，从而提高系统的整体弹性。 Hystrix 解决什么问题？对于每个具有99.99％正常运行时间的30个服务。  99.99^30 = 99.7％正常运行时间">
+<meta name="twitter:description" content="什么是 Hystrix？在分布式环境中，不可避免地会有一些服务依赖项会失败。Hystrix是一个库，它通过添加延迟容忍和容错逻辑来帮助控制这些分布式服务之间的交互。Hystrix通过隔离服务之间的访问点、阻止它们之间的级联故障，并提供备用选项，从而提高系统的整体弹性。
+Hystrix 解决什么问题？对于每个具有99.99％正常运行时间的30个服务。
+
+99.99^30 = 99.7％正常运行时间">
 
 
 
-<script type="text/javascript" id="hexo.configuration">
+<script type="text/javascript" id="hexo.configurations">
   var NexT = window.NexT || {};
   var CONFIG = {
-    scheme: 'Pisces',
-    sidebar: {"position":"left","display":"post"},
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
     fancybox: true,
-    motion: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
     duoshuo: {
-      userId: undefined,
+      userId: '0',
       author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
     }
   };
 </script>
 
 
 
-
   <link rel="canonical" href="http://zhuxinhong.github.io/2017/07/16/SpringCloud/Hystrix/"/>
 
-  <title> Hystrix之hystrix-javanica | zhuxinhong blog </title>
-</head>
 
-<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
 
+
+
+  <title>Hystrix之hystrix-javanica | zhuxinhong blog</title>
   
 
 
@@ -126,36 +143,42 @@
 
 
 
+</head>
 
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
 
   
   
     
   
 
-  <div class="container one-collumn sidebar-position-left page-post-detail ">
+  <div class="container sidebar-position-left page-post-detail">
     <div class="headband"></div>
 
     <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
-      <div class="header-inner"><div class="site-meta ">
-  
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
 
-  <div class="custom-logo-site-title">
-    <a href="/"  class="brand" rel="start">
-      <span class="logo-line-before"><i></i></span>
-      <span class="site-title">zhuxinhong blog</span>
-      <span class="logo-line-after"><i></i></span>
-    </a>
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">zhuxinhong blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">java coder</p>
+      
   </div>
-  <p class="site-subtitle">java coder</p>
-</div>
 
-<div class="site-nav-toggle">
-  <button>
-    <span class="btn-bar"></span>
-    <span class="btn-bar"></span>
-    <span class="btn-bar"></span>
-  </button>
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
 </div>
 
 <nav class="site-nav">
@@ -176,31 +199,11 @@
       
         
         <li class="menu-item menu-item-archives">
-          <a href="/archives" rel="section">
+          <a href="/archives/" rel="section">
             
               <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
             
             归档
-          </a>
-        </li>
-      
-        
-        <li class="menu-item menu-item-categories">
-          <a href="/categories" rel="section">
-            
-              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
-            
-            分类
-          </a>
-        </li>
-      
-        
-        <li class="menu-item menu-item-tags">
-          <a href="/tags" rel="section">
-            
-              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
-            
-            标签
           </a>
         </li>
       
@@ -211,6 +214,8 @@
 
   
 </nav>
+
+
 
  </div>
     </header>
@@ -225,49 +230,68 @@
     
 
   
-  
 
   
   
   
 
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://zhuxinhong.github.io/2017/07/16/SpringCloud/Hystrix/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="祝欣鸿">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/Wechat.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="zhuxinhong blog">
+    </span>
 
     
       <header class="post-header">
 
         
         
-          <h1 class="post-title" itemprop="name headline">
-            
-            
-              
-                Hystrix之hystrix-javanica
-              
-            
-          </h1>
+          <h1 class="post-title" itemprop="name headline">Hystrix之hystrix-javanica</h1>
         
 
         <div class="post-meta">
           <span class="post-time">
-            <span class="post-meta-item-icon">
-              <i class="fa fa-calendar-o"></i>
-            </span>
-            <span class="post-meta-item-text">发表于</span>
-            <time itemprop="dateCreated" datetime="2017-07-16T00:00:00+08:00" content="2017-07-16">
-              2017-07-16
-            </time>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-07-16T00:00:00+08:00">
+                2017-07-16
+              </time>
+            
+
+            
+
+            
           </span>
 
           
             <span class="post-category" >
-              &nbsp; | &nbsp;
+            
+              <span class="post-meta-divider">|</span>
+            
               <span class="post-meta-item-icon">
                 <i class="fa fa-folder-o"></i>
               </span>
-              <span class="post-meta-item-text">分类于</span>
               
-                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
                   <a href="/categories/SpringCloud/" itemprop="url" rel="index">
                     <span itemprop="name">SpringCloud</span>
                   </a>
@@ -275,7 +299,6 @@
 
                 
                 
-
               
             </span>
           
@@ -285,16 +308,21 @@
           
 
           
-
-          
           
 
           
+
+          
+
+          
+
         </div>
       </header>
     
 
-
+    
+    
+    
     <div class="post-body" itemprop="articleBody">
 
       
@@ -338,8 +366,8 @@
 <h2 id="hystrix-javanica"><a href="#hystrix-javanica" class="headerlink" title="hystrix-javanica"></a>hystrix-javanica</h2><p>使用完整的hystrix需要大量代码，可能需要花费大量时间写一个Hystrix命令。Javanica旨在通过引入注释来简化使用hystrix。Javanica通过在Spring中声明HystrixCommandAspect这个bean来实现，这里不再赘述AOP。</p>
 <p>Javanica 通过 ConfigurationManager 来管理属性配置。</p>
 <p>以下注解和代码效果等同。</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"><span class="meta">@HystrixCommand</span>(commandProperties = &#123;</div><div class="line">        <span class="meta">@HystrixProperty</span>(name = <span class="string">"execution.isolation.thread.timeoutInMilliseconds"</span>, value = <span class="string">"500"</span>)</div><div class="line">    &#125;)</div><div class="line"><span class="function"><span class="keyword">public</span> User <span class="title">getUserById</span><span class="params">(String id)</span> </span>&#123;</div><div class="line">    <span class="keyword">return</span> userResource.getUserById(id);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">ConfigurationManager.getConfigInstance().setProperty(<span class="string">"hystrix.command.getUserById.execution.isolation.thread.timeoutInMilliseconds"</span>, <span class="string">"500"</span>);</div></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@HystrixCommand</span>(commandProperties = &#123;</span><br><span class="line">        <span class="meta">@HystrixProperty</span>(name = <span class="string">"execution.isolation.thread.timeoutInMilliseconds"</span>, value = <span class="string">"500"</span>)</span><br><span class="line">    &#125;)</span><br><span class="line"><span class="function"><span class="keyword">public</span> User <span class="title">getUserById</span><span class="params">(String id)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> userResource.getUserById(id);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ConfigurationManager.getConfigInstance().setProperty(<span class="string">"hystrix.command.getUserById.execution.isolation.thread.timeoutInMilliseconds"</span>, <span class="string">"500"</span>);</span><br></pre></td></tr></table></figure>
 <h3 id="HystrixCommand-注解配置"><a href="#HystrixCommand-注解配置" class="headerlink" title="HystrixCommand 注解配置"></a>HystrixCommand 注解配置</h3><h4 id="隔离策略"><a href="#隔离策略" class="headerlink" title="隔离策略"></a>隔离策略</h4><ul>
 <li><p>ExecutionIsolationStrategy.THREAD</p>
 <p>在一个单独的线程上执行，并发请求受到线程池中线程数量的限制。推荐使用。</p>
@@ -509,27 +537,27 @@
 </tr>
 </tbody>
 </table>
-<h3 id="SpringMVC"><a href="#SpringMVC" class="headerlink" title="SpringMVC"></a>SpringMVC</h3><figure class="highlight xml"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"><span class="tag">&lt;<span class="name">aop:aspectj-autoproxy</span>/&gt;</span></div><div class="line">   <span class="tag">&lt;<span class="name">bean</span> <span class="attr">id</span>=<span class="string">"hystrixAspect"</span> <span class="attr">class</span>=<span class="string">"com.netflix.hystrix.contrib.javanica.aop.aspectj.HystrixCommandAspect"</span>&gt;</span><span class="tag">&lt;/<span class="name">bean</span>&gt;</span></div></pre></td></tr></table></figure>
-<h3 id="SpringBoot"><a href="#SpringBoot" class="headerlink" title="SpringBoot"></a>SpringBoot</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line"><span class="meta">@Configuration</span></div><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">HystrixConfiguration</span> </span>&#123;</div><div class="line"></div><div class="line">  <span class="meta">@Bean</span></div><div class="line">  <span class="function"><span class="keyword">public</span> HystrixCommandAspect <span class="title">hystrixAspect</span><span class="params">()</span> </span>&#123;</div><div class="line">    <span class="keyword">return</span> <span class="keyword">new</span> HystrixCommandAspect();</div><div class="line">  &#125;</div><div class="line"></div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<h3 id="Sync-Execution"><a href="#Sync-Execution" class="headerlink" title="Sync Execution"></a>Sync Execution</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"><span class="meta">@HystrixCommand</span>(groupKey=<span class="string">"UserGroup"</span>, commandKey = <span class="string">"GetUserByIdCommand"</span>)</div><div class="line"><span class="function"><span class="keyword">public</span> User <span class="title">getUserById</span><span class="params">(String id)</span> </span>&#123;</div><div class="line">    <span class="keyword">return</span> userResource.getUserById(id);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<h3 id="Async-Execution"><a href="#Async-Execution" class="headerlink" title="Async Execution"></a>Async Execution</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line"><span class="meta">@HystrixCommand</span></div><div class="line"><span class="function"><span class="keyword">public</span> Future&lt;User&gt; <span class="title">getUserByIdAsync</span><span class="params">(<span class="keyword">final</span> String id)</span> </span>&#123;</div><div class="line">    <span class="keyword">return</span> <span class="keyword">new</span> AsyncResult&lt;User&gt;() &#123;</div><div class="line">        <span class="meta">@Override</span></div><div class="line">        <span class="function"><span class="keyword">public</span> User <span class="title">invoke</span><span class="params">()</span> </span>&#123;</div><div class="line">            <span class="keyword">return</span> userResource.getUserById(id);</div><div class="line">        &#125;</div><div class="line">    &#125;;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<h3 id="Reactive-Exection"><a href="#Reactive-Exection" class="headerlink" title="Reactive Exection"></a>Reactive Exection</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div></pre></td><td class="code"><pre><div class="line"><span class="meta">@HystrixCommand</span></div><div class="line"><span class="function"><span class="keyword">public</span> Observable&lt;User&gt; <span class="title">getUserById</span><span class="params">(<span class="keyword">final</span> String id)</span> </span>&#123;</div><div class="line">    <span class="keyword">return</span> Observable.create(<span class="keyword">new</span> Observable.OnSubscribe&lt;User&gt;() &#123;</div><div class="line">            <span class="meta">@Override</span></div><div class="line">            <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">call</span><span class="params">(Subscriber&lt;? <span class="keyword">super</span> User&gt; observer)</span> </span>&#123;</div><div class="line">                <span class="keyword">try</span> &#123;</div><div class="line">                    <span class="keyword">if</span> (!observer.isUnsubscribed()) &#123;</div><div class="line">                        observer.onNext(<span class="keyword">new</span> User(id, name + id));</div><div class="line">                        observer.onCompleted();</div><div class="line">                    &#125;</div><div class="line">                &#125; <span class="keyword">catch</span> (Exception e) &#123;</div><div class="line">                    observer.onError(e);</div><div class="line">                &#125;</div><div class="line">            &#125;</div><div class="line">        &#125;);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<h3 id="Fallback-1"><a href="#Fallback-1" class="headerlink" title="Fallback"></a>Fallback</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line"><span class="meta">@HystrixCommand</span>(fallbackMethod = <span class="string">"defaultUser"</span>)</div><div class="line"><span class="function"><span class="keyword">public</span> User <span class="title">getUserById</span><span class="params">(String id)</span> </span>&#123;</div><div class="line">    <span class="keyword">return</span> userResource.getUserById(id);</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">private</span> User <span class="title">defaultUser</span><span class="params">(String id)</span> </span>&#123;</div><div class="line">    <span class="keyword">return</span> <span class="keyword">new</span> User(<span class="string">"def"</span>, <span class="string">"def"</span>);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h3 id="SpringMVC"><a href="#SpringMVC" class="headerlink" title="SpringMVC"></a>SpringMVC</h3><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">aop:aspectj-autoproxy</span>/&gt;</span></span><br><span class="line">   <span class="tag">&lt;<span class="name">bean</span> <span class="attr">id</span>=<span class="string">"hystrixAspect"</span> <span class="attr">class</span>=<span class="string">"com.netflix.hystrix.contrib.javanica.aop.aspectj.HystrixCommandAspect"</span>&gt;</span><span class="tag">&lt;/<span class="name">bean</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<h3 id="SpringBoot"><a href="#SpringBoot" class="headerlink" title="SpringBoot"></a>SpringBoot</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Configuration</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">HystrixConfiguration</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">  <span class="meta">@Bean</span></span><br><span class="line">  <span class="function"><span class="keyword">public</span> HystrixCommandAspect <span class="title">hystrixAspect</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">new</span> HystrixCommandAspect();</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="Sync-Execution"><a href="#Sync-Execution" class="headerlink" title="Sync Execution"></a>Sync Execution</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@HystrixCommand</span>(groupKey=<span class="string">"UserGroup"</span>, commandKey = <span class="string">"GetUserByIdCommand"</span>)</span><br><span class="line"><span class="function"><span class="keyword">public</span> User <span class="title">getUserById</span><span class="params">(String id)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> userResource.getUserById(id);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="Async-Execution"><a href="#Async-Execution" class="headerlink" title="Async Execution"></a>Async Execution</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@HystrixCommand</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> Future&lt;User&gt; <span class="title">getUserByIdAsync</span><span class="params">(<span class="keyword">final</span> String id)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">new</span> AsyncResult&lt;User&gt;() &#123;</span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="function"><span class="keyword">public</span> User <span class="title">invoke</span><span class="params">()</span> </span>&#123;</span><br><span class="line">            <span class="keyword">return</span> userResource.getUserById(id);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="Reactive-Exection"><a href="#Reactive-Exection" class="headerlink" title="Reactive Exection"></a>Reactive Exection</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@HystrixCommand</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> Observable&lt;User&gt; <span class="title">getUserById</span><span class="params">(<span class="keyword">final</span> String id)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> Observable.create(<span class="keyword">new</span> Observable.OnSubscribe&lt;User&gt;() &#123;</span><br><span class="line">            <span class="meta">@Override</span></span><br><span class="line">            <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">call</span><span class="params">(Subscriber&lt;? <span class="keyword">super</span> User&gt; observer)</span> </span>&#123;</span><br><span class="line">                <span class="keyword">try</span> &#123;</span><br><span class="line">                    <span class="keyword">if</span> (!observer.isUnsubscribed()) &#123;</span><br><span class="line">                        observer.onNext(<span class="keyword">new</span> User(id, name + id));</span><br><span class="line">                        observer.onCompleted();</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">                    observer.onError(e);</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="Fallback-1"><a href="#Fallback-1" class="headerlink" title="Fallback"></a>Fallback</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@HystrixCommand</span>(fallbackMethod = <span class="string">"defaultUser"</span>)</span><br><span class="line"><span class="function"><span class="keyword">public</span> User <span class="title">getUserById</span><span class="params">(String id)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> userResource.getUserById(id);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">private</span> User <span class="title">defaultUser</span><span class="params">(String id)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">new</span> User(<span class="string">"def"</span>, <span class="string">"def"</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <ul>
 <li>Hystrix命令和fallback应该在同一个类中，并且具有相同的方法签名(失败执行异常的可选参数)。</li>
 <li>如果需要异常，在末尾添加Throwable，对访问修饰符无要求。</li>
 <li>fallback方法可以继续添加fallback。</li>
 </ul>
-<h3 id="Fallback-Exception"><a href="#Fallback-Exception" class="headerlink" title="Fallback Exception"></a>Fallback Exception</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div></pre></td><td class="code"><pre><div class="line"><span class="meta">@HystrixCommand</span>(fallbackMethod = <span class="string">"fallback1"</span>)</div><div class="line"><span class="function">User <span class="title">getUserById</span><span class="params">(String id)</span> </span>&#123;</div><div class="line">    <span class="keyword">throw</span> <span class="keyword">new</span> RuntimeException(<span class="string">"getUserById command failed"</span>);</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="meta">@HystrixCommand</span>(fallbackMethod = <span class="string">"fallback2"</span>)</div><div class="line"><span class="function">User <span class="title">fallback1</span><span class="params">(String id, Throwable e)</span> </span>&#123;</div><div class="line">    <span class="keyword">assert</span> <span class="string">"getUserById command failed"</span>.equals(e.getMessage());</div><div class="line">    <span class="keyword">throw</span> <span class="keyword">new</span> RuntimeException(<span class="string">"fallback1 failed"</span>);</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="meta">@HystrixCommand</span>(fallbackMethod = <span class="string">"fallback3"</span>)</div><div class="line"><span class="function">User <span class="title">fallback2</span><span class="params">(String id)</span> </span>&#123;</div><div class="line">    <span class="keyword">throw</span> <span class="keyword">new</span> RuntimeException(<span class="string">"fallback2 failed"</span>);</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="meta">@HystrixCommand</span>(fallbackMethod = <span class="string">"staticFallback"</span>)</div><div class="line"><span class="function">User <span class="title">fallback3</span><span class="params">(String id, Throwable e)</span> </span>&#123;</div><div class="line">    <span class="keyword">assert</span> <span class="string">"fallback2 failed"</span>.equals(e.getMessage());</div><div class="line">    <span class="keyword">throw</span> <span class="keyword">new</span> RuntimeException(<span class="string">"fallback3 failed"</span>);</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="function">User <span class="title">staticFallback</span><span class="params">(String id, Throwable e)</span> </span>&#123;</div><div class="line">    <span class="keyword">assert</span> <span class="string">"fallback3 failed"</span>.equals(e.getMessage());</div><div class="line">    <span class="keyword">return</span> <span class="keyword">new</span> User(<span class="string">"def"</span>, <span class="string">"def"</span>);</div><div class="line">&#125;</div><div class="line">    </div><div class="line"><span class="comment">// test</span></div><div class="line"><span class="meta">@Test</span></div><div class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">test</span><span class="params">()</span> </span>&#123;</div><div class="line">	assertEquals(<span class="string">"def"</span>, getUserById(<span class="string">"1"</span>).getName());</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h3 id="Fallback-Exception"><a href="#Fallback-Exception" class="headerlink" title="Fallback Exception"></a>Fallback Exception</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@HystrixCommand</span>(fallbackMethod = <span class="string">"fallback1"</span>)</span><br><span class="line"><span class="function">User <span class="title">getUserById</span><span class="params">(String id)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">throw</span> <span class="keyword">new</span> RuntimeException(<span class="string">"getUserById command failed"</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="meta">@HystrixCommand</span>(fallbackMethod = <span class="string">"fallback2"</span>)</span><br><span class="line"><span class="function">User <span class="title">fallback1</span><span class="params">(String id, Throwable e)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">assert</span> <span class="string">"getUserById command failed"</span>.equals(e.getMessage());</span><br><span class="line">    <span class="keyword">throw</span> <span class="keyword">new</span> RuntimeException(<span class="string">"fallback1 failed"</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="meta">@HystrixCommand</span>(fallbackMethod = <span class="string">"fallback3"</span>)</span><br><span class="line"><span class="function">User <span class="title">fallback2</span><span class="params">(String id)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">throw</span> <span class="keyword">new</span> RuntimeException(<span class="string">"fallback2 failed"</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="meta">@HystrixCommand</span>(fallbackMethod = <span class="string">"staticFallback"</span>)</span><br><span class="line"><span class="function">User <span class="title">fallback3</span><span class="params">(String id, Throwable e)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">assert</span> <span class="string">"fallback2 failed"</span>.equals(e.getMessage());</span><br><span class="line">    <span class="keyword">throw</span> <span class="keyword">new</span> RuntimeException(<span class="string">"fallback3 failed"</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function">User <span class="title">staticFallback</span><span class="params">(String id, Throwable e)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">assert</span> <span class="string">"fallback3 failed"</span>.equals(e.getMessage());</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">new</span> User(<span class="string">"def"</span>, <span class="string">"def"</span>);</span><br><span class="line">&#125;</span><br><span class="line">    </span><br><span class="line"><span class="comment">// test</span></span><br><span class="line"><span class="meta">@Test</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">test</span><span class="params">()</span> </span>&#123;</span><br><span class="line">	assertEquals(<span class="string">"def"</span>, getUserById(<span class="string">"1"</span>).getName());</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <h3 id="Async-Sync-fallback"><a href="#Async-Sync-fallback" class="headerlink" title="Async/Sync fallback"></a>Async/Sync fallback</h3><ul>
 <li>sync command, sync fallback</li>
 <li>async command, sync fallback</li>
 <li>async command, async fallback</li>
 </ul>
 <h3 id="Default-fallback"><a href="#Default-fallback" class="headerlink" title="Default fallback"></a>Default fallback</h3><p>该特性允许为整个类或具体的命令定义默认的回退。如果你有一组具有完全相同的回滚逻辑的命令，那么仍然需要为每个命令定义一个fallback，因为fallback应该具有与命令相同的签名，如下所示:</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div></pre></td><td class="code"><pre><div class="line"> <span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Service</span> </span>&#123;</div><div class="line">    <span class="meta">@RequestMapping</span>(value = <span class="string">"/test1"</span>)</div><div class="line">    <span class="meta">@HystrixCommand</span>(fallbackMethod = <span class="string">"fallback"</span>)</div><div class="line">    <span class="function"><span class="keyword">public</span> APIResponse <span class="title">test1</span><span class="params">(String param1)</span> </span>&#123;</div><div class="line">        <span class="comment">// some codes here</span></div><div class="line">        <span class="keyword">return</span> APIResponse.success(<span class="string">"success"</span>);</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="meta">@RequestMapping</span>(value = <span class="string">"/test2"</span>)</div><div class="line">    <span class="meta">@HystrixCommand</span>(fallbackMethod = <span class="string">"fallback"</span>)</div><div class="line">    <span class="function"><span class="keyword">public</span> APIResponse <span class="title">test2</span><span class="params">()</span> </span>&#123;</div><div class="line">        <span class="comment">// some codes here</span></div><div class="line">        <span class="keyword">return</span> APIResponse.success(<span class="string">"success"</span>);</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="meta">@RequestMapping</span>(value = <span class="string">"/test3"</span>)</div><div class="line">    <span class="meta">@HystrixCommand</span>(fallbackMethod = <span class="string">"fallback"</span>)</div><div class="line">    <span class="function"><span class="keyword">public</span> APIResponse <span class="title">test3</span><span class="params">(ObjectRequest obj)</span> </span>&#123;</div><div class="line">        <span class="comment">// some codes here</span></div><div class="line">        <span class="keyword">return</span> APIResponse.success(<span class="string">"success"</span>);</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="function"><span class="keyword">private</span> APIResponse <span class="title">fallback</span><span class="params">(String param1)</span> </span>&#123;</div><div class="line">        <span class="keyword">return</span> APIResponse.failed(<span class="string">"Server is busy"</span>);</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="function"><span class="keyword">private</span> APIResponse <span class="title">fallback</span><span class="params">()</span> </span>&#123;</div><div class="line">        <span class="keyword">return</span> APIResponse.failed(<span class="string">"Server is busy"</span>);</div><div class="line">    &#125;</div><div class="line">    </div><div class="line">    <span class="function"><span class="keyword">private</span> APIResponse <span class="title">fallback</span><span class="params">(ObjectRequest obj)</span> </span>&#123;</div><div class="line">        <span class="keyword">return</span> APIResponse.failed(<span class="string">"Server is busy"</span>);</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"> <span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Service</span> </span>&#123;</span><br><span class="line">    <span class="meta">@RequestMapping</span>(value = <span class="string">"/test1"</span>)</span><br><span class="line">    <span class="meta">@HystrixCommand</span>(fallbackMethod = <span class="string">"fallback"</span>)</span><br><span class="line">    <span class="function"><span class="keyword">public</span> APIResponse <span class="title">test1</span><span class="params">(String param1)</span> </span>&#123;</span><br><span class="line">        <span class="comment">// some codes here</span></span><br><span class="line">        <span class="keyword">return</span> APIResponse.success(<span class="string">"success"</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@RequestMapping</span>(value = <span class="string">"/test2"</span>)</span><br><span class="line">    <span class="meta">@HystrixCommand</span>(fallbackMethod = <span class="string">"fallback"</span>)</span><br><span class="line">    <span class="function"><span class="keyword">public</span> APIResponse <span class="title">test2</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="comment">// some codes here</span></span><br><span class="line">        <span class="keyword">return</span> APIResponse.success(<span class="string">"success"</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@RequestMapping</span>(value = <span class="string">"/test3"</span>)</span><br><span class="line">    <span class="meta">@HystrixCommand</span>(fallbackMethod = <span class="string">"fallback"</span>)</span><br><span class="line">    <span class="function"><span class="keyword">public</span> APIResponse <span class="title">test3</span><span class="params">(ObjectRequest obj)</span> </span>&#123;</span><br><span class="line">        <span class="comment">// some codes here</span></span><br><span class="line">        <span class="keyword">return</span> APIResponse.success(<span class="string">"success"</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">private</span> APIResponse <span class="title">fallback</span><span class="params">(String param1)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> APIResponse.failed(<span class="string">"Server is busy"</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">private</span> APIResponse <span class="title">fallback</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> APIResponse.failed(<span class="string">"Server is busy"</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="function"><span class="keyword">private</span> APIResponse <span class="title">fallback</span><span class="params">(ObjectRequest obj)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> APIResponse.failed(<span class="string">"Server is busy"</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p>默认的fallback特性减少冗余方法：</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div></pre></td><td class="code"><pre><div class="line"><span class="meta">@DefaultProperties</span>(defaultFallback = <span class="string">"fallback"</span>)</div><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Service</span> </span>&#123;</div><div class="line">    <span class="meta">@RequestMapping</span>(value = <span class="string">"/test1"</span>)</div><div class="line">    <span class="meta">@HystrixCommand</span></div><div class="line">    <span class="function"><span class="keyword">public</span> APIResponse <span class="title">test1</span><span class="params">(String param1)</span> </span>&#123;</div><div class="line">        <span class="comment">// some codes here</span></div><div class="line">        <span class="keyword">return</span> APIResponse.success(<span class="string">"success"</span>);</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="meta">@RequestMapping</span>(value = <span class="string">"/test2"</span>)</div><div class="line">    <span class="meta">@HystrixCommand</span></div><div class="line">    <span class="function"><span class="keyword">public</span> APIResponse <span class="title">test2</span><span class="params">()</span> </span>&#123;</div><div class="line">        <span class="comment">// some codes here</span></div><div class="line">        <span class="keyword">return</span> APIResponse.success(<span class="string">"success"</span>);</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="meta">@RequestMapping</span>(value = <span class="string">"/test3"</span>)</div><div class="line">    <span class="meta">@HystrixCommand</span></div><div class="line">    <span class="function"><span class="keyword">public</span> APIResponse <span class="title">test3</span><span class="params">(ObjectRequest obj)</span> </span>&#123;</div><div class="line">        <span class="comment">// some codes here</span></div><div class="line">        <span class="keyword">return</span> APIResponse.success(<span class="string">"success"</span>);</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="function"><span class="keyword">private</span> APIResponse <span class="title">fallback</span><span class="params">()</span> </span>&#123;</div><div class="line">        <span class="keyword">return</span> APIResponse.failed(<span class="string">"Server is busy"</span>);</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@DefaultProperties</span>(defaultFallback = <span class="string">"fallback"</span>)</span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Service</span> </span>&#123;</span><br><span class="line">    <span class="meta">@RequestMapping</span>(value = <span class="string">"/test1"</span>)</span><br><span class="line">    <span class="meta">@HystrixCommand</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> APIResponse <span class="title">test1</span><span class="params">(String param1)</span> </span>&#123;</span><br><span class="line">        <span class="comment">// some codes here</span></span><br><span class="line">        <span class="keyword">return</span> APIResponse.success(<span class="string">"success"</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@RequestMapping</span>(value = <span class="string">"/test2"</span>)</span><br><span class="line">    <span class="meta">@HystrixCommand</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> APIResponse <span class="title">test2</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="comment">// some codes here</span></span><br><span class="line">        <span class="keyword">return</span> APIResponse.success(<span class="string">"success"</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@RequestMapping</span>(value = <span class="string">"/test3"</span>)</span><br><span class="line">    <span class="meta">@HystrixCommand</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> APIResponse <span class="title">test3</span><span class="params">(ObjectRequest obj)</span> </span>&#123;</span><br><span class="line">        <span class="comment">// some codes here</span></span><br><span class="line">        <span class="keyword">return</span> APIResponse.success(<span class="string">"success"</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">private</span> APIResponse <span class="title">fallback</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> APIResponse.failed(<span class="string">"Server is busy"</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p>默认的fallback不含任何参数，除了异常参数以获得执行异常，并且不应该抛出任何异常。以下是按下行优先级的顺序排列:</p>
 <ol>
 <li>@HystrixCommand 定义的 fallbackMethod。</li>
@@ -546,47 +574,44 @@
 
       
     </div>
+    
+    
+    
 
-    <div>
-      
-        
+    
 
-      
-    </div>
+    
 
-    <div>
-      
-        
-
-      
-    </div>
+    
 
     <footer class="post-footer">
       
         <div class="post-tags">
           
-            <a href="/tags/Hystrix/" rel="tag">#Hystrix</a>
+            <a href="/tags/Hystrix/" rel="tag"># Hystrix</a>
           
-            <a href="/tags/SpringCloud/" rel="tag">#SpringCloud</a>
+            <a href="/tags/SpringCloud/" rel="tag"># SpringCloud</a>
           
         </div>
+      
+
+      
+      
       
 
       
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2017/07/13/Java并发/并发编程的挑战/" rel="next" title="并发编程的挑战与底层实现原理">
-                <i class="fa fa-chevron-left"></i> 并发编程的挑战与底层实现原理
+              <a href="/2017/06/12/编写高质量代码/工程质量/" rel="next" title="工程质量">
+                <i class="fa fa-chevron-left"></i> 工程质量
               </a>
             
           </div>
 
+          <span class="post-nav-divider"></span>
+
           <div class="post-nav-prev post-nav-item">
-            
-              <a href="/2017/11/14/JavaWeb/JVM参数/" rel="prev" title="HotSpot 虚拟机主要参数">
-                HotSpot 虚拟机主要参数 <i class="fa fa-chevron-right"></i>
-              </a>
             
           </div>
         </div>
@@ -595,6 +620,10 @@
       
       
     </footer>
+  </div>
+  
+  
+  
   </article>
 
 
@@ -610,9 +639,9 @@
 
 
           
-  <div class="comments" id="comments">
-    
-  </div>
+
+  
+
 
 
         </div>
@@ -628,82 +657,104 @@
   </div>
 
   <aside id="sidebar" class="sidebar">
+    
     <div class="sidebar-inner">
 
       
 
       
         <ul class="sidebar-nav motion-element">
-          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
             文章目录
           </li>
-          <li class="sidebar-nav-overview" data-target="site-overview">
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
             站点概览
           </li>
         </ul>
       
 
-      <section class="site-overview sidebar-panel ">
-        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
-          <img class="site-author-image" itemprop="image"
-               src="http://o7s628cn2.bkt.clouddn.com/image/avatar.png"
-               alt="祝欣鸿" />
-          <p class="site-author-name" itemprop="name">祝欣鸿</p>
-          <p class="site-description motion-element" itemprop="description">时光如白马，稍纵即逝。术业有专攻，一生做好一件事真的很重要。</p>
-        </div>
-        <nav class="site-state motion-element">
-          <div class="site-state-item site-state-posts">
-            <a href="/archives">
-              <span class="site-state-item-count">36</span>
-              <span class="site-state-item-name">日志</span>
-            </a>
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/Wechat.jpeg"
+                alt="祝欣鸿" />
+            
+              <p class="site-author-name" itemprop="name">祝欣鸿</p>
+              <p class="site-description motion-element" itemprop="description">时光如白马，稍纵即逝。术业有专攻，一生做好一件事真的很重要。</p>
           </div>
 
-          
-            <div class="site-state-item site-state-categories">
-              <a href="/categories">
-                <span class="site-state-item-count">9</span>
-                <span class="site-state-item-name">分类</span>
-              </a>
-            </div>
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">34</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">8</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">15</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
           
 
           
-            <div class="site-state-item site-state-tags">
-              <a href="/tags">
-                <span class="site-state-item-count">16</span>
-                <span class="site-state-item-name">标签</span>
-              </a>
-            </div>
+
+          
           
 
-        </nav>
-
-        
-
-        <div class="links-of-author motion-element">
           
+          
+
+          
+
         </div>
-
-        
-        
-
-        
-        
-
       </section>
 
       
+      <!--noindex-->
         <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
           <div class="post-toc">
+
             
               
             
+
             
               <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#什么是-Hystrix？"><span class="nav-number">1.</span> <span class="nav-text">什么是 Hystrix？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Hystrix-解决什么问题？"><span class="nav-number">2.</span> <span class="nav-text">Hystrix 解决什么问题？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Hystrix-工作原理"><span class="nav-number">3.</span> <span class="nav-text">Hystrix 工作原理</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Hystrix-功能实现"><span class="nav-number">4.</span> <span class="nav-text">Hystrix 功能实现</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#hystrix-javanica"><span class="nav-number">5.</span> <span class="nav-text">hystrix-javanica</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#HystrixCommand-注解配置"><span class="nav-number">5.1.</span> <span class="nav-text">HystrixCommand 注解配置</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#隔离策略"><span class="nav-number">5.1.1.</span> <span class="nav-text">隔离策略</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#HystrixCommand"><span class="nav-number">5.1.2.</span> <span class="nav-text">HystrixCommand</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Fallback"><span class="nav-number">5.1.3.</span> <span class="nav-text">Fallback</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Circuit-Breaker"><span class="nav-number">5.1.4.</span> <span class="nav-text">Circuit Breaker</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#ThreadPool"><span class="nav-number">5.1.5.</span> <span class="nav-text">ThreadPool</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#SpringMVC"><span class="nav-number">5.2.</span> <span class="nav-text">SpringMVC</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#SpringBoot"><span class="nav-number">5.3.</span> <span class="nav-text">SpringBoot</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Sync-Execution"><span class="nav-number">5.4.</span> <span class="nav-text">Sync Execution</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Async-Execution"><span class="nav-number">5.5.</span> <span class="nav-text">Async Execution</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Reactive-Exection"><span class="nav-number">5.6.</span> <span class="nav-text">Reactive Exection</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Fallback-1"><span class="nav-number">5.7.</span> <span class="nav-text">Fallback</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Fallback-Exception"><span class="nav-number">5.8.</span> <span class="nav-text">Fallback Exception</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Async-Sync-fallback"><span class="nav-number">5.9.</span> <span class="nav-text">Async/Sync fallback</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Default-fallback"><span class="nav-number">5.10.</span> <span class="nav-text">Default fallback</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#错误传播"><span class="nav-number">5.11.</span> <span class="nav-text">错误传播</span></a></li></ol></li></ol></div>
             
+
           </div>
         </section>
+      <!--/noindex-->
+      
+
       
 
     </div>
@@ -716,36 +767,50 @@
 
     <footer id="footer" class="footer">
       <div class="footer-inner">
-        <div class="copyright" >
-  
-  &copy; 
-  <span itemprop="copyrightYear">2017</span>
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
   <span class="with-love">
-    <i class="fa fa-heart"></i>
+    <i class="fa fa-user"></i>
   </span>
   <span class="author" itemprop="copyrightHolder">祝欣鸿</span>
+
+  
 </div>
 
-<div class="powered-by">
-  由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
-</div>
 
-<div class="theme-info">
-  主题 -
-  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
-    NexT.Pisces
-  </a>
-</div>
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
 
         
+
+
+
+
+
+
 
         
       </div>
     </footer>
 
-    <div class="back-to-top">
-      <i class="fa fa-arrow-up"></i>
-    </div>
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
   </div>
 
   
@@ -768,54 +833,82 @@
 
 
 
-  
-  <script type="text/javascript" src="/vendors/jquery/index.js?v=2.1.3"></script>
-
-  
-  <script type="text/javascript" src="/vendors/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
-
-  
-  <script type="text/javascript" src="/vendors/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
-
-  
-  <script type="text/javascript" src="/vendors/velocity/velocity.min.js?v=1.2.1"></script>
-
-  
-  <script type="text/javascript" src="/vendors/velocity/velocity.ui.min.js?v=1.2.1"></script>
-
-  
-  <script type="text/javascript" src="/vendors/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
 
 
-  
 
 
-  <script type="text/javascript" src="/js/src/utils.js?v=5.0.1"></script>
 
-  <script type="text/javascript" src="/js/src/motion.js?v=5.0.1"></script>
+
 
 
 
   
   
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
 
 
-  <script type="text/javascript" src="/js/src/affix.js?v=5.0.1"></script>
+  
 
-  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.0.1"></script>
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
 
 
 
   
-  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.0.1"></script>
-<script type="text/javascript" src="/js/src/post-details.js?v=5.0.1"></script>
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
 
 
 
   
 
 
-  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.0.1"></script>
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
 
 
 
@@ -823,10 +916,32 @@
 
 
 
+
+
   
 
 
 
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
 
   
   

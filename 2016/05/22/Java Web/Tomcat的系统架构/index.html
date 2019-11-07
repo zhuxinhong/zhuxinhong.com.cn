@@ -1,0 +1,768 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Java,Tomcat," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="Tomcat总体结构Tomcat有2个核心组件：  
+
+Connector  
+Container  
+
+其中Connector组件可以被替换，一个Container可以选择对用多个Connector。多个Connector和一个Container形成一个Service。有了Service就可以对外提供服务了。但Service需要一个生存环境，这时就非Server莫属了。所以整个Tomcat的生命">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Tomcat系统架构">
+<meta property="og:url" content="http://zhuxinhong.github.io/2016/05/22/Java Web/Tomcat的系统架构/index.html">
+<meta property="og:site_name" content="zhuxinhong blog">
+<meta property="og:description" content="Tomcat总体结构Tomcat有2个核心组件：  
+
+Connector  
+Container  
+
+其中Connector组件可以被替换，一个Container可以选择对用多个Connector。多个Connector和一个Container形成一个Service。有了Service就可以对外提供服务了。但Service需要一个生存环境，这时就非Server莫属了。所以整个Tomcat的生命">
+<meta property="og:image" content="http://o7s628cn2.bkt.clouddn.com/image/javaweb/Service.png">
+<meta property="og:image" content="http://o7s628cn2.bkt.clouddn.com/image/javaweb/StandardService.png">
+<meta property="og:image" content="http://o7s628cn2.bkt.clouddn.com/image/javaweb/Server.png">
+<meta property="og:updated_time" content="2019-05-17T05:57:58.556Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Tomcat系统架构">
+<meta name="twitter:description" content="Tomcat总体结构Tomcat有2个核心组件：  
+
+Connector  
+Container  
+
+其中Connector组件可以被替换，一个Container可以选择对用多个Connector。多个Connector和一个Container形成一个Service。有了Service就可以对外提供服务了。但Service需要一个生存环境，这时就非Server莫属了。所以整个Tomcat的生命">
+<meta name="twitter:image" content="http://o7s628cn2.bkt.clouddn.com/image/javaweb/Service.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://zhuxinhong.github.io/2016/05/22/Java Web/Tomcat的系统架构/"/>
+
+
+
+
+
+  <title>Tomcat系统架构 | zhuxinhong blog</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">zhuxinhong blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">java coder</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://zhuxinhong.github.io/2016/05/22/Java Web/Tomcat的系统架构/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="祝欣鸿">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/Wechat.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="zhuxinhong blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Tomcat系统架构</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2016-05-22T00:00:00+08:00">
+                2016-05-22
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Java-Web/" itemprop="url" rel="index">
+                    <span itemprop="name">Java Web</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="Tomcat总体结构"><a href="#Tomcat总体结构" class="headerlink" title="Tomcat总体结构"></a>Tomcat总体结构</h1><p>Tomcat有2个核心组件：  </p>
+<ul>
+<li>Connector  </li>
+<li>Container  </li>
+</ul>
+<p>其中Connector组件可以被替换，一个Container可以选择对用多个Connector。多个Connector和一个Container形成一个Service。有了Service就可以对外提供服务了。但Service需要一个生存环境，这时就非Server莫属了。所以整个Tomcat的生命周期由Server控制。</p>
+<p>Connector主要负责对外交流，Container主要处理Connector接受的请求，主要处理内部事务。其实，Service只是在Connector和Container外面多包一层，把它们组装在一起，对外提供服务。一个Service可以设置多个Connector，但只能有一个Container容器。</p>
+<h2 id="Service"><a href="#Service" class="headerlink" title="Service"></a>Service</h2><p><img src="http://o7s628cn2.bkt.clouddn.com/image/javaweb/Service.png" alt="Service"></p>
+<p>从org.apache.catalina.Service接口中定义方法可以看出，它主要是为了关联Connector和Container，同时会初始化其他组件。所有组件的生命周期在一个Lifecycle的接口中控制。</p>
+<p><img src="http://o7s628cn2.bkt.clouddn.com/image/javaweb/StandardService.png" alt="StandardService"></p>
+<p>从StandardService类结构方法可以看出，除了Service接口方法的实现以及控制组件生命周期的Lifecycle接口的实现，还有几个方法用于实现时间监听方法。不仅是这个Service组件，在Tomcat中其他组件也同样有这个几个方法，这也是一个典型设计模式。</p>
+<p>下面看一下StandardService中几个主要方法，setContainer方法如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setContainer</span><span class="params">(Container container)</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">        Container oldContainer = <span class="keyword">this</span>.container;</span><br><span class="line">        <span class="keyword">if</span> ((oldContainer != <span class="keyword">null</span>) &amp;&amp; (oldContainer <span class="keyword">instanceof</span> Engine))</span><br><span class="line">            ((Engine) oldContainer).setService(<span class="keyword">null</span>);</span><br><span class="line">        <span class="keyword">this</span>.container = container;</span><br><span class="line">        <span class="keyword">if</span> ((<span class="keyword">this</span>.container != <span class="keyword">null</span>) &amp;&amp; (<span class="keyword">this</span>.container <span class="keyword">instanceof</span> Engine))</span><br><span class="line">            ((Engine) <span class="keyword">this</span>.container).setService(<span class="keyword">this</span>);</span><br><span class="line">        <span class="keyword">if</span> (getState().isAvailable() &amp;&amp; (<span class="keyword">this</span>.container != <span class="keyword">null</span>)) &#123;</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                <span class="keyword">this</span>.container.start();</span><br><span class="line">            &#125; <span class="keyword">catch</span> (LifecycleException e) &#123;</span><br><span class="line">                <span class="comment">// Ignore</span></span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> (getState().isAvailable() &amp;&amp; (oldContainer != <span class="keyword">null</span>)) &#123;</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                oldContainer.stop();</span><br><span class="line">            &#125; <span class="keyword">catch</span> (LifecycleException e) &#123;</span><br><span class="line">                <span class="comment">// Ignore</span></span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// Report this property change to interested listeners</span></span><br><span class="line">        support.firePropertyChange(<span class="string">"container"</span>, oldContainer, <span class="keyword">this</span>.container);</span><br><span class="line"></span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+<p>这段代码很简单，首先判断当前Service有没有已经关联的Container，如果已经关联，去除这个关联关系—-((Engine) oldContainer).setService(null)。如果这个oldContainer已经启动了，结束它的生命周期，然后再替换新的。</p>
+<p>AddConnector方法如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">addConnector</span><span class="params">(Connector connector)</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">synchronized</span> (connectors) &#123;</span><br><span class="line">            connector.setService(<span class="keyword">this</span>);</span><br><span class="line">            Connector results[] = <span class="keyword">new</span> Connector[connectors.length + <span class="number">1</span>];</span><br><span class="line">            System.arraycopy(connectors, <span class="number">0</span>, results, <span class="number">0</span>, connectors.length);</span><br><span class="line">            results[connectors.length] = connector;</span><br><span class="line">            connectors = results;</span><br><span class="line"></span><br><span class="line">            <span class="keyword">if</span> (getState().isAvailable()) &#123;</span><br><span class="line">                <span class="keyword">try</span> &#123;</span><br><span class="line">                    connector.start();</span><br><span class="line">                &#125; <span class="keyword">catch</span> (LifecycleException e) &#123;</span><br><span class="line">                    log.error(sm.getString(</span><br><span class="line">                            <span class="string">"standardService.connector.startFailed"</span>,</span><br><span class="line">                            connector), e);</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            <span class="comment">// Report this property change to interested listeners</span></span><br><span class="line">            support.firePropertyChange(<span class="string">"connector"</span>, <span class="keyword">null</span>, connector);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+<p>首先设置关联关系，然后初始化，开始新的生命周期。Connector用的是数组，而不是List集合，从性能角度考虑可以理解。有趣的是这里用了数组但并没有一开始就分配一个固定大小的数组。</p>
+<h2 id="Server"><a href="#Server" class="headerlink" title="Server"></a>Server</h2><p>Server要完成的任务很简单，提供一个接口让其他程序能够访问到这个Service集合，同时要维护它所包含的所有Service生命周期，包括如何初始化、如何结束服务、如何找到别人要访问的Service。</p>
+<p>Server的类结构图如下：<br><img src="http://o7s628cn2.bkt.clouddn.com/image/javaweb/Server.png" alt="Server"></p>
+<p>它的标准实现类StandardServer实现了上面这些方法，同时也实现了Lifecycle、MbeanRegistration两个接口的所有方法。下面看一下StandardServer一个重要方法addService的实现：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">addService</span><span class="params">(Service service)</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    service.setServer(<span class="keyword">this</span>);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">synchronized</span> (services) &#123;</span><br><span class="line">        Service results[] = <span class="keyword">new</span> Service[services.length + <span class="number">1</span>];</span><br><span class="line">        System.arraycopy(services, <span class="number">0</span>, results, <span class="number">0</span>, services.length);</span><br><span class="line">        results[services.length] = service;</span><br><span class="line">        services = results;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> (getState().isAvailable()) &#123;</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                service.start();</span><br><span class="line">            &#125; <span class="keyword">catch</span> (LifecycleException e) &#123;</span><br><span class="line">                <span class="comment">// Ignore</span></span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// Report this property change to interested listeners</span></span><br><span class="line">        support.firePropertyChange(<span class="string">"service"</span>, <span class="keyword">null</span>, service);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>从第一行就知道了Service和Server是相互关联的，Server也是和Service管理Connector一样管理它，也是将Service放在一个数组中。</p>
+<h2 id="Lifecycle"><a href="#Lifecycle" class="headerlink" title="Lifecycle"></a>Lifecycle</h2><p>在Tomcat中组件的生命周期通过Lifecycle接口来控制，组件只要集成这个接口并实现其中方法就可以统一被拥有它的组件控制了。最高级的组件就是Server，而控制Server的是Startup，也就是启动和关闭Tomcat。Lifecycle接口方法的实现都在其他组件中，组件的生命周期由包含它的父组件控制，所以它的Start方法自然就是调用它下面组件的Start方法，Stop方法也是一样。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">startInternal</span><span class="params">()</span> <span class="keyword">throws</span> LifecycleException </span>&#123;</span><br><span class="line"></span><br><span class="line">    fireLifecycleEvent(CONFIGURE_START_EVENT, <span class="keyword">null</span>);</span><br><span class="line">    setState(LifecycleState.STARTING);</span><br><span class="line"></span><br><span class="line">    globalNamingResources.start();</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// Start our defined Services</span></span><br><span class="line">    <span class="keyword">synchronized</span> (services) &#123;</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; services.length; i++) &#123;</span><br><span class="line">            services[i].start();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">stopInternal</span><span class="params">()</span> <span class="keyword">throws</span> LifecycleException </span>&#123;</span><br><span class="line"></span><br><span class="line">    setState(LifecycleState.STOPPING);</span><br><span class="line">    fireLifecycleEvent(CONFIGURE_STOP_EVENT, <span class="keyword">null</span>);</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// Stop our defined Services</span></span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; services.length; i++) &#123;</span><br><span class="line">        services[i].stop();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    globalNamingResources.stop();</span><br><span class="line">    </span><br><span class="line">    stopAwait();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>监听的代码会包围Service组件的启动过程，但所有Service必须要实现Lifecycle接口，这样做会更加灵活。</p>
+<h2 id="Connector组件"><a href="#Connector组件" class="headerlink" title="Connector组件"></a>Connector组件</h2><p>它的主要任务数负责接收浏览器发过来的TCP连接请求，创建一个Request和Response对象分别用于和请求端交换数据。然后会产生一个线程来处理这个请求并把产生的Request和Response对象传给处理这个请求的线程，处理这个请求的线程就是Container要做的事了。</p>
+<p>在Tomcat7中，Connector有3种选择：    </p>
+<ul>
+<li>BIO–Http11Protocol</li>
+<li>NIO–Http11NioProtocol</li>
+<li>apr–Http11AprProtocol</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="title">Connector</span><span class="params">(String protocol)</span> </span>&#123;</span><br><span class="line">    setProtocol(protocol);</span><br><span class="line">    <span class="comment">// Instantiate protocol handler</span></span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        Class&lt;?&gt; clazz = Class.forName(protocolHandlerClassName);</span><br><span class="line">        <span class="keyword">this</span>.protocolHandler = (ProtocolHandler) clazz.newInstance();</span><br><span class="line">    &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">        log.error(sm.getString(</span><br><span class="line">                <span class="string">"coyoteConnector.protocolHandlerInstantiationFailed"</span>), e);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>通过上述代码可以看出，Connector会根据我们在server.xml中配置的Connector类型来初始化。</p>
+<p>这里以常用的NIO来说明，找到Http11NioProtocol基类的start方法：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">start</span><span class="params">()</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (getLog().isInfoEnabled())</span><br><span class="line">        getLog().info(sm.getString(<span class="string">"abstractProtocolHandler.start"</span>,</span><br><span class="line">                getNameInternal()));</span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        endpoint.start();</span><br><span class="line">    &#125; <span class="keyword">catch</span> (Exception ex) &#123;</span><br><span class="line">        getLog().error(sm.getString(<span class="string">"abstractProtocolHandler.startError"</span>,</span><br><span class="line">                getNameInternal()), ex);</span><br><span class="line">        <span class="keyword">throw</span> ex;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Start async timeout thread</span></span><br><span class="line">    asyncTimeout = <span class="keyword">new</span> AsyncTimeout();</span><br><span class="line">    Thread timeoutThread = <span class="keyword">new</span> Thread(asyncTimeout, getNameInternal() + <span class="string">"-AsyncTimeout"</span>);</span><br><span class="line">    timeoutThread.setPriority(endpoint.getThreadPriority());</span><br><span class="line">    timeoutThread.setDaemon(<span class="keyword">true</span>);</span><br><span class="line">    timeoutThread.start();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>start方法中调用endpoint.start()，找到对应方法，在NioEndpoint类中：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">startInternal</span><span class="params">()</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> (!running) &#123;</span><br><span class="line">            running = <span class="keyword">true</span>;</span><br><span class="line">            paused = <span class="keyword">false</span>;</span><br><span class="line"></span><br><span class="line">            processorCache = <span class="keyword">new</span> SynchronizedStack&lt;&gt;(SynchronizedStack.DEFAULT_SIZE,</span><br><span class="line">                    socketProperties.getProcessorCache());</span><br><span class="line">            eventCache = <span class="keyword">new</span> SynchronizedStack&lt;&gt;(SynchronizedStack.DEFAULT_SIZE,</span><br><span class="line">                            socketProperties.getEventCache());</span><br><span class="line">            nioChannels = <span class="keyword">new</span> SynchronizedStack&lt;&gt;(SynchronizedStack.DEFAULT_SIZE,</span><br><span class="line">                    socketProperties.getBufferPool());</span><br><span class="line"></span><br><span class="line">            <span class="comment">// Create worker collection</span></span><br><span class="line">            <span class="keyword">if</span> ( getExecutor() == <span class="keyword">null</span> ) &#123;</span><br><span class="line">                createExecutor();</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            initializeConnectionLatch();</span><br><span class="line"></span><br><span class="line">            <span class="comment">// Start poller threads</span></span><br><span class="line">            pollers = <span class="keyword">new</span> Poller[getPollerThreadCount()];</span><br><span class="line">            <span class="keyword">for</span> (<span class="keyword">int</span> i=<span class="number">0</span>; i&lt;pollers.length; i++) &#123;</span><br><span class="line">                pollers[i] = <span class="keyword">new</span> Poller();</span><br><span class="line">                Thread pollerThread = <span class="keyword">new</span> Thread(pollers[i], getName() + <span class="string">"-ClientPoller-"</span>+i);</span><br><span class="line">                pollerThread.setPriority(threadPriority);</span><br><span class="line">                pollerThread.setDaemon(<span class="keyword">true</span>);</span><br><span class="line">                pollerThread.start();</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            startAcceptorThreads();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+<p>当执行到startAcceptorThreads()时，就会进入等待请求的状态，知道一个新的请求到来才会激活它继续执行。</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Java/" rel="tag"># Java</a>
+          
+            <a href="/tags/Tomcat/" rel="tag"># Tomcat</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/05/18/Java Web/NIO的工作机制/" rel="next" title="NIO工作机制">
+                <i class="fa fa-chevron-left"></i> NIO工作机制
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2016/05/28/Java Web/深入分析ClassLoader/" rel="prev" title="深入分析ClassLoader">
+                深入分析ClassLoader <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/Wechat.jpeg"
+                alt="祝欣鸿" />
+            
+              <p class="site-author-name" itemprop="name">祝欣鸿</p>
+              <p class="site-description motion-element" itemprop="description">时光如白马，稍纵即逝。术业有专攻，一生做好一件事真的很重要。</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">34</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">8</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">15</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Tomcat总体结构"><span class="nav-number">1.</span> <span class="nav-text">Tomcat总体结构</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Service"><span class="nav-number">1.1.</span> <span class="nav-text">Service</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Server"><span class="nav-number">1.2.</span> <span class="nav-text">Server</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Lifecycle"><span class="nav-number">1.3.</span> <span class="nav-text">Lifecycle</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Connector组件"><span class="nav-number">1.4.</span> <span class="nav-text">Connector组件</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">祝欣鸿</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
