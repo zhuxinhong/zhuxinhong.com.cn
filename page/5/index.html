@@ -231,6 +231,168 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://zhuxinhong.github.io/2015/07/22/redis设计与实现/Redis服务器单机数据库的实现/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="祝欣鸿">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/Wechat.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="zhuxinhong blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2015/07/22/redis设计与实现/Redis服务器单机数据库的实现/" itemprop="url">Redis服务器单机数据库的实现</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2015-07-22T00:00:00+08:00">
+                2015-07-22
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Redis设计与实现/" itemprop="url" rel="index">
+                    <span itemprop="name">Redis设计与实现</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>Redis命令请求的执行过程：</p>
+<p>1.发送命令请求<br>客户端将命令请求转换成协议格式，通过连接到服务器的套接字发送给服务器。</p>
+<p>2.读取命令请求<br>1）读取套接字协议格式的请求，保存到客户端状态的缓冲输入区。<br>2）分析缓冲区命令，提取命令参数及个数，分别保存到客户端状态的argv属性和argc属性。<br>3）调用命令执行器。</p>
+<p>3.命令执行器</p>
+<p>1）查找实现命令：根据客户端状态的argv[0]参数，查找参数指定的命令，保存到客户端状态的cmd属性。<br>2）执行预备操作：检查客户端cmd属性指向、参数个数、身份验证是否合法等等一系列服务器和客户端状态的校验。<br>3）调用命令的实现函数：函数调用产生setCommand(client)将产生一个 “+OK\r\n” 回复，保存到客户端的buf属性。<br>4）执行后续工作：根据配置执行相应操作，例如慢查询日志、AOF持久化、主从服务。</p>
+<p>4.将命令回复发送给客户端：将协议格式的命令回复 +“OK\r\n”发送给客户端。<br>5.客户端接收并打印命令回复：将协议回复的 “OK\r\n” 转换成 “OK\n” 打印给用户。</p>
+<p>Redis服务器中serverCron函数每隔100ms执行一次，该函数负责管理服务器资源并保持服务器良好运转。  </p>
+<ul>
+<li>更新服务器时间缓存  </li>
+<li>更新LRU时钟  </li>
+<li>更新服务器每秒执行命令次数  </li>
+<li>更新服务器内存峰值记录  </li>
+<li>处理SIGTERM信号  </li>
+<li>管理客户端资源  </li>
+<li>管理数据库资源  </li>
+<li>执行被延迟的BGREWRITEAOF  </li>
+<li>检查持久化操作的运行状态  </li>
+<li>将AOP缓冲区内容写入AOF文件  </li>
+<li>关闭异步客户端  </li>
+<li>增加cronloops计数器的值  </li>
+</ul>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="http://zhuxinhong.github.io/2015/07/12/redis设计与实现/Redis时间事件/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -815,165 +977,6 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://zhuxinhong.github.io/2015/07/01/redis设计与实现/Redis中的数据库/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="祝欣鸿">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/Wechat.jpeg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="zhuxinhong blog">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2015/07/01/redis设计与实现/Redis中的数据库/" itemprop="url">Redis中的数据库</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2015-07-01T00:00:00+08:00">
-                2015-07-01
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Redis设计与实现/" itemprop="url" rel="index">
-                    <span itemprop="name">Redis设计与实现</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>Redis服务器的所有数据库都保存在服务器状态 redis.h/redisServer结构的db数组中，db数组中每项都是一个 redis.h/redisDb结构，代表一个数据库实例。</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">struct redisServer &#123;</span><br><span class="line">	//...</span><br><span class="line">	int dbnum;</span><br><span class="line">	//...</span><br><span class="line">	redisDb *db;</span><br><span class="line">	//...</span><br><span class="line">&#125; ;</span><br></pre></td></tr></table></figure>
-<p>初始化数据库实例默认是16个，可以用过select 0~15 来切换。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">typeof struct redisClient &#123;</span><br><span class="line">	//...</span><br><span class="line">	//记录客户端当前正在使用的数据库</span><br><span class="line">	redisDb *db;</span><br><span class="line">	//...</span><br><span class="line">&#125; redisClient;</span><br></pre></td></tr></table></figure></p>
-<p>redisDb 结构中的dict字典保存了数据库中的所有键值对，这个字典称之为键空间。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">typeof struct redisDb &#123;</span><br><span class="line">	//...</span><br><span class="line">	dict *dict</span><br><span class="line">	//...</span><br><span class="line">&#125; redisDb;</span><br></pre></td></tr></table></figure></p>
-<p>我们在对键进行增删改查操作时候，其实就是在对dict的字典结构进行对应操作。</p>
-<p>读写键的维护操作：<br>1.读取一个key后(读和写都要先读)，服务器会更新键空间命中次数和不命中次数。这2个值可以在INFO命令的status属性 keyspace_hit和keyspace_misses查看。<br>2.读取一个key后，服务器会更新key的LRU(最后一次使用)时间，这个值可以用于计算key的闲置时间，使用Object idletime $key 命令可以查看。<br>3.读取一个key时，发现该key已过期，会先删除。<br>4.如果有watch命令监视了某个key，服务器在对该key进行修改后，会将这个键标记为脏(dirty)，从而让此key暴露给事物。<br>5.服务器每修改一个key后，会对脏键计数器+1，这个计数器会触发redis的持久化以及复制操作。<br>6.如果服务器开启了数据库通知功能，那么在key被修改后，redis会按配置发送相应的通知。</p>
-<p>Redis有4个命令可以设置键的过期时间：</p>
-<ol>
-<li>expire <key> <ttl> 设置key的生存时间为ttl秒；</ttl></key></li>
-<li>pexpire <key> <ttk> 设置key的生存时间为ttl毫秒； </ttk></key></li>
-<li>expireat <key> <ts> 设置key的过期时间为ts的秒数时间戳；</ts></key></li>
-<li>pexpireat <key> <ts> 设置key的过期时间为ts的毫秒数时间戳；</ts></key></li>
-</ol>
-<p>实际上 expire, pexpire, expireat 3个命令都是使用pexpireat实现的，只需要转换时间单位就行了。</p>
-<p>redisDb结构中，有一个expires字典保存了所有key的过期时间，这个字典称之为过期字典。<br>typeof struct redisDb {<br>//…<br>dict *expires;<br>//…<br>} redisDb;</p>
-<p>当一个key被设为过期后，redisDb中键空间字典和过期字典中的键重复，并不会出现重复对象，2个key指向的都是同一个对象。</p>
-<p>key过期删除策略：<br>1.定时删除：设置过期键的时候，创意一个定时器；<br>2.惰性删除：放任过期键不管，每次访问时，判断是否过期，如过期则删除；<br>3.定期删除：每隔一段时间，redis会扫描过期键，发现过期则删除；</p>
-<p>Redis实际使用的是惰性删除和定期删除2种配合使用。<br>定期删除函数执行步骤：<br>1.从一定量的数据库中去除一定数量的随机键检查，删除其中的过期键；<br>2.全局变量current_db会记录当前函数检查的进度，并在下一次调用时，接着上一次的进度处理。<br>3.随着函数不断被执行，所有过期键都会被检查到，这时将current_db变量重置为0，再开始新一轮的检查。</p>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
@@ -1028,7 +1031,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">34</span>
+                  <span class="site-state-item-count">35</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -1039,7 +1042,7 @@
               
               <div class="site-state-item site-state-categories">
                 <a href="/categories/index.html">
-                  <span class="site-state-item-count">8</span>
+                  <span class="site-state-item-count">7</span>
                   <span class="site-state-item-name">分类</span>
                 </a>
               </div>

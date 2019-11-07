@@ -231,6 +231,203 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://zhuxinhong.github.io/2016/07/05/HBase/初识HBase/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="祝欣鸿">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/Wechat.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="zhuxinhong blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2016/07/05/HBase/初识HBase/" itemprop="url">初识HBase</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2016-07-05T00:00:00+08:00">
+                2016-07-05
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/HBase/" itemprop="url" rel="index">
+                    <span itemprop="name">HBase</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h2 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h2><p>HBase是一个构建在HDFS之上、分布式、面向列的开源数据库，由Google BigTable的开源实现，它主要用于存储海量数据，是Hadoop生态系统中的重要一员。</p>
+<h2 id="HBase优势"><a href="#HBase优势" class="headerlink" title="HBase优势"></a>HBase优势</h2><h3 id="1-成熟"><a href="#1-成熟" class="headerlink" title="1.成熟"></a>1.成熟</h3><ul>
+<li>社区成熟    </li>
+<li>理论充分经过实践</li>
+<li>丰富的工具支持, hbck、phoenix、solr</li>
+</ul>
+<h3 id="2-高效"><a href="#2-高效" class="headerlink" title="2.高效"></a>2.高效</h3><ul>
+<li>将随机嘟列转化为顺序读写，适应高并发写入</li>
+<li>均衡效果好读写性能和机器数保持线性关系</li>
+<li>行中没有保存数据的列不占存储空间</li>
+</ul>
+<h3 id="3-分布式特性"><a href="#3-分布式特性" class="headerlink" title="3.分布式特性"></a>3.分布式特性</h3><ul>
+<li>基于HDFS、Zookeeper</li>
+<li>一致性、可用性、分区容忍性</li>
+<li>大数据存储</li>
+<li>易扩展</li>
+</ul>
+<h2 id="HBase表特点"><a href="#HBase表特点" class="headerlink" title="HBase表特点"></a>HBase表特点</h2><ul>
+<li>大：一个表可以有数十亿行，上百万列</li>
+<li>面向列：面向列（族）的存储和权限访问，列（族）独立索引</li>
+<li>稀疏：对于为空（null）的列，并不占用存储空间，因此，表可以设计的非常稀疏</li>
+<li>数据类型单一：HBase中的数据类型都是字符串(string)</li>
+<li>无模式：每行都有一个可排序的主键和任意多的列，列可以根据需要动态增加，同一张表中不同的行可以有截然不同的列</li>
+</ul>
+<h2 id="HBase-VS-RDBMS"><a href="#HBase-VS-RDBMS" class="headerlink" title="HBase VS RDBMS"></a>HBase VS RDBMS</h2><ul>
+<li>数据类型<br>HBase中的数据都是字符串类型</li>
+<li>数据操作<br>HBase只有普通的增删改查等操作，没有表之间的关联查询</li>
+<li>存储模式<br>HBase是基于列式存储的，而RDBMS是基于行式存储的</li>
+<li>应用场景<br>HBase适合存储大量数据，查询效率极高</li>
+</ul>
+<hr>
+<h2 id="HBase概念"><a href="#HBase概念" class="headerlink" title="HBase概念"></a>HBase概念</h2><h3 id="1-主键"><a href="#1-主键" class="headerlink" title="1.主键"></a>1.主键</h3><ul>
+<li>用来检索记录的主键</li>
+<li>访问HBase表中的行，只有三种方式：<ol>
+<li>通过单个Row Key访问</li>
+<li>通过Row Key的range</li>
+<li>全表扫描</li>
+</ol>
+</li>
+<li>主键为任意字符串，最大长度为64kb，按字典顺序存储，在HBase内部保存为字节数组</li>
+</ul>
+<h3 id="2-列族"><a href="#2-列族" class="headerlink" title="2.列族"></a>2.列族</h3><ul>
+<li>列族在创建表的时候声明，一个列族可以包含多个列，列中的数据都是以二进制形式存在，没有数据类型</li>
+<li>列族是一些列的集合</li>
+<li>一个列族所有列成员是有着相同的前缀。比如，列courses:histor和courses:math都是列族courses的成员，冒号是列族的分隔符，用来区分前缀和列名</li>
+</ul>
+<h3 id="3-时间戳与存储单元"><a href="#3-时间戳与存储单元" class="headerlink" title="3.时间戳与存储单元"></a>3.时间戳与存储单元</h3><ul>
+<li>HBase中通过row和columns确定的为一个存贮单元称为cell。每个cell都保存着同一份数据的多个版本。</li>
+<li>在写入数据时，时间戳可以由HBase自动赋值（当前系统时间精确到毫秒），也可以显示赋值。</li>
+<li>每个cell中，不用版本的数据按照时间的倒序排序。</li>
+</ul>
+<h2 id="HBase数据模型"><a href="#HBase数据模型" class="headerlink" title="HBase数据模型"></a>HBase数据模型</h2><h3 id="HBase存储细节"><a href="#HBase存储细节" class="headerlink" title="HBase存储细节"></a>HBase存储细节</h3><ul>
+<li>每个列族存储在HDFS上的一个单独文件夹中</li>
+<li>Key和Version number会在每个列族中存储一份</li>
+<li>空值不会被保存</li>
+</ul>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="http://zhuxinhong.github.io/2016/06/07/Scala/Scala基础/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -980,179 +1177,6 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://zhuxinhong.github.io/2016/05/17/Java Web/深入分析IO工作机制/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="祝欣鸿">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/Wechat.jpeg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="zhuxinhong blog">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2016/05/17/Java Web/深入分析IO工作机制/" itemprop="url">深入分析I/O工作机制</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2016-05-17T00:00:00+08:00">
-                2016-05-17
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Java-Web/" itemprop="url" rel="index">
-                    <span itemprop="name">Java Web</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h1 id="Java的I-O基本架构"><a href="#Java的I-O基本架构" class="headerlink" title="Java的I/O基本架构"></a>Java的I/O基本架构</h1><p>Java的I/O操作类在java.io下，大概有将近80个类，大概可以分为以下4类：  </p>
-<ul>
-<li>基于字节操作的IO接口：InputStream和OutputStream  </li>
-<li>基于字符操作的IO接口：Writer和Reader  </li>
-<li>基于磁盘操作的IO接口：File  </li>
-<li>基于网络操作的IO接口：Socket</li>
-</ul>
-<p>前2组主要是传输数据的数据格式，后两组主要是传输数据的方式，虽然Socket不在java.io下，在此仍然放在一起，因为IO核心问题要么是数据格式影响IO操作，要么是传输方式影响IO操作，也就是将什么样的数据写到什么地方的问题。</p>
-<h2 id="字节与字符的转化接口"><a href="#字节与字符的转化接口" class="headerlink" title="字节与字符的转化接口"></a>字节与字符的转化接口</h2><p>数据持久化或网络传输都是以字节进行的，所以必须要有从字符到字节或者字节到字符的转化。<br>InputStreamReader类是从字节到字符的转化桥梁，从InputStream到Reader的过程要指定编码字符集，否则将采用操作系统默认的字符集，很可能会出现乱码问题。StreamDecoder正是完成从字节到字符的解码的实现类。  </p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">try</span> &#123;</span><br><span class="line">	StringBuffer str = <span class="keyword">new</span> StringBuffer();</span><br><span class="line">	<span class="keyword">char</span>[] buf = <span class="keyword">new</span> <span class="keyword">char</span>[<span class="number">1024</span>];</span><br><span class="line">	FileReader f = <span class="keyword">new</span> FileReader(<span class="string">"file"</span>);</span><br><span class="line">	<span class="keyword">while</span>(f.read(buf) &gt; <span class="number">0</span>)&#123;</span><br><span class="line">		str.append(buf);</span><br><span class="line">	&#125;</span><br><span class="line">	str.toString();</span><br><span class="line">&#125; <span class="keyword">catch</span> (IOException e)&#123;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>FileReader就是按照上述方式读取文件，FileReader继承了InputStreamReader，实际上是读取文件流，然后通过StreamDecoder解码成char。<br>写入也是类似过程，通过OutputStreamWriter类完成从字符到字节的过程，有StreamEncoder完成解码过程。</p>
-<hr>
-<h1 id="磁盘I-O工作机制"><a href="#磁盘I-O工作机制" class="headerlink" title="磁盘I/O工作机制"></a>磁盘I/O工作机制</h1><p>读取和写入文件I/O操作都调用操作系统提供的接口，因为磁盘设备是操作系统管理的，应用程序要访问物理设备只能通过系统调用的方式。只要是操作系统调用，就存在内核空间地址和用户空间地址切换的问题，这是操作系统本身安全机制，而将内核程序运行使用的内存空间和用户程序运行的内存空间进行隔离造成的。这样虽然保证了内核程旭运行安全，但必然存在数据可能需要从内核空间向用户空间复制的问题。</p>
-<p>如果遇到非常耗时的操作，如磁盘I/O，数据从磁盘复制到内存空间，然后又从内核空间复制到用户空间，将会非常缓慢。这时OS为了加速I/O访问，在内核空间使用缓存机制，也就是从磁盘读取的文件按照一定的组织方式进行缓存，如果用户访问的是同一段磁盘地址的空间数据，那么OS将从内核缓存中直接取出返回给用户程序，这样可以减少I/O响应时间。</p>
-<h2 id="标准访问文件方式"><a href="#标准访问文件方式" class="headerlink" title="标准访问文件方式"></a>标准访问文件方式</h2><p>当程序调用read()接口时，操作系统检查在内核告诉缓存中有没有需要的数据，如果已经缓存了，那么直接从缓存中返回，如果没有，从磁盘中读取，然后缓存在操作系统缓存中。</p>
-<p>写入方式是，程序调用write()接口将数据从用户地址空间复制到内核地址空间的缓存中。这时对用户程序来说写已经完成，至于什么时候再写到磁盘中由OS决定，除非显示调用了sync同步命令。</p>
-<h2 id="直接I-O方式"><a href="#直接I-O方式" class="headerlink" title="直接I/O方式"></a>直接I/O方式</h2><p>程序直接访问磁盘，不经过OS内核数据缓冲区，这样做的目的是减少一次从内核缓冲区到用户程序缓存的数据复制。这种方式通常是在对数据的缓存管理由应用程序实现的数据库管理系统中。如在数据库管理系统中，系统明确知道应该缓存哪些数据，应该失效哪些数据，还可以对一些热点数据做预加载，提前将热点数据加载到内存，可以加速数据的访问效率。</p>
-<p>但直接I/O也有负面影响，如果访问的数据不在应用程序缓存中，那么每次数据都会从磁盘直接加载，这种加载会非常缓慢。通过直接I/O与异步I/O结合使用，会得到比较好的性能。</p>
-<h2 id="同步访问文件的方式"><a href="#同步访问文件的方式" class="headerlink" title="同步访问文件的方式"></a>同步访问文件的方式</h2><p>数据的读取和写入都是同步操作的，它与标准访问文件不同的是，只有当数据被成功写到磁盘时才返回给应用程序成功的标志。</p>
-<p>这种访问文件的方式性能比较差，只有在一些对数据安全性要求比较高的场景中才会使用，而且通常这种操作方式的硬件都是定制的。</p>
-<h2 id="异步访问文件的方式"><a href="#异步访问文件的方式" class="headerlink" title="异步访问文件的方式"></a>异步访问文件的方式</h2><p>当访问数据的线程发出请求之后，线程会接着去处理其他事情，而不是阻塞等待，当请求的数据返回后继续处理下面的操作。这种访问文件的方式可明显提供应用程序效率，但不会改变访问文件的效率。</p>
-<h2 id="内存映射方式"><a href="#内存映射方式" class="headerlink" title="内存映射方式"></a>内存映射方式</h2><p>OS将内存中某一块区域与磁盘中的文件关联起来，当腰访问内存中一段数据时，转换为访问文件的某一段数据。这种方式目的同样是减少数据从内核空间缓存到用户空间缓存的数据复制操作，因为这2个数据是共享的。</p>
-<h2 id="Java访问磁盘文件"><a href="#Java访问磁盘文件" class="headerlink" title="Java访问磁盘文件"></a>Java访问磁盘文件</h2><p>在Java中通常的File并不代表一个真实存在的文件对象，当指定一个路径描述符时，它会返回一个代表这个路径的虚拟对象，这个可能是一个真实存在的文件或者是一个包含多个文件的目录。大多数情况下，我们并不关心这个文件是否真的存在，而是关心对这个文件到底如何操作。</p>
-<p>何时会真正检查一个文件存不存在？要是在真正要读取这个文件时。例如，FileInputStream类都是操作一个文件的接口，注意到在创建一个FileInputStream对象时会创建一个FileDescriptor对象，其实这个对象就是真正代表一个存在的文件对象的描述。当操作一个文件对象时可以通过getFD()方法获取真正操作的与底层OS相关联的文件描述。例如，可以调用FileDescriptor.sync()方法将操作系统缓存中的数据强制刷新到物理磁盘中。</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="title">FileInputStream</span><span class="params">(File file)</span> <span class="keyword">throws</span> FileNotFoundException </span>&#123;</span><br><span class="line">        String name = (file != <span class="keyword">null</span> ? file.getPath() : <span class="keyword">null</span>);</span><br><span class="line">        SecurityManager security = System.getSecurityManager();</span><br><span class="line">        <span class="keyword">if</span> (security != <span class="keyword">null</span>) &#123;</span><br><span class="line">            security.checkRead(name);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> (name == <span class="keyword">null</span>) &#123;</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> NullPointerException();</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> (file.isInvalid()) &#123;</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> FileNotFoundException(<span class="string">"Invalid file path"</span>);</span><br><span class="line">        &#125;</span><br><span class="line">        fd = <span class="keyword">new</span> FileDescriptor();</span><br><span class="line">        fd.incrementAndGetUseCount();</span><br><span class="line">        <span class="keyword">this</span>.path = name;</span><br><span class="line">        open(name);</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
-<p>当传入一个文件路径时，将会根据这个路径创建一个File对象来标识这个文件，然后根据这个File对象创建真正读取文件的操作对象，这时将会真正创建一个关联真实存在的磁盘文件的描述符FileDescriptor，通过这个对象可以直接控制这个磁盘文件。</p>
-<hr>
-<h1 id="Java-Socket工作机制"><a href="#Java-Socket工作机制" class="headerlink" title="Java Socket工作机制"></a>Java Socket工作机制</h1><h2 id="建立通信链路"><a href="#建立通信链路" class="headerlink" title="建立通信链路"></a>建立通信链路</h2><p>当客户端要与服务端通信时，客户端首先要创建一个Socket实例，OS将为这个Socket实例分配一个没有被使用的本地端口号，并创建一个包含本地地址、远程地址和端口号的套接字数据结构，这个数据结构将一直保存在系统中直到这个连接关闭。在创建Socket实例的构造函数正确返回之前，将要进行TCP的3次握手协议，TCP握手协议完成后，Socket实例对象将创建完成，否则抛出IOException错误。</p>
-<p>与之对应的服务端将创建一个ServerSocket实例，创建ServerSocket比较简单，只要指定的端口号未被占用，一般实例都会创建成功。同时OS也会为ServerSocket实例创建一个底层数据结构，这个数据结构包含指定监听的端口号和包含监听地址的通配符，通常情况下都是“*”，即监听所有地址。之后当调用accept()方法时，将进入阻塞状态，等待客户端的请求。</p>
-<p>当一个新的请求到来时，将为这个连接创建一个新的套接字数据结构，该套接字数据的信息包含的地址和端口信息正是请求源地址和端口。这个新创建的数据结构将会关联到ServerSocket实例的一个未完成的连接数据结构列表中。注意，这时服务端的与之对应的Socket实例并没有完成创建，而要等到与客户端的3次握手完成后，这个服务端的Socket实例才会返回，并将这个Socket实例对应的数据结构从未完成列表中移到已完成列表中。所以与ServerSocket所关联的列表中每个数据结构都代表与一个客户端建立的TCP连接。</p>
-<h2 id="数据传输"><a href="#数据传输" class="headerlink" title="数据传输"></a>数据传输</h2><p>当连接建立成功，服务端和客户端都会拥有一个Socket实例，每个Socket实例都有一个InputStream和一个OutputStream，并通过这两个对象交换数据。同时我们知道网络I/O都是以字节流传输的，当创建Socket对象时，OS将会为InputStream和OutputStream分别分配一定大小的缓存区，数据的写入和读取都是通过这个缓存区完成。</p>
-<p>写入端将数据写到OutputStream的SendQ队列中，当队列填满时，数据将被转移到另一端InputStream的RecvQ队列中，如果这时RecvQ已经满了，那么OutputStream的write方法将会阻塞，直到RecvQ队列有足够的空间容纳SendQ发送的数据。这个缓存区的大小及写入端的速度和读取端的速度非常影响这个连接的数据传输效率，由于可能会发生阻塞，所有网络I/O与磁盘I/O不同的是数据的写入和读取还要有一个协调的过程，如果两边同时传送数据可能会产生死锁。</p>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
@@ -1207,7 +1231,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">34</span>
+                  <span class="site-state-item-count">35</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -1218,7 +1242,7 @@
               
               <div class="site-state-item site-state-categories">
                 <a href="/categories/index.html">
-                  <span class="site-state-item-count">8</span>
+                  <span class="site-state-item-count">7</span>
                   <span class="site-state-item-name">分类</span>
                 </a>
               </div>

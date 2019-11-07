@@ -231,6 +231,179 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://zhuxinhong.github.io/2016/05/17/Java Web/深入分析IO工作机制/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="祝欣鸿">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/Wechat.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="zhuxinhong blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2016/05/17/Java Web/深入分析IO工作机制/" itemprop="url">深入分析I/O工作机制</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2016-05-17T00:00:00+08:00">
+                2016-05-17
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Java-Web/" itemprop="url" rel="index">
+                    <span itemprop="name">Java Web</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h1 id="Java的I-O基本架构"><a href="#Java的I-O基本架构" class="headerlink" title="Java的I/O基本架构"></a>Java的I/O基本架构</h1><p>Java的I/O操作类在java.io下，大概有将近80个类，大概可以分为以下4类：  </p>
+<ul>
+<li>基于字节操作的IO接口：InputStream和OutputStream  </li>
+<li>基于字符操作的IO接口：Writer和Reader  </li>
+<li>基于磁盘操作的IO接口：File  </li>
+<li>基于网络操作的IO接口：Socket</li>
+</ul>
+<p>前2组主要是传输数据的数据格式，后两组主要是传输数据的方式，虽然Socket不在java.io下，在此仍然放在一起，因为IO核心问题要么是数据格式影响IO操作，要么是传输方式影响IO操作，也就是将什么样的数据写到什么地方的问题。</p>
+<h2 id="字节与字符的转化接口"><a href="#字节与字符的转化接口" class="headerlink" title="字节与字符的转化接口"></a>字节与字符的转化接口</h2><p>数据持久化或网络传输都是以字节进行的，所以必须要有从字符到字节或者字节到字符的转化。<br>InputStreamReader类是从字节到字符的转化桥梁，从InputStream到Reader的过程要指定编码字符集，否则将采用操作系统默认的字符集，很可能会出现乱码问题。StreamDecoder正是完成从字节到字符的解码的实现类。  </p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">try</span> &#123;</span><br><span class="line">	StringBuffer str = <span class="keyword">new</span> StringBuffer();</span><br><span class="line">	<span class="keyword">char</span>[] buf = <span class="keyword">new</span> <span class="keyword">char</span>[<span class="number">1024</span>];</span><br><span class="line">	FileReader f = <span class="keyword">new</span> FileReader(<span class="string">"file"</span>);</span><br><span class="line">	<span class="keyword">while</span>(f.read(buf) &gt; <span class="number">0</span>)&#123;</span><br><span class="line">		str.append(buf);</span><br><span class="line">	&#125;</span><br><span class="line">	str.toString();</span><br><span class="line">&#125; <span class="keyword">catch</span> (IOException e)&#123;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>FileReader就是按照上述方式读取文件，FileReader继承了InputStreamReader，实际上是读取文件流，然后通过StreamDecoder解码成char。<br>写入也是类似过程，通过OutputStreamWriter类完成从字符到字节的过程，有StreamEncoder完成解码过程。</p>
+<hr>
+<h1 id="磁盘I-O工作机制"><a href="#磁盘I-O工作机制" class="headerlink" title="磁盘I/O工作机制"></a>磁盘I/O工作机制</h1><p>读取和写入文件I/O操作都调用操作系统提供的接口，因为磁盘设备是操作系统管理的，应用程序要访问物理设备只能通过系统调用的方式。只要是操作系统调用，就存在内核空间地址和用户空间地址切换的问题，这是操作系统本身安全机制，而将内核程序运行使用的内存空间和用户程序运行的内存空间进行隔离造成的。这样虽然保证了内核程旭运行安全，但必然存在数据可能需要从内核空间向用户空间复制的问题。</p>
+<p>如果遇到非常耗时的操作，如磁盘I/O，数据从磁盘复制到内存空间，然后又从内核空间复制到用户空间，将会非常缓慢。这时OS为了加速I/O访问，在内核空间使用缓存机制，也就是从磁盘读取的文件按照一定的组织方式进行缓存，如果用户访问的是同一段磁盘地址的空间数据，那么OS将从内核缓存中直接取出返回给用户程序，这样可以减少I/O响应时间。</p>
+<h2 id="标准访问文件方式"><a href="#标准访问文件方式" class="headerlink" title="标准访问文件方式"></a>标准访问文件方式</h2><p>当程序调用read()接口时，操作系统检查在内核告诉缓存中有没有需要的数据，如果已经缓存了，那么直接从缓存中返回，如果没有，从磁盘中读取，然后缓存在操作系统缓存中。</p>
+<p>写入方式是，程序调用write()接口将数据从用户地址空间复制到内核地址空间的缓存中。这时对用户程序来说写已经完成，至于什么时候再写到磁盘中由OS决定，除非显示调用了sync同步命令。</p>
+<h2 id="直接I-O方式"><a href="#直接I-O方式" class="headerlink" title="直接I/O方式"></a>直接I/O方式</h2><p>程序直接访问磁盘，不经过OS内核数据缓冲区，这样做的目的是减少一次从内核缓冲区到用户程序缓存的数据复制。这种方式通常是在对数据的缓存管理由应用程序实现的数据库管理系统中。如在数据库管理系统中，系统明确知道应该缓存哪些数据，应该失效哪些数据，还可以对一些热点数据做预加载，提前将热点数据加载到内存，可以加速数据的访问效率。</p>
+<p>但直接I/O也有负面影响，如果访问的数据不在应用程序缓存中，那么每次数据都会从磁盘直接加载，这种加载会非常缓慢。通过直接I/O与异步I/O结合使用，会得到比较好的性能。</p>
+<h2 id="同步访问文件的方式"><a href="#同步访问文件的方式" class="headerlink" title="同步访问文件的方式"></a>同步访问文件的方式</h2><p>数据的读取和写入都是同步操作的，它与标准访问文件不同的是，只有当数据被成功写到磁盘时才返回给应用程序成功的标志。</p>
+<p>这种访问文件的方式性能比较差，只有在一些对数据安全性要求比较高的场景中才会使用，而且通常这种操作方式的硬件都是定制的。</p>
+<h2 id="异步访问文件的方式"><a href="#异步访问文件的方式" class="headerlink" title="异步访问文件的方式"></a>异步访问文件的方式</h2><p>当访问数据的线程发出请求之后，线程会接着去处理其他事情，而不是阻塞等待，当请求的数据返回后继续处理下面的操作。这种访问文件的方式可明显提供应用程序效率，但不会改变访问文件的效率。</p>
+<h2 id="内存映射方式"><a href="#内存映射方式" class="headerlink" title="内存映射方式"></a>内存映射方式</h2><p>OS将内存中某一块区域与磁盘中的文件关联起来，当腰访问内存中一段数据时，转换为访问文件的某一段数据。这种方式目的同样是减少数据从内核空间缓存到用户空间缓存的数据复制操作，因为这2个数据是共享的。</p>
+<h2 id="Java访问磁盘文件"><a href="#Java访问磁盘文件" class="headerlink" title="Java访问磁盘文件"></a>Java访问磁盘文件</h2><p>在Java中通常的File并不代表一个真实存在的文件对象，当指定一个路径描述符时，它会返回一个代表这个路径的虚拟对象，这个可能是一个真实存在的文件或者是一个包含多个文件的目录。大多数情况下，我们并不关心这个文件是否真的存在，而是关心对这个文件到底如何操作。</p>
+<p>何时会真正检查一个文件存不存在？要是在真正要读取这个文件时。例如，FileInputStream类都是操作一个文件的接口，注意到在创建一个FileInputStream对象时会创建一个FileDescriptor对象，其实这个对象就是真正代表一个存在的文件对象的描述。当操作一个文件对象时可以通过getFD()方法获取真正操作的与底层OS相关联的文件描述。例如，可以调用FileDescriptor.sync()方法将操作系统缓存中的数据强制刷新到物理磁盘中。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="title">FileInputStream</span><span class="params">(File file)</span> <span class="keyword">throws</span> FileNotFoundException </span>&#123;</span><br><span class="line">        String name = (file != <span class="keyword">null</span> ? file.getPath() : <span class="keyword">null</span>);</span><br><span class="line">        SecurityManager security = System.getSecurityManager();</span><br><span class="line">        <span class="keyword">if</span> (security != <span class="keyword">null</span>) &#123;</span><br><span class="line">            security.checkRead(name);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> (name == <span class="keyword">null</span>) &#123;</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> NullPointerException();</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> (file.isInvalid()) &#123;</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> FileNotFoundException(<span class="string">"Invalid file path"</span>);</span><br><span class="line">        &#125;</span><br><span class="line">        fd = <span class="keyword">new</span> FileDescriptor();</span><br><span class="line">        fd.incrementAndGetUseCount();</span><br><span class="line">        <span class="keyword">this</span>.path = name;</span><br><span class="line">        open(name);</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+<p>当传入一个文件路径时，将会根据这个路径创建一个File对象来标识这个文件，然后根据这个File对象创建真正读取文件的操作对象，这时将会真正创建一个关联真实存在的磁盘文件的描述符FileDescriptor，通过这个对象可以直接控制这个磁盘文件。</p>
+<hr>
+<h1 id="Java-Socket工作机制"><a href="#Java-Socket工作机制" class="headerlink" title="Java Socket工作机制"></a>Java Socket工作机制</h1><h2 id="建立通信链路"><a href="#建立通信链路" class="headerlink" title="建立通信链路"></a>建立通信链路</h2><p>当客户端要与服务端通信时，客户端首先要创建一个Socket实例，OS将为这个Socket实例分配一个没有被使用的本地端口号，并创建一个包含本地地址、远程地址和端口号的套接字数据结构，这个数据结构将一直保存在系统中直到这个连接关闭。在创建Socket实例的构造函数正确返回之前，将要进行TCP的3次握手协议，TCP握手协议完成后，Socket实例对象将创建完成，否则抛出IOException错误。</p>
+<p>与之对应的服务端将创建一个ServerSocket实例，创建ServerSocket比较简单，只要指定的端口号未被占用，一般实例都会创建成功。同时OS也会为ServerSocket实例创建一个底层数据结构，这个数据结构包含指定监听的端口号和包含监听地址的通配符，通常情况下都是“*”，即监听所有地址。之后当调用accept()方法时，将进入阻塞状态，等待客户端的请求。</p>
+<p>当一个新的请求到来时，将为这个连接创建一个新的套接字数据结构，该套接字数据的信息包含的地址和端口信息正是请求源地址和端口。这个新创建的数据结构将会关联到ServerSocket实例的一个未完成的连接数据结构列表中。注意，这时服务端的与之对应的Socket实例并没有完成创建，而要等到与客户端的3次握手完成后，这个服务端的Socket实例才会返回，并将这个Socket实例对应的数据结构从未完成列表中移到已完成列表中。所以与ServerSocket所关联的列表中每个数据结构都代表与一个客户端建立的TCP连接。</p>
+<h2 id="数据传输"><a href="#数据传输" class="headerlink" title="数据传输"></a>数据传输</h2><p>当连接建立成功，服务端和客户端都会拥有一个Socket实例，每个Socket实例都有一个InputStream和一个OutputStream，并通过这两个对象交换数据。同时我们知道网络I/O都是以字节流传输的，当创建Socket对象时，OS将会为InputStream和OutputStream分别分配一定大小的缓存区，数据的写入和读取都是通过这个缓存区完成。</p>
+<p>写入端将数据写到OutputStream的SendQ队列中，当队列填满时，数据将被转移到另一端InputStream的RecvQ队列中，如果这时RecvQ已经满了，那么OutputStream的write方法将会阻塞，直到RecvQ队列有足够的空间容纳SendQ发送的数据。这个缓存区的大小及写入端的速度和读取端的速度非常影响这个连接的数据传输效率，由于可能会发生阻塞，所有网络I/O与磁盘I/O不同的是数据的写入和读取还要有一个协调的过程，如果两边同时传送数据可能会产生死锁。</p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="http://zhuxinhong.github.io/2016/05/15/深入理解Java虚拟机/垃圾收集器算法/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -905,168 +1078,6 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://zhuxinhong.github.io/2015/07/22/redis设计与实现/Redis服务器单机数据库的实现/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="祝欣鸿">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/Wechat.jpeg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="zhuxinhong blog">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2015/07/22/redis设计与实现/Redis服务器单机数据库的实现/" itemprop="url">Redis服务器单机数据库的实现</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2015-07-22T00:00:00+08:00">
-                2015-07-22
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Redis设计与实现/" itemprop="url" rel="index">
-                    <span itemprop="name">Redis设计与实现</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>Redis命令请求的执行过程：</p>
-<p>1.发送命令请求<br>客户端将命令请求转换成协议格式，通过连接到服务器的套接字发送给服务器。</p>
-<p>2.读取命令请求<br>1）读取套接字协议格式的请求，保存到客户端状态的缓冲输入区。<br>2）分析缓冲区命令，提取命令参数及个数，分别保存到客户端状态的argv属性和argc属性。<br>3）调用命令执行器。</p>
-<p>3.命令执行器</p>
-<p>1）查找实现命令：根据客户端状态的argv[0]参数，查找参数指定的命令，保存到客户端状态的cmd属性。<br>2）执行预备操作：检查客户端cmd属性指向、参数个数、身份验证是否合法等等一系列服务器和客户端状态的校验。<br>3）调用命令的实现函数：函数调用产生setCommand(client)将产生一个 “+OK\r\n” 回复，保存到客户端的buf属性。<br>4）执行后续工作：根据配置执行相应操作，例如慢查询日志、AOF持久化、主从服务。</p>
-<p>4.将命令回复发送给客户端：将协议格式的命令回复 +“OK\r\n”发送给客户端。<br>5.客户端接收并打印命令回复：将协议回复的 “OK\r\n” 转换成 “OK\n” 打印给用户。</p>
-<p>Redis服务器中serverCron函数每隔100ms执行一次，该函数负责管理服务器资源并保持服务器良好运转。  </p>
-<ul>
-<li>更新服务器时间缓存  </li>
-<li>更新LRU时钟  </li>
-<li>更新服务器每秒执行命令次数  </li>
-<li>更新服务器内存峰值记录  </li>
-<li>处理SIGTERM信号  </li>
-<li>管理客户端资源  </li>
-<li>管理数据库资源  </li>
-<li>执行被延迟的BGREWRITEAOF  </li>
-<li>检查持久化操作的运行状态  </li>
-<li>将AOP缓冲区内容写入AOF文件  </li>
-<li>关闭异步客户端  </li>
-<li>增加cronloops计数器的值  </li>
-</ul>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
@@ -1121,7 +1132,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">34</span>
+                  <span class="site-state-item-count">35</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -1132,7 +1143,7 @@
               
               <div class="site-state-item site-state-categories">
                 <a href="/categories/index.html">
-                  <span class="site-state-item-count">8</span>
+                  <span class="site-state-item-count">7</span>
                   <span class="site-state-item-name">分类</span>
                 </a>
               </div>
